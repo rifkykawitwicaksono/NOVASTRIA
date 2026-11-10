@@ -20,12 +20,31 @@ async function init(){
   $("year").textContent=new Date().getFullYear();
   $("contactLink").href="https://wa.me/"+ADMIN_WA+"?text="+encodeURIComponent("Halo admin NOVASTRIA, saya ingin bertanya.");
   try{
-    const r=await fetch("assets/products.json");
-    if(!r.ok)throw new Error("Katalog gagal dimuat.");
-    catalog=(await r.json()).products||[];
+    let liveProducts=null;
+    // Prioritaskan katalog Supabase agar perubahan admin langsung muncul di toko.
+    if(supabaseClient){
+      const live=await supabaseClient.from("store_products")
+        .select("product,variant,public_price,reseller_price,in_stock")
+        .eq("is_active",true).order("sort_order").order("product").order("variant");
+      if(!live.error&&Array.isArray(live.data)&&live.data.length){
+        liveProducts=live.data.map(p=>({
+          product:p.product,variant:p.variant,inStock:p.in_stock,
+          publicPrice:p.public_price,resellerPrice:p.reseller_price
+        }));
+      }else if(live.error){
+        console.warn("Katalog Supabase belum tersedia; memakai katalog statis:",live.error.message);
+      }
+    }
+    if(liveProducts){
+      catalog=liveProducts;
+    }else{
+      const r=await fetch("assets/products.json");
+      if(!r.ok)throw new Error("Katalog gagal dimuat.");
+      catalog=(await r.json()).products||[];
+    }
     $("productCount").textContent=catalog.length;
     populateCategories();renderProducts();
-  }catch(error){$("productGrid").innerHTML='<div class="empty">Katalog belum bisa dimuat. Periksa file assets/products.json.</div>';}
+  }catch(error){$("productGrid").innerHTML='<div class="empty">Katalog belum bisa dimuat. Periksa koneksi dan sumber katalog.</div>';}
   $("searchInput").addEventListener("input",renderProducts);
   $("categoryFilter").addEventListener("change",renderProducts);
   $("openAccount").addEventListener("click",openAccount);
