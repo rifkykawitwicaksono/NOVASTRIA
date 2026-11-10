@@ -196,9 +196,16 @@ async function createSale(e){
 function renderPayoutRequests(){
  const labels={pending:"Menunggu",approved:"Disetujui",rejected:"Ditolak"};
  $("requestsBody").innerHTML=payoutRequests.length?payoutRequests.map(r=>{
-  const actions=r.status==="pending"?'<div class="admin-actions"><button data-request="approved" data-id="'+esc(r.id)+'">Setujui</button><button class="admin-danger" data-request="rejected" data-id="'+esc(r.id)+'">Tolak</button></div>':badge(r.status);
+  const actions=r.status==="pending"?'<div class="admin-actions"><button data-request="approved" data-id="'+esc(r.id)+'">Setujui</button><button class="admin-danger" data-request="rejected" data-id="'+esc(r.id)+'">Tolak</button></div>':r.status==="approved"?'<button data-request-paid="'+esc(r.id)+'">Catat transfer selesai</button>':badge(r.status);
   return '<tr><td><strong>'+esc(r.full_name||"-")+'</strong><small>'+esc(r.email)+'</small></td><td>'+money(r.amount)+'</td><td>'+esc(r.payout_method)+'<small>'+esc(r.payout_account)+'</small></td><td>'+esc(r.notes||"-")+'</td><td>'+badge(r.status)+'<small>'+esc(r.admin_notes||"")+'</small></td><td>'+esc(date(r.created_at))+actions+'</td></tr>';
  }).join(""):'<tr><td colspan="6" class="admin-empty">Belum ada pengajuan.</td></tr>';
+ $("requestsBody").querySelectorAll("[data-request-paid]").forEach(b=>b.addEventListener("click",async()=>{
+  if(!confirm("Pastikan dana sudah benar-benar ditransfer ke rekening anggota. Lanjutkan?"))return;
+  const reference=prompt("Nomor referensi transfer (opsional):")||null;
+  const notes=prompt("Catatan transfer (opsional):")||null;
+  try{await rpc("admin_complete_payout_request",{p_request_id:b.dataset.requestPaid,p_reference:reference,p_notes:notes});await loadAll();notice("Transfer dicatat dan saldo komisi diperbarui.","success");}
+  catch(e){notice("Gagal mencatat transfer: "+e.message,"error");}
+ }));
  $("requestsBody").querySelectorAll("[data-request]").forEach(b=>b.addEventListener("click",async()=>{
   if(!confirm((b.dataset.request==="approved"?"Setujui":"Tolak")+" pengajuan ini?"))return;
   const notes=prompt("Catatan admin (opsional):")||null;
