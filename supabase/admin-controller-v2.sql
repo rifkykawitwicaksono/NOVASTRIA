@@ -203,7 +203,7 @@ BEGIN
     'reseller_active',(SELECT count(*) FROM public.memberships WHERE membership_type='reseller' AND status='active'),
     'pending_payments',(SELECT count(*) FROM public.membership_payments WHERE status='pending'),
     'verified_revenue',(SELECT COALESCE(sum(amount),0) FROM public.membership_payments WHERE status='verified'),
-    'available_commission',(SELECT COALESCE(sum(c.amount),0) FROM public.referral_commissions c WHERE c.status='available'),
+    'available_commission',(SELECT GREATEST(COALESCE((SELECT sum(c.amount) FROM public.referral_commissions c),0)-COALESCE((SELECT sum(po.amount) FROM public.commission_payouts po WHERE po.status='paid'),0),0)),
     'paid_commission',(SELECT COALESCE(sum(amount),0) FROM public.commission_payouts WHERE status='paid')
   ) INTO v;
   RETURN v;
@@ -295,30 +295,12 @@ DECLARE v_available BIGINT; v_id UUID;
 BEGIN
  IF NOT public.is_novastria_admin() THEN RAISE EXCEPTION 'Akses admin diperlukan'; END IF;
  IF p_amount<=0 THEN RAISE EXCEPTION 'Nominal pencairan harus lebih dari nol'; END IF;
- SELECT COALESCE((SELECT sum(amount) FROM public.referral_commissions WHERE referrer_id=p_user_id AND status='available'),0)
+ SELECT COALESCE((SELECT sum(amount) FROM public.referral_commissions WHERE referrer_id=p_user_id),0)
    - COALESCE((SELECT sum(amount) FROM public.commission_payouts WHERE user_id=p_user_id AND status='paid'),0)
  INTO v_available;
- IF p_amount>v_available THEN RAISE EXCEPTION 'Saldo komisi tidak mencukupi. Tersedia: %',v_available; END IF;
+ IF p_amount>v_available THEN RAISE EXCEPTION 'Saldo komisi tidak mencukupi. Tersedia: %',GREATEST(v_available,0); END IF;
  INSERT INTO public.commission_payouts(user_id,amount,payment_reference,notes,paid_by)
  VALUES(p_user_id,p_amount,NULLIF(p_reference,''),NULLIF(p_notes,''),auth.uid()) RETURNING id INTO v_id;
- -- Tandai komisi secara FIFO sampai nilai pencairan terpenuhi; jika parsial, pecah baris komisi.
- DECLARE
-   c RECORD;
-   remaining BIGINT := p_amount;
- BEGIN
-   FOR c IN SELECT id,amount FROM public.referral_commissions WHERE referrer_id=p_user_id AND status='available' ORDER BY created_at,id FOR UPDATE LOOP
-     EXIT WHEN remaining<=0;
-     IF c.amount<=remaining THEN
-       UPDATE public.referral_commissions SET status='paid' WHERE id=c.id;
-       remaining:=remaining-c.amount;
-     ELSE
-       UPDATE public.referral_commissions SET amount=amount-remaining WHERE id=c.id;
-       INSERT INTO public.referral_commissions(payment_id,referrer_id,referred_user_id,amount,status)
-       SELECT payment_id,referrer_id,referred_user_id,remaining,'paid' FROM public.referral_commissions WHERE id=c.id;
-       remaining:=0;
-     END IF;
-   END LOOP;
- END;
  PERFORM public.novastria_admin_log('commission_payout','commission_payout',v_id::text,jsonb_build_object('user_id',p_user_id,'amount',p_amount));
  RETURN v_id;
 END; $$;
