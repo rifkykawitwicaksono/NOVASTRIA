@@ -1,10 +1,19 @@
 const ADMIN_WA = "62895429626389";
-const SUPABASE_URL = "https://hwtrqgtabamuixaqiscx.supabase.co";
+const SUPABASE_URL = "https://hwtrqgtabamuixaqiscx.supabaseClient.co";
 const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_LBhpfEc_ANm5geSULymA6A_qINelIr6";
 const money = n => new Intl.NumberFormat("id-ID",{style:"currency",currency:"IDR",maximumFractionDigits:0}).format(n);
 const $ = id => document.getElementById(id);
 const esc = v => String(v ?? "").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-const supabase = window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+let supabaseClient = null;
+try {
+  if (window.supabase && typeof window.supabaseClient.createClient === "function") {
+    supabaseClient = window.supabaseClient.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+      auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
+    });
+  }
+} catch (error) {
+  console.error("Supabase gagal diinisialisasi:", error);
+}
 let catalog=[],selectedOrder=null,joinType="referral",currentUser=null,member=null,authMode="login";
 
 async function init(){
@@ -33,13 +42,25 @@ async function init(){
   $("requestJoin").addEventListener("click",requestJoin);
   document.querySelectorAll("[data-close]").forEach(button=>button.addEventListener("click",()=>$(button.dataset.close).close()));
   document.querySelectorAll("[data-join]").forEach(button=>button.addEventListener("click",()=>openJoin(button.dataset.join)));
-  const result=await supabase.auth.getSession();
-  currentUser=result.data.session?result.data.session.user:null;
-  await refreshMember();
-  supabase.auth.onAuthStateChange((_event,session)=>{
-    currentUser=session?session.user:null;
-    Promise.resolve().then(()=>refreshMember());
-  });
+  // Katalog dan interaksi dasar tetap berjalan walau CDN/auth Supabase bermasalah.
+  if (!supabaseClient) {
+    setAuthMessage("Layanan akun belum termuat. Muat ulang halaman atau periksa koneksi internet.");
+    updateMemberUI();
+    return;
+  }
+  try {
+    const result = await supabaseClient.auth.getSession();
+    currentUser = result.data?.session?.user || null;
+    await refreshMember();
+    supabaseClient.auth.onAuthStateChange((_event, session) => {
+      currentUser = session?.user || null;
+      Promise.resolve().then(() => refreshMember());
+    });
+  } catch (error) {
+    console.error("Inisialisasi sesi gagal:", error);
+    updateMemberUI();
+    setAuthMessage("Katalog tetap tersedia, tetapi layanan akun gagal terhubung. Coba muat ulang.");
+  }
 }
 
 function populateCategories(){
@@ -61,9 +82,9 @@ function renderProducts(){
 
 async function refreshMember(){
   member=null;
-  if(currentUser){
-    const profileResult=await supabase.from("profiles").select("id,full_name,phone,referral_code").eq("id",currentUser.id).maybeSingle();
-    const membershipResult=await supabase.from("memberships").select("membership_type,status").eq("user_id",currentUser.id);
+  if(currentUser && supabaseClient){
+    const profileResult=await supabaseClient.from("profiles").select("id,full_name,phone,referral_code").eq("id",currentUser.id).maybeSingle();
+    const membershipResult=await supabaseClient.from("memberships").select("membership_type,status").eq("user_id",currentUser.id);
     if(profileResult.error||membershipResult.error){
       console.error("Gagal memuat data anggota:",profileResult.error||membershipResult.error);
       setProfileMessage("Akun berhasil masuk, tetapi data profil belum tersedia. Pastikan SQL setup-auth.sql sudah dijalankan di Supabase.");
@@ -127,6 +148,10 @@ function setAuthMode(mode){
 
 async function handleAuthSubmit(event){
   event.preventDefault();
+  if (!supabaseClient) {
+    setAuthMessage("Layanan akun belum termuat. Katalog tetap bisa digunakan; coba muat ulang halaman.");
+    return;
+  }
   const email=$("authEmail").value.trim(),password=$("authPassword").value,button=$("authSubmit");
   button.disabled=true;button.textContent=authMode==="signup"?"Mendaftarkan...":"Memeriksa...";
   setAuthMessage("");
@@ -134,7 +159,7 @@ async function handleAuthSubmit(event){
     if(authMode==="signup"){
       const fullName=$("authName").value.trim(),phone=$("authPhone").value.trim(),inviteCode=$("authInviteCode").value.trim().toUpperCase();
       if(!fullName||!phone)throw new Error("Nama lengkap dan nomor WhatsApp wajib diisi.");
-      const result=await supabase.auth.signUp({
+      const result=await supabaseClient.auth.signUp({
         email,password,
         options:{
           emailRedirectTo:window.location.origin+window.location.pathname,
@@ -151,7 +176,7 @@ async function handleAuthSubmit(event){
         setAuthMessage("Pendaftaran diterima. Buka email Anda dan klik tautan verifikasi sebelum login.","success");
       }
     }else{
-      const result=await supabase.auth.signInWithPassword({email,password});
+      const result=await supabaseClient.auth.signInWithPassword({email,password});
       if(result.error)throw result.error;
       currentUser=result.data.user;
       await refreshMember();
@@ -162,18 +187,19 @@ async function handleAuthSubmit(event){
 }
 
 async function saveProfile(){
-  if(!currentUser)return;
+  if(!currentUser || !supabaseClient)return;
   const full_name=$("memberName").value.trim(),phone=$("memberPhone").value.trim();
   if(!full_name||!phone){setProfileMessage("Nama dan nomor WhatsApp wajib diisi.");return;}
   const button=$("saveProfile");button.disabled=true;button.textContent="Menyimpan...";
-  const result=await supabase.from("profiles").update({full_name:full_name,phone:phone}).eq("id",currentUser.id);
+  const result=await supabaseClient.from("profiles").update({full_name:full_name,phone:phone}).eq("id",currentUser.id);
   button.disabled=false;button.textContent="Simpan perubahan profil";
   if(result.error){setProfileMessage("Gagal menyimpan profil: "+result.error.message);return;}
   await refreshMember();setProfileMessage("Profil berhasil diperbarui.","success");
 }
 
 async function logout(){
-  const result=await supabase.auth.signOut();
+  if (!supabaseClient) return;
+  const result=await supabaseClient.auth.signOut();
   if(result.error){setProfileMessage("Gagal keluar: "+result.error.message);return;}
   currentUser=null;member=null;$("authForm").reset();$("accountDialog").close();updateMemberUI();
 }
