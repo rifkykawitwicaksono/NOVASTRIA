@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#090b18"><title>Admin Controller — NOVASTRIA</title>
+<link rel="stylesheet" href="assets/style.css">
+<style>
+.admin-wrap{max-width:1180px;margin:0 auto;padding:48px 24px 80px}.admin-head{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:26px}.admin-head h1{font-size:clamp(28px,4vw,42px);margin:8px 0}.admin-sub{color:var(--muted);font-size:13px}.admin-toolbar{display:flex;gap:10px;flex-wrap:wrap;margin:20px 0}.admin-toolbar input,.admin-toolbar select{background:#11152a;border:1px solid var(--line);border-radius:10px;padding:13px;color:var(--text);font:13px 'DM Sans';min-width:190px}.admin-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.admin-stat{border:1px solid #ffffff18;background:#ffffff08;border-radius:14px;padding:18px}.admin-stat span{display:block;color:var(--muted);font-size:11px}.admin-stat strong{display:block;font:700 26px 'Space Grotesk';margin-top:8px}.admin-table-wrap{overflow:auto;border:1px solid #ffffff1b;border-radius:15px;background:#11152a}.admin-table{width:100%;border-collapse:collapse;min-width:760px;font-size:12px}.admin-table th,.admin-table td{padding:14px;text-align:left;border-bottom:1px solid #ffffff12}.admin-table th{color:#bfc5df;font-weight:700;background:#ffffff08}.admin-table td{color:#e8eafa}.admin-table small{display:block;color:var(--muted);margin-top:4px}.admin-actions{display:flex;gap:6px;flex-wrap:wrap}.admin-actions button{border:1px solid #ffffff25;border-radius:8px;padding:8px 10px;background:#ffffff0b;color:white;cursor:pointer;font-size:11px}.admin-actions button:hover{border-color:var(--purple)}.admin-alert{padding:14px 16px;border:1px solid #ffffff20;border-radius:12px;color:#cbd0e4;background:#ffffff08;margin:16px 0;font-size:12px;line-height:1.7}.admin-alert.error{border-color:#b95b5b;color:#ffc4bd}.admin-alert.success{border-color:#398b7e;color:#a5f2e5}.admin-empty{padding:28px;text-align:center;color:var(--muted);font-size:13px}.admin-label{font-size:10px;letter-spacing:1.5px;color:var(--cyan);font-weight:700}.admin-back{color:#c9baff;font-size:12px}@media(max-width:760px){.admin-stats{grid-template-columns:repeat(2,1fr)}.admin-wrap{padding:30px 15px}.admin-head{align-items:flex-start;flex-direction:column}}
+</style>
+</head>
+<body>
+<header class="topbar"><a class="brand" href="index.html"><span class="brand-mark">N</span><span>NOVASTRIA<small>ADMIN CONTROLLER</small></span></a><a class="admin-back" href="index.html">← Kembali ke toko</a></header>
+<main class="admin-wrap">
+  <div class="admin-head"><div><span class="admin-label">PANEL ADMINISTRATOR</span><h1>Admin Controller</h1><p class="admin-sub" id="adminIdentity">Memeriksa sesi admin...</p></div><button class="btn btn-outline" id="adminLogout" type="button">Keluar</button></div>
+  <div id="adminNotice" class="admin-alert">Memeriksa hak akses...</div>
+  <section id="adminPanel" hidden>
+    <div class="admin-stats">
+      <div class="admin-stat"><span>Total anggota</span><strong id="totalMembers">0</strong></div>
+      <div class="admin-stat"><span>Referral aktif</span><strong id="activeReferral">0</strong></div>
+      <div class="admin-stat"><span>Reseller aktif</span><strong id="activeReseller">0</strong></div>
+      <div class="admin-stat"><span>Membership nonaktif</span><strong id="inactiveMembership">0</strong></div>
+    </div>
+    <div class="admin-toolbar"><input id="memberSearch" type="search" placeholder="Cari nama, email, atau kode referral"><select id="membershipFilter"><option value="">Semua status</option><option value="active">Aktif</option><option value="inactive">Belum aktif</option></select><button class="btn btn-outline" id="reloadMembers" type="button">Muat ulang</button></div>
+    <div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Anggota</th><th>Kontak</th><th>Kode referral</th><th>Referral</th><th>Reseller</th><th>Aksi</th></tr></thead><tbody id="membersBody"><tr><td colspan="6" class="admin-empty">Memuat data anggota...</td></tr></tbody></table></div>
+    <p class="admin-alert">Catatan: panel ini mengubah status keanggotaan di database. Verifikasi bukti pembayaran tetap harus dilakukan admin secara manual sebelum menekan tombol aktivasi. Integrasi pembayaran otomatis dan pencatatan komisi belum termasuk tahap ini.</p>
+  </section>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="assets/admin.js?v=20261111-1"></script>
+</body></html>
