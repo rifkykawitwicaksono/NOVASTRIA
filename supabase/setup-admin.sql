@@ -43,10 +43,15 @@ CREATE POLICY "NOVASTRIA admins can read all profiles"
   ON public.profiles FOR SELECT TO authenticated
   USING (public.is_novastria_admin());
 
--- Admin dapat membaca dan mengubah status membership.
-DROP POLICY IF EXISTS "NOVASTRIA admins manage memberships" ON public.memberships;
-CREATE POLICY "NOVASTRIA admins manage memberships"
-  ON public.memberships FOR ALL TO authenticated
+-- Admin hanya diberi SELECT dan UPDATE pada membership, bukan INSERT/DELETE.
+DROP POLICY IF EXISTS "NOVASTRIA admins read memberships" ON public.memberships;
+CREATE POLICY "NOVASTRIA admins read memberships"
+  ON public.memberships FOR SELECT TO authenticated
+  USING (public.is_novastria_admin());
+
+DROP POLICY IF EXISTS "NOVASTRIA admins update memberships" ON public.memberships;
+CREATE POLICY "NOVASTRIA admins update memberships"
+  ON public.memberships FOR UPDATE TO authenticated
   USING (public.is_novastria_admin())
   WITH CHECK (public.is_novastria_admin());
 
