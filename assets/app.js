@@ -25,8 +25,7 @@ $("searchInput").addEventListener("input",renderProducts);$("categoryFilter").ad
 function updateMemberUI(){
  $("accountStatus").textContent=member?`${member.name||"Anggota"} • Referral: ${member.referralActive?"Aktif":"Tidak aktif"} • Reseller: ${member.resellerActive?"Aktif":"Tidak aktif"}`:"Belum masuk";
  $("memberStatus").textContent=member?`Nama: ${member.name||"-"} | Referral: ${member.referralActive?"Aktif":"Tidak aktif"} | Reseller: ${member.resellerActive?"Aktif":"Tidak aktif"} | Kode: ${member.referralCode||"Belum dibuat"}`:"Belum ada status keanggotaan aktif.";
- $("memberName").value=member?.name||"";$("memberPhone").value=member?.phone||"";$("refCode").value=member?.referralCode||"";
- $("memberNotice").textContent=member?.resellerActive?"Harga reseller ditampilkan. Status browser ini hanya simulasi, bukan bukti pembayaran.":"Harga publik ditampilkan. Masuk sebagai reseller untuk melihat harga reseller.";renderProducts();
+ $("memberName").value=member?.name||"";$("memberPhone").value=member?.phone||"";$("refCode").value=member?.referralCode||""; renderProducts();
 }
 function openAccount(){$("accountDialog").showModal();}
 $("openAccount").addEventListener("click",openAccount);$("manageAccount").addEventListener("click",openAccount);
