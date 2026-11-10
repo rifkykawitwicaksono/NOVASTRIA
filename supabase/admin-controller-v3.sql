@@ -174,3 +174,48 @@ END; $$;
 REVOKE ALL ON FUNCTION public.admin_complete_payout_request(UUID,TEXT,TEXT) FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION public.admin_complete_payout_request(UUID,TEXT,TEXT) TO authenticated;
 NOTIFY pgrst,'reload schema';
+
+
+-- Reserve funds for all pending/approved member requests, including when admin uses the
+-- legacy manual payout form. This prevents manual payouts consuming requested balances.
+CREATE OR REPLACE FUNCTION public.admin_record_payout(p_user_id UUID,p_amount BIGINT,p_reference TEXT,p_notes TEXT DEFAULT NULL)
+RETURNS UUID LANGUAGE plpgsql SECURITY DEFINER SET search_path = '' AS $$
+DECLARE v_available BIGINT; v_id UUID;
+BEGIN
+ IF NOT public.is_novastria_admin() THEN RAISE EXCEPTION 'Akses admin diperlukan'; END IF;
+ IF p_amount<=0 THEN RAISE EXCEPTION 'Nominal pencairan harus lebih dari nol'; END IF;
+ PERFORM pg_advisory_xact_lock(hashtextextended(p_user_id::text,0));
+ SELECT COALESCE((SELECT sum(amount) FROM public.referral_commissions WHERE referrer_id=p_user_id),0)
+  -COALESCE((SELECT sum(amount) FROM public.commission_payouts WHERE user_id=p_user_id AND status='paid'),0)
+  -COALESCE((SELECT sum(amount) FROM public.commission_payout_requests WHERE user_id=p_user_id AND status IN ('pending','approved')),0)
+ INTO v_available;
+ IF p_amount>GREATEST(v_available,0) THEN RAISE EXCEPTION 'Saldo bebas tidak mencukupi setelah memperhitungkan pengajuan pencairan. Tersedia: %',GREATEST(v_available,0); END IF;
+ INSERT INTO public.commission_payouts(user_id,amount,payment_reference,notes,paid_by)
+ VALUES(p_user_id,p_amount,NULLIF(p_reference,''),NULLIF(p_notes,''),auth.uid()) RETURNING id INTO v_id;
+ PERFORM public.novastria_admin_log('commission_payout','commission_payout',v_id::text,jsonb_build_object('user_id',p_user_id,'amount',p_amount));
+ RETURN v_id;
+END; $$;
+
+-- Completing one approved request must preserve funds reserved by other requests.
+CREATE OR REPLACE FUNCTION public.admin_complete_payout_request(p_request_id UUID,p_reference TEXT DEFAULT NULL,p_notes TEXT DEFAULT NULL)
+RETURNS UUID LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $$
+DECLARE r public.commission_payout_requests%ROWTYPE; v_id UUID; v_available BIGINT;
+BEGIN
+ IF NOT public.is_novastria_admin() THEN RAISE EXCEPTION 'Akses admin diperlukan'; END IF;
+ SELECT * INTO r FROM public.commission_payout_requests WHERE id=p_request_id FOR UPDATE;
+ IF NOT FOUND OR r.status<>'approved' THEN RAISE EXCEPTION 'Pengajuan harus berstatus disetujui sebelum ditandai dibayar'; END IF;
+ PERFORM pg_advisory_xact_lock(hashtextextended(r.user_id::text,0));
+ SELECT COALESCE((SELECT sum(amount) FROM public.referral_commissions WHERE referrer_id=r.user_id),0)
+  -COALESCE((SELECT sum(amount) FROM public.commission_payouts WHERE user_id=r.user_id AND status='paid'),0)
+  -COALESCE((SELECT sum(amount) FROM public.commission_payout_requests WHERE user_id=r.user_id AND status IN ('pending','approved') AND id<>r.id),0)
+ INTO v_available;
+ IF r.amount>GREATEST(v_available,0) THEN RAISE EXCEPTION 'Saldo komisi tidak mencukupi setelah memperhitungkan pengajuan lain'; END IF;
+ INSERT INTO public.commission_payouts(user_id,amount,payment_reference,notes,paid_by)
+ VALUES(r.user_id,r.amount,NULLIF(p_reference,''),COALESCE(NULLIF(p_notes,''),'Pencairan dari pengajuan anggota'),auth.uid()) RETURNING id INTO v_id;
+ UPDATE public.commission_payout_requests SET status='paid',admin_notes=COALESCE(NULLIF(p_notes,''),admin_notes),reviewed_by=auth.uid(),reviewed_at=now() WHERE id=r.id;
+ PERFORM public.novastria_admin_log('payout_request_paid','commission_payout_request',r.id::text,jsonb_build_object('payout_id',v_id,'amount',r.amount));
+ RETURN v_id;
+END; $$;
+REVOKE ALL ON FUNCTION public.admin_record_payout(UUID,BIGINT,TEXT,TEXT) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.admin_record_payout(UUID,BIGINT,TEXT,TEXT) TO authenticated;
+NOTIFY pgrst,'reload schema';
