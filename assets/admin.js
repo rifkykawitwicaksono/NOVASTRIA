@@ -6,7 +6,7 @@ const priceLabel=n=>n===null||n===undefined?"Belum ditetapkan":money(n);
 const date=v=>v?new Date(v).toLocaleString("id-ID",{dateStyle:"medium",timeStyle:"short"}):"-";
 const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const db=window.supabase?.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
-let members=[],payments=[],commissions=[],payouts=[],products=[],overview={};
+let members=[],payments=[],commissions=[],payouts=[],products=[],overview={},sales=[],payoutRequests=[],salesSummary={};
 function notice(message,type=""){const el=$("adminNotice");el.textContent=message;el.className="admin-alert "+type;}
 function badge(status){return '<span class="admin-badge '+esc(status)+'">'+esc(({active:"Aktif",inactive:"Nonaktif",none:"Belum ada",pending:"Menunggu",verified:"Terverifikasi",rejected:"Ditolak",paid:"Dibayar"}[status]||status))+'</span>';}
 async function rpc(name,args={}){const r=await db.rpc(name,args);if(r.error)throw r.error;return r.data;}
@@ -21,6 +21,7 @@ async function start(){
   $("paymentForm").addEventListener("submit",createPayment);
   $("payoutForm").addEventListener("submit",createPayout);
   $("productForm").addEventListener("submit",saveProduct);
+  $("saleForm").addEventListener("submit",createSale);
   $("resetProduct").addEventListener("click",resetProductForm);
   if(!db){notice("Supabase JS tidak termuat. Periksa koneksi internet lalu muat ulang.","error");return;}
   const {data,error}=await db.auth.getSession();
@@ -41,7 +42,7 @@ async function loadAll(){
   notice("Memperbarui data admin...");
   const tasks=[
     ["members","admin_list_members"],["overview","admin_get_overview"],["payments","admin_list_payments"],
-    ["commissions","admin_list_commissions"],["payouts","admin_list_payouts"],["products","admin_list_products"],["audit","admin_list_audit"]
+    ["commissions","admin_list_commissions"],["payouts","admin_list_payouts"],["products","admin_list_products"],["sales","admin_list_sales"],["salesSummary","admin_get_sales_summary"],["payoutRequests","admin_list_payout_requests"],["audit","admin_list_audit"]
   ];
   const results=await Promise.all(tasks.map(async ([key,fn])=>{try{return [key,await rpc(fn)];}catch(e){return [key,{__error:e.message}];}}));
   const errors=[];
@@ -53,13 +54,16 @@ async function loadAll(){
     else if(key==="commissions")commissions=value||[];
     else if(key==="payouts")payouts=value||[];
     else if(key==="products")products=value||[];
+    else if(key==="sales")sales=value||[];
+    else if(key==="salesSummary")salesSummary=value||{};
+    else if(key==="payoutRequests")payoutRequests=value||[];
     else if(key==="audit")renderAudit(value||[]);
   }
   renderAll();
   if(errors.length)notice("Sebagian modul gagal dimuat: "+errors.join(" | "), "error");
   else notice("Semua modul berhasil diperbarui dari Supabase.","success");
 }
-function renderAll(){renderStats();renderMembers();renderMemberOptions();renderPayments();renderCommissions();renderPayouts();renderProducts();renderReports();}
+function renderAll(){renderStats();renderMembers();renderMemberOptions();renderPayments();renderCommissions();renderPayouts();renderProducts();renderSales();renderPayoutRequests();renderReports();}
 function renderStats(){
   $("statMembers").textContent=overview.members??members.length;
   $("statReferral").textContent=overview.referral_active??members.filter(m=>m.referral_status==="active").length;
@@ -88,6 +92,7 @@ function renderMemberOptions(){
   payouts.filter(p=>p.status==="paid").forEach(p=>balances.set(p.user_id,(balances.get(p.user_id)||0)-Number(p.amount||0)));
   const payees=[...balances].filter(([,v])=>v>0).map(([id,v])=>{const m=members.find(x=>x.id===id);return m?'<option value="'+esc(id)+'">'+esc((m.full_name||m.email)+" — tersedia "+money(v))+'</option>':"";}).join("");
   $("payoutUser").innerHTML='<option value="">Pilih penerima komisi</option>'+payees;
+  $("saleUser").innerHTML='<option value="">Pelanggan umum</option>'+members.map(m=>'<option value="'+esc(m.id)+'">'+esc((m.full_name||m.email)+" — "+m.email)+'</option>').join("");
 }
 async function createPayment(e){
   e.preventDefault();
@@ -166,7 +171,44 @@ async function toggleProduct(id){
   try{await rpc("admin_save_product",{p_id:id,p_product:p.product,p_variant:p.variant,p_public_price:p.public_price,p_reseller_price:p.reseller_price,p_in_stock:p.in_stock,p_is_active:active,p_sort_order:p.sort_order});await loadAll();notice("Visibilitas produk diperbarui.","success");}
   catch(e){notice("Gagal mengubah produk: "+e.message,"error");}
 }
+
+function renderSales(){
+ const labels={pending:"Menunggu",paid:"Dibayar",fulfilled:"Selesai",cancelled:"Dibatalkan"};
+ $("salesBody").innerHTML=sales.length?sales.map(s=>{
+  const actions=s.status==="cancelled"?"":'<div class="admin-actions">'+["pending","paid","fulfilled","cancelled"].filter(x=>x!==s.status).map(x=>'<button data-sale-status="'+x+'" data-id="'+esc(s.id)+'">'+labels[x]+'</button>').join("")+'</div>';
+  return '<tr><td><strong>'+esc(s.customer_name)+'</strong><small>'+esc(s.customer_contact||"-")+'</small></td><td>'+esc(s.product)+'<small>'+esc(s.variant)+'</small></td><td>'+esc(s.quantity)+'</td><td>'+money(s.unit_price*s.quantity)+'</td><td>'+money(s.cost_price*s.quantity)+'</td><td>'+badge(s.status)+'</td><td>'+esc(date(s.created_at))+actions+'</td></tr>';
+ }).join(""):'<tr><td colspan="7" class="admin-empty">Belum ada penjualan.</td></tr>';
+ $("salesBody").querySelectorAll("[data-sale-status]").forEach(b=>b.addEventListener("click",async()=>{
+  if(!confirm("Ubah status transaksi ini menjadi "+labels[b.dataset.saleStatus]+"?"))return;
+  try{await rpc("admin_update_sale_status",{p_sale_id:b.dataset.id,p_status:b.dataset.saleStatus,p_notes:null});await loadAll();notice("Status penjualan diperbarui.","success");}
+  catch(e){notice("Gagal mengubah status: "+e.message,"error");}
+ }));
+}
+async function createSale(e){
+ e.preventDefault();const val=id=>$(id).value.trim(),q=Number(val("saleQuantity")),price=Number(val("salePrice")),cost=Number(val("saleCost"));
+ if(q<1||price<0||cost<0){notice("Jumlah dan harga tidak valid.","error");return;}
+ const b=e.submitter;b.disabled=true;
+ try{
+  await rpc("admin_create_sale",{p_user_id:val("saleUser")||null,p_customer_name:val("saleCustomer"),p_contact:val("saleContact"),p_product:val("saleProduct"),p_variant:val("saleVariant"),p_quantity:q,p_unit_price:price,p_cost_price:cost,p_status:val("saleStatus"),p_method:val("saleMethod"),p_reference:val("saleReference"),p_notes:val("saleNotes")});
+  $("saleForm").reset();$("saleQuantity").value=1;$("saleCost").value=0;await loadAll();showTab("sales");notice("Penjualan berhasil dicatat.","success");
+ }catch(err){notice("Gagal mencatat penjualan: "+err.message,"error");}finally{b.disabled=false;}
+}
+function renderPayoutRequests(){
+ const labels={pending:"Menunggu",approved:"Disetujui",rejected:"Ditolak"};
+ $("requestsBody").innerHTML=payoutRequests.length?payoutRequests.map(r=>{
+  const actions=r.status==="pending"?'<div class="admin-actions"><button data-request="approved" data-id="'+esc(r.id)+'">Setujui</button><button class="admin-danger" data-request="rejected" data-id="'+esc(r.id)+'">Tolak</button></div>':badge(r.status);
+  return '<tr><td><strong>'+esc(r.full_name||"-")+'</strong><small>'+esc(r.email)+'</small></td><td>'+money(r.amount)+'</td><td>'+esc(r.payout_method)+'<small>'+esc(r.payout_account)+'</small></td><td>'+esc(r.notes||"-")+'</td><td>'+badge(r.status)+'<small>'+esc(r.admin_notes||"")+'</small></td><td>'+esc(date(r.created_at))+actions+'</td></tr>';
+ }).join(""):'<tr><td colspan="6" class="admin-empty">Belum ada pengajuan.</td></tr>';
+ $("requestsBody").querySelectorAll("[data-request]").forEach(b=>b.addEventListener("click",async()=>{
+  if(!confirm((b.dataset.request==="approved"?"Setujui":"Tolak")+" pengajuan ini?"))return;
+  const notes=prompt("Catatan admin (opsional):")||null;
+  try{await rpc("admin_review_payout_request",{p_request_id:b.dataset.id,p_decision:b.dataset.request,p_notes:notes});await loadAll();notice("Pengajuan pencairan diproses.","success");}
+  catch(e){notice("Gagal memproses pengajuan: "+e.message,"error");}
+ }));
+}
+
 function renderReports(){
+ $("salesCount").textContent=salesSummary.orders??0;$("salesRevenue").textContent=money(salesSummary.revenue);$("salesCost").textContent=money(salesSummary.cost);$("salesProfit").textContent=money(salesSummary.profit);
   $("reportCount").textContent=payments.length;
   $("reportPending").textContent=payments.filter(p=>p.status==="pending").length;
   $("reportVerified").textContent=payments.filter(p=>p.status==="verified").length;
