@@ -1,30 +1,39 @@
 # NOVASTRIA — Premium Digital Store
 
-Website statis dengan katalog 59 varian produk, pencarian, filter, harga publik/reseller, pemesanan WhatsApp, dan dua alur pendaftaran anggota yang terpisah.
+Website NOVASTRIA dengan katalog digital, pencarian, filter, harga publik/reseller, pemesanan WhatsApp, Supabase Auth, dan Admin Controller.
 
-## Struktur
-- `index.html` — halaman utama.
+## Struktur penting
+- `index.html` — halaman toko.
+- `admin.html` — dashboard admin.
+- `assets/app.js` — katalog, autentikasi, profil, dan pemesanan.
+- `assets/admin.js` — pemeriksaan admin dan pengelolaan status keanggotaan.
 - `assets/style.css` — desain responsif.
-- `assets/app.js` — interaksi katalog, akun demo, pesanan, dan pendaftaran.
 - `assets/products.json` — data katalog dan harga.
+- `supabase/setup-auth.sql` — trigger profil otomatis dan backfill akun lama.
+- `supabase/setup-admin.sql` — otorisasi admin dan kebijakan RLS.
 
-## Aktifkan GitHub Pages
-1. Buka tab **Settings** pada repository.
-2. Pilih **Pages**.
-3. Di **Build and deployment**, pilih **Deploy from a branch**.
-4. Pilih branch `main` dan folder `/(root)`, lalu klik **Save**.
-5. Tunggu proses deployment, kemudian buka URL Pages yang diberikan GitHub.
+## Setup Supabase
 
-## Pengaturan
-Nomor WhatsApp admin ada pada konstanta `ADMIN_WA` di `assets/app.js`. Formatnya kode negara tanpa `+`.
-Data harga dan ketersediaan ada di `assets/products.json`. Harga sekarang hanya nilai awal: markup reseller +3% dan publik +7%, dibulatkan ke Rp1.000. Verifikasi harga dan stok dengan supplier sebelum menerima pesanan.
+1. Jalankan seluruh `supabase/setup-auth.sql` di Supabase SQL Editor.
+2. Pastikan akun `kitatopupin@gmail.com` sudah terdaftar di NOVASTRIA / Supabase Auth.
+3. Jalankan seluruh `supabase/setup-admin.sql` di SQL Editor untuk memberikan hak Admin Utama kepada akun tersebut.
+4. Pastikan query selesai tanpa error.
+5. Login dengan akun admin, lalu buka `https://rifkykawitwicaksono.github.io/NOVASTRIA/admin.html`.
 
-## Program anggota
-- Referral member: Rp150.000; pengundang langsung menerima Rp100.000 dan NOVASTRIA Rp50.000 setelah pembayaran tervalidasi.
-- Reseller member: Rp100.000 sekali bayar untuk akses harga reseller setelah diverifikasi.
-- Kedua status terpisah. Membayar satu program tidak otomatis mengaktifkan program lainnya.
+## Admin Controller tahap pertama
+- Memeriksa hak admin melalui fungsi database `is_novastria_admin()`.
+- Menampilkan daftar profil anggota.
+- Mencari anggota berdasarkan nama, nomor WhatsApp, dan kode referral.
+- Menampilkan status Referral dan Reseller.
+- Mengaktifkan atau menonaktifkan status yang sudah memiliki baris pada tabel `memberships`.
 
-## Batasan penting
-Ini masih frontend statis/demo. Profil dan status anggota disimpan di `localStorage` browser, bukan akun aman di server. Pengunjung dapat mengubah data lokalnya sendiri. Form hanya membuka WhatsApp; tidak ada pembayaran otomatis, database pusat, verifikasi pembayaran, pembukuan komisi, atau dashboard admin. Jangan mengaktifkan status anggota atau membayar komisi berdasarkan status di browser.
+**Verifikasi pembayaran tetap manual.** Aktifkan status hanya setelah bukti pembayaran diperiksa. Dashboard ini belum memproses pembayaran, membuat membership yang belum ada, mencatat komisi, atau mengirim payout.
 
-Untuk produksi dibutuhkan backend, database, autentikasi, pencatatan transaksi, dan webhook pembayaran yang diverifikasi di server. Jangan menyimpan API key, password, atau secret di file frontend publik.
+## Keamanan
+- Browser menggunakan Supabase Publishable Key; jangan memasukkan Secret Key atau service-role key ke HTML/JavaScript.
+- Hak admin ditentukan oleh tabel `public.novastria_admins` dan fungsi database, bukan berdasarkan email yang diketik di browser.
+- Kebijakan RLS membatasi operasi admin. Jangan memberikan akses admin ke akun lain tanpa verifikasi.
+- Status keanggotaan tidak boleh diubah dari browser anggota biasa.
+
+## Katalog dan kontak
+Nomor WhatsApp admin diatur pada konstanta `ADMIN_WA` dalam `assets/app.js`. Data harga dan ketersediaan ada di `assets/products.json`; verifikasi dengan supplier sebelum menerima pesanan.
