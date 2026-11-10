@@ -23,12 +23,15 @@ async function init(){
   $("manageAccount").addEventListener("click",openAccount);
   $("closeAccount").addEventListener("click",()=>$("accountDialog").close());
   $("authForm").addEventListener("submit",handleAuthSubmit);
-  $("toggleAuthMode").addEventListener("click",toggleAuthMode);
+  $("loginModeBtn").addEventListener("click",()=>setAuthMode("login"));
+  $("signupModeBtn").addEventListener("click",()=>setAuthMode("signup"));
+  $("accountDialog").addEventListener("click",event=>{if(event.target===$("accountDialog"))$("accountDialog").close();});
+  setAuthMode("login");
   $("saveProfile").addEventListener("click",saveProfile);
   $("logout").addEventListener("click",logout);
   $("sendOrder").addEventListener("click",sendOrder);
   $("requestJoin").addEventListener("click",requestJoin);
-  document.querySelectorAll("[data-close]").forEach(button=>button.addEventListener("click",()=>$ (button.dataset.close).close()));
+  document.querySelectorAll("[data-close]").forEach(button=>button.addEventListener("click",()=>$(button.dataset.close).close()));
   document.querySelectorAll("[data-join]").forEach(button=>button.addEventListener("click",()=>openJoin(button.dataset.join)));
   const result=await supabase.auth.getSession();
   currentUser=result.data.session?result.data.session.user:null;
@@ -105,16 +108,20 @@ function openAccount(){
   $("accountDialog").showModal();
 }
 
-function toggleAuthMode(){
-  authMode=authMode==="login"?"signup":"login";
-  const signup=authMode==="signup";
+function setAuthMode(mode){
+  authMode=mode;
+  const signup=mode==="signup";
   $("accountDialogTitle").textContent=signup?"Buat akun NOVASTRIA":"Masuk ke akun";
   $("authIntro").textContent=signup?"Buat akun dengan email aktif. Tautan verifikasi akan dikirim ke email Anda.":"Masuk untuk melihat profil dan status keanggotaan NOVASTRIA.";
   document.querySelectorAll(".signup-only").forEach(el=>el.hidden=!signup);
-  $("authName").required=signup;$("authPhone").required=signup;
+  $("authName").required=signup;
+  $("authPhone").required=signup;
   $("authSubmit").textContent=signup?"Daftar akun":"Masuk";
-  $("toggleAuthMode").textContent=signup?"Sudah punya akun? Masuk":"Belum punya akun? Daftar sekarang";
   $("authPassword").autocomplete=signup?"new-password":"current-password";
+  $("loginModeBtn").classList.toggle("active",!signup);
+  $("signupModeBtn").classList.toggle("active",signup);
+  $("loginModeBtn").setAttribute("aria-pressed",String(!signup));
+  $("signupModeBtn").setAttribute("aria-pressed",String(signup));
   setAuthMessage("");
 }
 
