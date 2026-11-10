@@ -3,7 +3,6 @@ const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_LBhpfEc_ANm5geSULymA6A_qINelIr6
 const $ = id => document.getElementById(id);
 const db = window.supabase?.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
 let rows = [];
-const moneyDate = value => value ? new Date(value).toLocaleDateString("id-ID") : "-";
 function notice(message,type=""){ $("adminNotice").textContent=message; $("adminNotice").className="admin-alert "+type; }
 async function start(){
   $("adminLogout").addEventListener("click",logout);
@@ -24,7 +23,7 @@ async function start(){
 async function loadMembers(){
   $("membersBody").innerHTML='<tr><td colspan="6" class="admin-empty">Memuat data anggota...</td></tr>';
   const [profilesResult,membershipsResult]=await Promise.all([
-    db.from("profiles").select("id,full_name,phone,referral_code,created_at").order("created_at",{ascending:false}),
+    db.from("profiles").select("id,full_name,phone,referral_code"),
     db.from("memberships").select("user_id,membership_type,status")
   ]);
   if(profilesResult.error){notice("Gagal membaca profil: "+profilesResult.error.message,"error");return;}
