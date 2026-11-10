@@ -1,64 +1,69 @@
-# NOVASTRIA — Supabase Auth setup
+# NOVASTRIA — Supabase setup
 
-Kode frontend menggunakan Supabase Auth email/password. Jalankan langkah berikut sebelum menguji pendaftaran.
+## 1. Autentikasi dan profil
+1. Buka Supabase Dashboard → SQL Editor.
+2. Jalankan seluruh file `supabase/setup-auth.sql`.
+3. Pastikan provider Email aktif pada Authentication → Sign In / Providers.
+4. Atur Site URL menjadi `https://rifkykawitwicaksono.github.io/NOVASTRIA/` dan Redirect URL `https://rifkykawitwicaksono.github.io/NOVASTRIA/**`.
 
-## 1. Jalankan SQL database
-
-1. Buka https://supabase.com/dashboard dan pilih project NOVASTRIA.
-2. Buka SQL Editor.
-3. Buka file supabase/setup-auth.sql pada repository ini.
-4. Salin seluruh isi file, tempel ke SQL Editor, lalu tekan Run.
-5. Pastikan query selesai tanpa error. Jalankan seluruh isi file, bukan hanya perintah penambahan kolom `phone`.
-
-SQL tersebut menambahkan kolom nomor WhatsApp, trigger pembuatan profil dan kode referral otomatis, membuat profil untuk akun Supabase yang sudah terdaftar tetapi belum memiliki profil, serta izin update terbatas untuk nama dan nomor WhatsApp. Aman dijalankan ulang: proses backfill hanya membuat profil yang belum ada. Trigger dibuat dengan SECURITY DEFINER dan search_path yang dikunci. Browser tidak diberi izin untuk mengubah status membership, pembayaran, atau komisi.
-
-## 2. Aktifkan email/password
-
-Di Supabase Dashboard:
-
-1. Buka Authentication → Sign In / Providers → Email.
-2. Pastikan provider Email aktif.
-3. Aktifkan Confirm email agar email pendaftar diverifikasi sebelum login.
-
-## 3. Atur alamat redirect
-
-Buka Authentication → URL Configuration:
-
-- Site URL: https://rifkykawitwicaksono.github.io/NOVASTRIA/
-- Redirect URLs: tambahkan https://rifkykawitwicaksono.github.io/NOVASTRIA/**
-
-Simpan perubahan.
-
-## 4. Uji alur autentikasi
-
-1. Tunggu GitHub Pages selesai menerbitkan commit terbaru.
-2. Buka website NOVASTRIA dan pilih Masuk / Daftar.
-3. Pilih Daftar sekarang, isi nama, nomor WhatsApp, email aktif, password minimal 8 karakter, dan kode referral pengundang bila ada.
-4. Buka email dan klik tautan verifikasi.
-5. Kembali ke website, lalu login.
-6. Pastikan profil dan kode referral pribadi tampil. Di Supabase, cek Authentication → Users dan tabel public.profiles.
-
-## Catatan penting
-
-- Publishable Key di frontend memang dirancang untuk aplikasi browser. Jangan pernah memasukkan sb_secret_... atau service-role key ke repository.
-- Status Referral dan Reseller tetap belum aktif sampai ada pembayaran yang diverifikasi dan status di database diubah oleh proses admin/server yang tepercaya.
-- Tombol pendaftaran program saat ini masih mengirim permintaan instruksi ke WhatsApp admin. Integrasi pembayaran iPaymu belum diaktifkan oleh perubahan autentikasi ini.
-- Untuk pengiriman email produksi, konfigurasi SMTP khusus di Supabase disarankan; layanan email bawaan memiliki batas pengiriman.
-- Pengguna yang sudah dibuat sebelum trigger dipasang mungkin belum memiliki baris profil. Buat akun uji baru setelah SQL dijalankan.
-
-## 5. Aktifkan Admin Controller
-
-1. Pastikan akun `kitatopupin@gmail.com` sudah terdaftar di Authentication → Users.
-2. Buka file `supabase/setup-admin.sql` dari repository.
-3. Salin seluruh isi file ke Supabase → SQL Editor, lalu tekan Run.
-4. Di SQL Editor, verifikasi admin terdaftar dengan:
+## 2. Admin utama
+1. Pastikan `kitatopupin@gmail.com` sudah terdaftar pada Authentication → Users.
+2. Jalankan seluruh `supabase/setup-admin.sql`.
+3. Verifikasi:
    ```sql
-   SELECT email, user_id FROM public.novastria_admins
-   WHERE email = 'kitatopupin@gmail.com';
+   SELECT email,user_id FROM public.novastria_admins
+   WHERE email='kitatopupin@gmail.com';
    ```
-5. Login ke NOVASTRIA menggunakan akun tersebut, lalu buka:
-   https://rifkykawitwicaksono.github.io/NOVASTRIA/admin.html
+   Harus mengembalikan satu baris.
 
-Jika query verifikasi tidak mengembalikan baris, akun belum terdaftar di Supabase Auth. Buat akun terlebih dahulu, lalu jalankan ulang `setup-admin.sql`.
+## 3. Upgrade Admin Control Center v2
+Jalankan seluruh file `supabase/admin-controller-v2.sql` satu kali di SQL Editor. File ini:
+- Membuat tabel pembayaran membership, komisi referral, pencairan komisi, audit log, dan katalog produk.
+- Memasukkan 59 produk dari katalog yang saat ini tersimpan di repository.
+- Membuat fungsi RPC yang memeriksa hak admin di database.
+- Membuat aturan RLS untuk data operasional dan katalog.
+- Menyambungkan katalog toko ke tabel produk Supabase.
 
-Admin Controller tahap pertama menyediakan daftar anggota, pencarian, ringkasan status, dan aktivasi/nonaktifkan membership yang sudah ada. Periksa bukti pembayaran secara manual sebelum aktivasi. Panel belum memproses pembayaran otomatis atau menghitung/membayar komisi.
+Setelah berhasil, logout lalu login kembali di website dan buka:
+`https://rifkykawitwicaksono.github.io/NOVASTRIA/admin.html`
+
+## 4. Alur operasional admin
+### Mencatat pembayaran
+1. Buka menu Pembayaran.
+2. Pilih anggota dan jenis membership.
+3. Masukkan nominal tetap: Referral Rp150.000 atau Reseller Rp100.000.
+4. Masukkan metode, referensi, URL bukti (opsional), dan catatan.
+5. Simpan sebagai Menunggu.
+6. Periksa bukti transfer secara manual, lalu klik Verifikasi atau Tolak.
+7. Verifikasi akan mengaktifkan membership secara otomatis.
+
+### Komisi referral
+- Hanya pembayaran Referral Member yang diverifikasi yang menghasilkan komisi.
+- Jika profil pembeli memiliki `referred_by`, pengundang mendapat komisi Rp100.000.
+- Pembayaran Reseller Member tidak menghasilkan komisi.
+- Tanpa pengundang yang valid, komisi tidak dibuat.
+- Jangan menjanjikan komisi sebelum pembayaran berhasil diverifikasi.
+
+### Pencairan komisi
+1. Pastikan transfer kepada anggota benar-benar sudah dilakukan.
+2. Buka Referral & Komisi.
+3. Pilih penerima dan masukkan nominal serta referensi transfer.
+4. Simpan. Database menolak pencairan melebihi saldo tersedia.
+
+### Produk dan harga
+- Edit harga/varian pada menu Produk & Harga.
+- Stok dan visibilitas bisa diubah terpisah.
+- Perubahan katalog tersimpan di Supabase dan dibaca oleh halaman toko.
+- Jika tabel katalog aktif kosong, toko menampilkan katalog kosong; file JSON hanya dipakai sebagai fallback jika tabel Supabase belum tersedia.
+
+## 5. Batasan saat ini
+- Belum ada integrasi iPaymu atau verifikasi transfer otomatis.
+- Bukti pembayaran belum diunggah ke Supabase Storage; admin dapat menyimpan URL bukti yang sudah diunggah di tempat tepercaya.
+- Belum ada formulir anggota untuk mengajukan pencairan komisi. Admin mencatat payout yang telah dilakukan.
+- Laporan keuangan hanya mencakup pembayaran membership. Penjualan produk melalui WhatsApp belum masuk database transaksi.
+- SMTP khusus Supabase disarankan untuk email verifikasi produksi.
+
+## 6. Keamanan
+- Gunakan hanya Publishable Key di frontend.
+- Jangan menaruh Secret Key/service-role key atau password database di repository.
+- Jangan mengaktifkan membership sebelum dana benar-benar diterima.
