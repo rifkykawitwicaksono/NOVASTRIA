@@ -45,7 +45,7 @@
       <label>Nomor WhatsApp<input id="memberPhone" type="tel" autocomplete="tel" placeholder="08xxxxxxxxxx"></label>
       <label>Kode referral pribadi<input id="memberReferralCode" readonly></label>
       <button class="btn btn-outline full" id="saveProfile" type="button">Simpan perubahan profil</button>
-      <button class="btn btn-primary full" id="logout" type="button">Keluar dari akun</button>
+      <div class="status-card"><h3>Pengajuan pencairan komisi</h3><p class="fineprint">Ajukan pencairan jika memiliki saldo komisi referral. Admin memeriksa pengajuan dan melakukan transfer secara manual.</p><form id="memberPayoutForm" class="auth-form"><label>Nominal (Rp)<input id="memberPayoutAmount" type="number" min="1" required placeholder="Contoh: 100000"></label><label>Metode<select id="memberPayoutMethod"><option value="Bank">Transfer bank</option><option value="DANA">DANA</option><option value="OVO">OVO</option><option value="GoPay">GoPay</option><option value="ShopeePay">ShopeePay</option></select></label><label>Nomor rekening / akun tujuan<input id="memberPayoutAccount" required minlength="4" placeholder="Nomor rekening atau e-wallet"></label><label>Catatan<input id="memberPayoutNotes" placeholder="Nama pemilik rekening"></label><button class="btn btn-primary full" type="submit">Kirim pengajuan</button></form><div id="memberPayoutHistory" class="fineprint">Riwayat pengajuan akan tampil di sini.</div></div><button class="btn btn-primary full" id="logout" type="button">Keluar dari akun</button>
       <p class="fineprint">Status referral dan reseller dibaca dari database. Status hanya berubah setelah pembayaran diverifikasi admin.</p>
       <p class="auth-message" id="profileMessage" role="status" aria-live="polite"></p>
     </div>
@@ -57,5 +57,5 @@
 <dialog id="joinDialog"><div class="dialog-head"><div><span class="eyebrow">PENDAFTARAN</span><h2 id="joinTitle">Program anggota</h2></div><button class="icon-close" data-close="joinDialog" aria-label="Tutup">×</button></div><div class="dialog-body"><div class="status-card" id="joinSummary"></div><p id="joinAccountNote" class="fineprint"></p><button class="btn btn-primary full" id="requestJoin" type="button">Minta instruksi pembayaran via WhatsApp</button><p class="fineprint">Keanggotaan tidak aktif sebelum pembayaran diperiksa dan diverifikasi admin. Pembayaran otomatis iPaymu belum diaktifkan.</p></div></dialog>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="assets/app.js?v=20261111-5"></script>
+<script src="assets/app.js?v=20261111-6"></script>
 </body></html>
