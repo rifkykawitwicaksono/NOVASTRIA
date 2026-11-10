@@ -1,81 +1,185 @@
-const SUPABASE_URL = "https://hwtrqgtabamuixaqiscx.supabase.co";
-const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_LBhpfEc_ANm5geSULymA6A_qINelIr6";
-const $ = id => document.getElementById(id);
-const db = window.supabase?.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
-let rows = [];
-function notice(message,type=""){ $("adminNotice").textContent=message; $("adminNotice").className="admin-alert "+type; }
+const SUPABASE_URL="https://hwtrqgtabamuixaqiscx.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY="sb_publishable_LBhpfEc_ANm5geSULymA6A_qINelIr6";
+const $=id=>document.getElementById(id);
+const money=n=>new Intl.NumberFormat("id-ID",{style:"currency",currency:"IDR",maximumFractionDigits:0}).format(Number(n||0));
+const date=v=>v?new Date(v).toLocaleString("id-ID",{dateStyle:"medium",timeStyle:"short"}):"-";
+const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const db=window.supabase?.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+let members=[],payments=[],commissions=[],payouts=[],products=[],overview={};
+function notice(message,type=""){const el=$("adminNotice");el.textContent=message;el.className="admin-alert "+type;}
+function badge(status){return '<span class="admin-badge '+esc(status)+'">'+esc(({active:"Aktif",inactive:"Nonaktif",none:"Belum ada",pending:"Menunggu",verified:"Terverifikasi",rejected:"Ditolak",paid:"Dibayar"}[status]||status))+'</span>';}
+async function rpc(name,args={}){const r=await db.rpc(name,args);if(r.error)throw r.error;return r.data;}
 async function start(){
   $("adminLogout").addEventListener("click",logout);
-  $("reloadMembers").addEventListener("click",loadMembers);
-  $("memberSearch").addEventListener("input",renderMembers);
-  $("membershipFilter").addEventListener("change",renderMembers);
-  if(!db){notice("Supabase tidak termuat. Periksa koneksi internet dan muat ulang.","error");return;}
-  const {data:{session},error}=await db.auth.getSession();
-  if(error||!session){notice("Silakan login terlebih dahulu melalui halaman toko.","error");$("adminIdentity").textContent="Belum login";return;}
-  $("adminIdentity").textContent=session.user.email||"Akun terautentikasi";
-  const check=await db.rpc("is_novastria_admin");
-  if(check.error){notice("Gagal memeriksa hak admin: "+check.error.message+". Pastikan supabase/setup-admin.sql sudah dijalankan.","error");return;}
-  if(check.data!==true){notice("Akses ditolak. Akun ini tidak terdaftar sebagai admin NOVASTRIA.","error");return;}
-  $("adminPanel").hidden=false;
-  notice("Akses admin terverifikasi. Data anggota dimuat dari database.","success");
-  await loadMembers();
+  $("refreshAll").addEventListener("click",loadAll);
+  document.querySelectorAll("[data-tab]").forEach(b=>b.addEventListener("click",()=>showTab(b.dataset.tab)));
+  $("memberSearch").addEventListener("input",renderMembers);$("memberFilter").addEventListener("change",renderMembers);
+  $("paymentFilter").addEventListener("change",renderPayments);$("paymentSearch").addEventListener("input",renderPayments);
+  $("productSearch").addEventListener("input",renderProducts);$("productVisibility").addEventListener("change",renderProducts);
+  $("paymentType").addEventListener("change",()=>{$("paymentAmount").value=$("paymentType").value==="referral"?150000:100000;});
+  $("paymentForm").addEventListener("submit",createPayment);
+  $("payoutForm").addEventListener("submit",createPayout);
+  $("productForm").addEventListener("submit",saveProduct);
+  $("resetProduct").addEventListener("click",resetProductForm);
+  if(!db){notice("Supabase JS tidak termuat. Periksa koneksi internet lalu muat ulang.","error");return;}
+  const {data,error}=await db.auth.getSession();
+  if(error||!data.session){notice("Silakan login melalui halaman toko terlebih dahulu.","error");$("adminIdentity").textContent="Belum login";return;}
+  $("adminIdentity").textContent="Login sebagai "+(data.session.user.email||"akun terautentikasi");
+  try{
+    const allowed=await rpc("is_novastria_admin");
+    if(allowed!==true){notice("Akses ditolak. Akun ini tidak memiliki hak Admin NOVASTRIA.","error");return;}
+    $("adminPanel").hidden=false;notice("Hak admin terverifikasi. Memuat modul operasional...","success");
+    await loadAll();
+  }catch(e){notice("Gagal memeriksa hak admin / memuat sistem: "+e.message+". Pastikan setup-admin.sql dan admin-controller-v2.sql sudah dijalankan.","error");}
 }
-async function loadMembers(){
-  $("membersBody").innerHTML='<tr><td colspan="6" class="admin-empty">Memuat data anggota...</td></tr>';
-  const [profilesResult,membershipsResult]=await Promise.all([
-    db.from("profiles").select("id,full_name,phone,referral_code"),
-    db.from("memberships").select("user_id,membership_type,status")
-  ]);
-  if(profilesResult.error){notice("Gagal membaca profil: "+profilesResult.error.message,"error");return;}
-  if(membershipsResult.error){notice("Gagal membaca keanggotaan: "+membershipsResult.error.message,"error");return;}
-  const memberships=membershipsResult.data||[];
-  rows=(profilesResult.data||[]).map(p=>({
-    ...p,
-    referral:memberships.find(m=>m.user_id===p.id&&m.membership_type==="referral")?.status||"none",
-    reseller:memberships.find(m=>m.user_id===p.id&&m.membership_type==="reseller")?.status||"none"
-  }));
-  updateStats();renderMembers();
+function showTab(name){
+  document.querySelectorAll("[data-tab]").forEach(b=>b.classList.toggle("active",b.dataset.tab===name));
+  document.querySelectorAll(".admin-section").forEach(s=>s.hidden=s.id!=="tab-"+name);
 }
-function updateStats(){
-  $("totalMembers").textContent=rows.length;
-  $("activeReferral").textContent=rows.filter(r=>r.referral==="active").length;
-  $("activeReseller").textContent=rows.filter(r=>r.reseller==="active").length;
-  $("inactiveMembership").textContent=rows.reduce((n,r)=>n+["referral","reseller"].filter(k=>r[k]==="inactive").length,0);
+async function loadAll(){
+  notice("Memperbarui data admin...");
+  const tasks=[
+    ["members","admin_list_members"],["overview","admin_get_overview"],["payments","admin_list_payments"],
+    ["commissions","admin_list_commissions"],["payouts","admin_list_payouts"],["products","admin_list_products"],["audit","admin_list_audit"]
+  ];
+  const results=await Promise.all(tasks.map(async ([key,fn])=>{try{return [key,await rpc(fn)];}catch(e){return [key,{__error:e.message}];}}));
+  const errors=[];
+  for(const [key,value] of results){
+    if(value&&value.__error){errors.push(key+": "+value.__error);continue;}
+    if(key==="overview")overview=value||{};
+    else if(key==="members")members=value||[];
+    else if(key==="payments")payments=value||[];
+    else if(key==="commissions")commissions=value||[];
+    else if(key==="payouts")payouts=value||[];
+    else if(key==="products")products=value||[];
+    else if(key==="audit")renderAudit(value||[]);
+  }
+  renderAll();
+  if(errors.length)notice("Sebagian modul gagal dimuat: "+errors.join(" | "), "error");
+  else notice("Semua modul berhasil diperbarui dari Supabase.","success");
+}
+function renderAll(){renderStats();renderMembers();renderMemberOptions();renderPayments();renderCommissions();renderPayouts();renderProducts();renderReports();}
+function renderStats(){
+  $("statMembers").textContent=overview.members??members.length;
+  $("statReferral").textContent=overview.referral_active??members.filter(m=>m.referral_status==="active").length;
+  $("statReseller").textContent=overview.reseller_active??members.filter(m=>m.reseller_status==="active").length;
+  $("statPending").textContent=overview.pending_payments??payments.filter(p=>p.status==="pending").length;
+  $("statRevenue").textContent=money(overview.verified_revenue);
+  $("statCommission").textContent=money(overview.available_commission);
+  $("statPayout").textContent=money(overview.paid_commission);
+  $("statProducts").textContent=products.filter(p=>p.is_active).length;
+  $("dashboardSummary").textContent="Saat ini terdapat "+members.length+" profil anggota, "+payments.filter(p=>p.status==="pending").length+" pembayaran menunggu verifikasi, "+commissions.length+" catatan komisi referral, dan "+products.length+" produk katalog. Periksa bukti pembayaran sebelum melakukan verifikasi.";
 }
 function renderMembers(){
-  const q=$("memberSearch").value.trim().toLowerCase(),filter=$("membershipFilter").value;
-  const visible=rows.filter(r=>{
-    const hay=[r.full_name,r.phone,r.referral_code].join(" ").toLowerCase();
-    const matchesFilter=!filter||r.referral===filter||r.reseller===filter;
-    return hay.includes(q)&&matchesFilter;
+  const q=$("memberSearch").value.trim().toLowerCase(),filter=$("memberFilter").value;
+  const list=members.filter(m=>{
+    const text=[m.full_name,m.email,m.phone,m.referral_code].join(" ").toLowerCase();
+    const ok=filter==="referral"?m.referral_status==="active":filter==="reseller"?m.reseller_status==="active":filter==="none"?m.referral_status==="none"&&m.reseller_status==="none":true;
+    return text.includes(q)&&ok;
   });
-  if(!visible.length){$("membersBody").innerHTML='<tr><td colspan="6" class="admin-empty">Tidak ada anggota yang cocok.</td></tr>';return;}
-  $("membersBody").innerHTML=visible.map(r=>'<tr><td><strong>'+escapeHtml(r.full_name||"Tanpa nama")+'</strong><small>'+escapeHtml(moneyDate(r.created_at))+'</small></td><td>'+escapeHtml(r.phone||"-")+'</td><td>'+escapeHtml(r.referral_code||"-")+'</td><td>'+statusText(r.referral)+'</td><td>'+statusText(r.reseller)+'</td><td><div class="admin-actions">'+actionButtons(r,"referral")+actionButtons(r,"reseller")+'</div></td></tr>').join("");
-  $("membersBody").querySelectorAll("[data-status]").forEach(button=>button.addEventListener("click",()=>changeStatus(button.dataset.user,button.dataset.type,button.dataset.status)));
+  $("membersBody").innerHTML=list.length?list.map(m=>'<tr><td><strong>'+esc(m.full_name||"Tanpa nama")+'</strong><small>'+esc(m.email)+'</small><small>'+esc(date(m.created_at))+'</small></td><td>'+esc(m.phone||"-")+'</td><td>'+esc(m.referral_code||"-")+'</td><td><small>'+esc(m.referred_by||"Tidak ada / tidak diketahui")+'</small></td><td>'+badge(m.referral_status)+'</td><td>'+badge(m.reseller_status)+'</td></tr>').join(""):'<tr><td colspan="6" class="admin-empty">Tidak ada anggota yang cocok.</td></tr>';
 }
-function statusText(s){return s==="active"?"Aktif":s==="inactive"?"Belum aktif":"Belum terdaftar";}
-function actionButtons(r,type){
-  const current=r[type],label=type==="referral"?"Referral":"Reseller";
-  if(current==="none")return '<button disabled title="Membership belum dibuat">'+label+': belum ada</button>';
-  const next=current==="active"?"inactive":"active",caption=next==="active"?"Aktifkan "+label:"Nonaktifkan "+label;
-  return '<button data-user="'+r.id+'" data-type="'+type+'" data-status="'+next+'">'+caption+'</button>';
+function renderMemberOptions(){
+  const options=members.map(m=>'<option value="'+esc(m.id)+'">'+esc((m.full_name||m.email)+" — "+m.email)+'</option>').join("");
+  $("paymentUser").innerHTML='<option value="">Pilih anggota</option>'+options;
+  const balances=new Map();
+  commissions.forEach(c=>balances.set(c.referrer_id,(balances.get(c.referrer_id)||0)+Number(c.amount||0)));
+  payouts.filter(p=>p.status==="paid").forEach(p=>balances.set(p.user_id,(balances.get(p.user_id)||0)-Number(p.amount||0)));
+  const payees=[...balances].filter(([,v])=>v>0).map(([id,v])=>{const m=members.find(x=>x.id===id);return m?'<option value="'+esc(id)+'">'+esc((m.full_name||m.email)+" — tersedia "+money(v))+'</option>':"";}).join("");
+  $("payoutUser").innerHTML='<option value="">Pilih penerima komisi</option>'+payees;
 }
-async function changeStatus(userId,type,status){
-  const confirmation=status==="active"
-    ?"Pastikan pembayaran program "+type+" sudah diverifikasi. Aktifkan sekarang?"
-    :"Nonaktifkan status "+type+" anggota ini?";
-  if(!confirm(confirmation))return;
-  const {data,error}=await db.from("memberships").update({status}).eq("user_id",userId).eq("membership_type",type).select("user_id");
-  if(error){notice("Perubahan gagal: "+error.message,"error");return;}
-  if(!data?.length){notice("Tidak ada baris membership yang berubah. Membership mungkin belum dibuat.","error");return;}
-  notice("Status "+type+" berhasil diperbarui.","success");
-  await loadMembers();
+async function createPayment(e){
+  e.preventDefault();
+  const user=$("paymentUser").value,type=$("paymentType").value,amount=Number($("paymentAmount").value);
+  if(!user||!Number.isFinite(amount)||amount<=0){notice("Pilih anggota dan nominal pembayaran yang benar.","error");return;}
+  const b=e.submitter;b.disabled=true;
+  try{
+    await rpc("admin_create_payment",{p_user_id:user,p_type:type,p_amount:amount,p_method:$("paymentMethod").value.trim(),p_reference:$("paymentReference").value.trim()||null,p_proof_url:$("paymentProof").value.trim()||null,p_notes:$("paymentNotes").value.trim()||null});
+    $("paymentForm").reset();$("paymentAmount").value=150000;await loadAll();showTab("payments");
+    notice("Pembayaran dicatat dengan status MENUNGGU. Verifikasi setelah bukti diperiksa.","success");
+  }catch(err){notice("Gagal mencatat pembayaran: "+err.message,"error");}
+  finally{b.disabled=false;}
 }
-function escapeHtml(value){return String(value??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
-async function logout(){
-  if(!db)return;
-  const {error}=await db.auth.signOut();
-  if(error){notice("Gagal keluar: "+error.message,"error");return;}
-  window.location.href="index.html";
+function renderPayments(){
+  const q=$("paymentSearch").value.trim().toLowerCase(),filter=$("paymentFilter").value;
+  const list=payments.filter(p=>(!filter||p.status===filter)&&[p.email,p.full_name,p.reference_code,p.payment_method].join(" ").toLowerCase().includes(q));
+  $("paymentsBody").innerHTML=list.length?list.map(p=>{
+    const proof=p.proof_url?'<a href="'+esc(p.proof_url)+'" target="_blank" rel="noopener noreferrer">Buka bukti</a>':"Tidak ada";
+    const actions=p.status==="pending"?'<div class="admin-actions"><button data-review="verified" data-id="'+esc(p.id)+'">Verifikasi</button><button class="admin-danger" data-review="rejected" data-id="'+esc(p.id)+'">Tolak</button></div>':badge(p.status);
+    return '<tr><td><strong>'+esc(p.full_name||"-")+'</strong><small>'+esc(p.email)+'</small></td><td>'+esc(p.membership_type==="referral"?"Referral Member":"Reseller Member")+'</td><td>'+money(p.amount)+'<small>'+esc(p.payment_method)+'</small></td><td>'+esc(p.reference_code||"-")+'<small>'+proof+'</small></td><td>'+badge(p.status)+'</td><td>'+esc(date(p.created_at))+'</td><td>'+actions+'</td></tr>';
+  }).join(""):'<tr><td colspan="7" class="admin-empty">Belum ada pembayaran.</td></tr>';
+  $("paymentsBody").querySelectorAll("[data-review]").forEach(b=>b.addEventListener("click",()=>reviewPayment(b.dataset.id,b.dataset.review)));
 }
+async function reviewPayment(id,decision){
+  const verb=decision==="verified"?"VERIFIKASI":"TOLAK";
+  if(!confirm("Yakin "+verb+" pembayaran ini? "+(decision==="verified"?"Membership akan diaktifkan dan komisi referral dapat dibuat otomatis.":"Status pembayaran menjadi ditolak.")))return;
+  const notes=prompt("Catatan admin (opsional):")||null;
+  try{await rpc("admin_review_payment",{p_payment_id:id,p_decision:decision,p_notes:notes});await loadAll();notice("Pembayaran berhasil diproses: "+decision+".","success");}
+  catch(e){notice("Gagal memproses pembayaran: "+e.message,"error");}
+}
+function renderCommissions(){
+  $("commissionsBody").innerHTML=commissions.length?commissions.map(c=>'<tr><td><strong>'+esc(c.full_name||"-")+'</strong><small>'+esc(c.email)+'</small></td><td>'+esc(c.referred_email)+'</td><td>'+money(c.amount)+'</td><td>'+esc(date(c.created_at))+'</td></tr>').join(""):'<tr><td colspan="4" class="admin-empty">Belum ada komisi. Komisi dibuat ketika referral baru membayar dan pembayaran diverifikasi.</td></tr>';
+}
+async function createPayout(e){
+  e.preventDefault();const user=$("payoutUser").value,amount=Number($("payoutAmount").value);
+  if(!user||!amount||amount<=0){notice("Pilih penerima dan nominal pencairan.","error");return;}
+  if(!confirm("Konfirmasi bahwa dana "+money(amount)+" sudah benar-benar ditransfer ke penerima?"))return;
+  const b=e.submitter;b.disabled=true;
+  try{await rpc("admin_record_payout",{p_user_id:user,p_amount:amount,p_reference:$("payoutReference").value.trim()||null,p_notes:$("payoutNotes").value.trim()||null});$("payoutForm").reset();await loadAll();showTab("commissions");notice("Pencairan komisi berhasil dicatat.","success");}
+  catch(err){notice("Gagal mencatat pencairan: "+err.message,"error");}
+  finally{b.disabled=false;}
+}
+function renderPayouts(){
+  $("payoutsBody").innerHTML=payouts.length?payouts.map(p=>'<tr><td><strong>'+esc(p.full_name||"-")+'</strong><small>'+esc(p.email)+'</small></td><td>'+money(p.amount)+'</td><td>'+esc(p.payment_reference||"-")+'</td><td>'+esc(date(p.paid_at||p.created_at))+'</td><td>'+badge(p.status)+'</td></tr>').join(""):'<tr><td colspan="5" class="admin-empty">Belum ada pencairan komisi.</td></tr>';
+}
+function renderProducts(){
+  const q=$("productSearch").value.trim().toLowerCase(),v=$("productVisibility").value;
+  const list=products.filter(p=>(p.product+" "+p.variant).toLowerCase().includes(q)&&(v==="active"?p.is_active:v==="hidden"?!p.is_active:true));
+  $("productsBody").innerHTML=list.length?list.map(p=>'<tr><td><strong>'+esc(p.product)+'</strong><small>'+esc(p.variant)+'</small></td><td>'+money(p.public_price)+'</td><td>'+money(p.reseller_price)+'</td><td>'+badge(p.in_stock?"active":"inactive")+'</td><td>'+badge(p.is_active?"active":"inactive")+'</td><td><div class="admin-actions"><button data-edit="'+esc(p.id)+'">Edit</button><button class="admin-danger" data-archive="'+esc(p.id)+'">'+(p.is_active?"Sembunyikan":"Aktifkan")+'</button></div></td></tr>').join(""):'<tr><td colspan="6" class="admin-empty">Produk tidak ditemukan.</td></tr>';
+  $("productsBody").querySelectorAll("[data-edit]").forEach(b=>b.addEventListener("click",()=>editProduct(b.dataset.edit)));
+  $("productsBody").querySelectorAll("[data-archive]").forEach(b=>b.addEventListener("click",()=>toggleProduct(b.dataset.archive)));
+}
+function editProduct(id){
+  const p=products.find(x=>x.id===id);if(!p)return;
+  $("productId").value=p.id;$("productName").value=p.product;$("productVariant").value=p.variant;
+  $("productPublic").value=p.public_price??"";$("productReseller").value=p.reseller_price??"";
+  $("productSort").value=p.sort_order??0;$("productStock").checked=p.in_stock;$("productActive").checked=p.is_active;
+  $("productName").focus();window.scrollTo({top:0,behavior:"smooth"});
+}
+function resetProductForm(){$("productForm").reset();$("productId").value="";$("productSort").value=0;$("productStock").checked=true;$("productActive").checked=true;}
+async function saveProduct(e){
+  e.preventDefault();const id=$("productId").value||null;
+  const val=id=>$(id).value.trim();
+  const parsePrice=id=>val(id)===""?null:Number(val(id));
+  const pub=parsePrice("productPublic"),res=parsePrice("productReseller");
+  if((pub!==null&&(!Number.isFinite(pub)||pub<0))||(res!==null&&(!Number.isFinite(res)||res<0))){notice("Harga harus berupa angka nol atau lebih.","error");return;}
+  const b=e.submitter;b.disabled=true;
+  try{await rpc("admin_save_product",{p_id:id,p_product:val("productName"),p_variant:val("productVariant"),p_public_price:pub,p_reseller_price:res,p_in_stock:$("productStock").checked,p_is_active:$("productActive").checked,p_sort_order:Number(val("productSort")||0)});resetProductForm();await loadAll();showTab("products");notice("Produk tersimpan. Katalog toko akan membaca data terbaru dari Supabase.","success");}
+  catch(err){notice("Gagal menyimpan produk: "+err.message,"error");}
+  finally{b.disabled=false;}
+}
+async function toggleProduct(id){
+  const p=products.find(x=>x.id===id);if(!p)return;
+  const active=!p.is_active;if(!confirm((active?"Tampilkan":"Sembunyikan")+" "+p.product+" — "+p.variant+"?"))return;
+  try{await rpc("admin_save_product",{p_id:id,p_product:p.product,p_variant:p.variant,p_public_price:p.public_price,p_reseller_price:p.reseller_price,p_in_stock:p.in_stock,p_is_active:active,p_sort_order:p.sort_order});await loadAll();notice("Visibilitas produk diperbarui.","success");}
+  catch(e){notice("Gagal mengubah produk: "+e.message,"error");}
+}
+function renderReports(){
+  $("reportCount").textContent=payments.length;
+  $("reportPending").textContent=payments.filter(p=>p.status==="pending").length;
+  $("reportVerified").textContent=payments.filter(p=>p.status==="verified").length;
+  $("reportRejected").textContent=payments.filter(p=>p.status==="rejected").length;
+  const months=new Map();
+  payments.filter(p=>p.status==="verified").forEach(p=>{
+    const d=new Date(p.verified_at||p.created_at),key=d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0");
+    const item=months.get(key)||{referral:0,reseller:0,total:0};
+    item[p.membership_type]+=Number(p.amount);item.total+=Number(p.amount);months.set(key,item);
+  });
+  const list=[...months.entries()].sort((a,b)=>b[0].localeCompare(a[0]));
+  $("reportBody").innerHTML=list.length?list.map(([month,v])=>'<tr><td>'+esc(month)+'</td><td>'+money(v.referral)+'</td><td>'+money(v.reseller)+'</td><td><strong>'+money(v.total)+'</strong></td></tr>').join(""):'<tr><td colspan="4" class="admin-empty">Belum ada pembayaran terverifikasi.</td></tr>';
+}
+function renderAudit(items){
+  $("auditBody").innerHTML=items.length?items.map(a=>'<tr><td>'+esc(a.admin_email||"-")+'</td><td>'+esc(a.action)+'</td><td>'+esc(a.entity_type)+'<small>'+esc(a.entity_id||"-")+'</small></td><td><small>'+esc(JSON.stringify(a.details||{}))+'</small></td><td>'+esc(date(a.created_at))+'</td></tr>').join(""):'<tr><td colspan="5" class="admin-empty">Belum ada aktivitas tercatat.</td></tr>';
+}
+async function logout(){if(!db)return;const r=await db.auth.signOut();if(r.error){notice("Gagal keluar: "+r.error.message,"error");return;}location.href="index.html";}
 start();
