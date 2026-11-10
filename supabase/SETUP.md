@@ -8,9 +8,9 @@ Kode frontend menggunakan Supabase Auth email/password. Jalankan langkah berikut
 2. Buka SQL Editor.
 3. Buka file supabase/setup-auth.sql pada repository ini.
 4. Salin seluruh isi file, tempel ke SQL Editor, lalu tekan Run.
-5. Pastikan query selesai tanpa error.
+5. Pastikan query selesai tanpa error. Jalankan seluruh isi file, bukan hanya perintah penambahan kolom `phone`.
 
-SQL tersebut menambahkan kolom nomor WhatsApp, trigger pembuatan profil dan kode referral otomatis, serta izin update terbatas untuk nama dan nomor WhatsApp. Trigger dibuat dengan SECURITY DEFINER dan search_path yang dikunci. Browser tidak diberi izin untuk mengubah status membership, pembayaran, atau komisi.
+SQL tersebut menambahkan kolom nomor WhatsApp, trigger pembuatan profil dan kode referral otomatis, membuat profil untuk akun Supabase yang sudah terdaftar tetapi belum memiliki profil, serta izin update terbatas untuk nama dan nomor WhatsApp. Aman dijalankan ulang: proses backfill hanya membuat profil yang belum ada. Trigger dibuat dengan SECURITY DEFINER dan search_path yang dikunci. Browser tidak diberi izin untuk mengubah status membership, pembayaran, atau komisi.
 
 ## 2. Aktifkan email/password
 
