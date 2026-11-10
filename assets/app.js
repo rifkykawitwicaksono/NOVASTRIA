@@ -14,7 +14,7 @@ try {
 } catch (error) {
   console.error("Supabase gagal diinisialisasi:", error);
 }
-let catalog=[],selectedOrder=null,joinType="referral",currentUser=null,member=null,memberLoadError="",authMode="login";
+let catalog=[],selectedOrder=null,joinType="referral",currentUser=null,member=null,memberLoadError="",authMode="login",activeCategory="all";
 
 async function init(){
   $("year").textContent=new Date().getFullYear();
@@ -46,7 +46,7 @@ async function init(){
     populateCategories();renderProducts();
   }catch(error){$("productGrid").innerHTML='<div class="empty">Katalog belum bisa dimuat. Periksa koneksi dan sumber katalog.</div>';}
   $("searchInput").addEventListener("input",renderProducts);
-  $("categoryFilter").addEventListener("change",renderProducts);
+  $("categoryTabs").addEventListener("click",event=>{const button=event.target.closest("[data-category]");if(!button)return;activeCategory=button.dataset.category;document.querySelectorAll(".category-tab").forEach(x=>x.classList.toggle("active",x===button));renderProducts();});
   $("openAccount").addEventListener("click",openAccount);
   $("manageAccount").addEventListener("click",openAccount);
   $("closeAccount").addEventListener("click",()=>$("accountDialog").close());
@@ -83,20 +83,53 @@ async function init(){
   }
 }
 
+function productPlatform(name){
+  const n=String(name||"").toLowerCase();
+  if(n.includes("ios")||n.includes("gbox")||n.includes("esign")||n==="migul")return "iOS";
+  return "Android";
+}
+
 function populateCategories(){
-  const names=[...new Set(catalog.map(p=>p.product))].sort();
-  $("categoryFilter").innerHTML='<option value="">Semua produk</option>'+names.map(n=>'<option value="'+esc(n)+'">'+esc(n)+'</option>').join("");
+  const counts={Android:0,"iOS":0};
+  const groups=new Map();
+  catalog.forEach(p=>{if(!groups.has(p.product))groups.set(p.product,[]);groups.get(p.product).push(p);});
+  for(const [name,items] of groups){
+    const platform=productPlatform(name);
+    counts[platform]=(counts[platform]||0)+items.length;
+  }
+  document.querySelector('[data-category="Android"]').textContent="Android · "+counts.Android;
+  document.querySelector('[data-category="iOS"]').textContent="iOS · "+counts.iOS;
 }
 
 function renderProducts(){
-  const q=$("searchInput").value.toLowerCase().trim(),cat=$("categoryFilter").value;
-  const filtered=catalog.filter(p=>(!cat||p.product===cat)&&(p.product+" "+p.variant).toLowerCase().includes(q));
-  if(!filtered.length){$("productGrid").innerHTML='<div class="empty">Produk tidak ditemukan.</div>';return;}
-  $("productGrid").innerHTML=filtered.map(p=>{
-    if(!p.inStock)return '<article class="product-card"><h3>'+esc(p.product)+'</h3><div class="variant">'+esc(p.variant)+'</div><div class="out-stock">Stok tidak tersedia</div></article>';
-    const reseller=member?.resellerActive===true,price=reseller?p.resellerPrice:p.publicPrice;
-    return '<article class="product-card"><h3>'+esc(p.product)+'</h3><div class="variant">'+esc(p.variant)+'</div><div class="price-row"><div><div class="price-caption">'+(reseller?"Harga reseller":"Harga publik")+'</div><div class="price-value">'+(price==null?"Konfirmasi admin":money(price))+'</div></div><span class="price-caption">IDR</span></div><button class="btn btn-primary" data-order="'+catalog.indexOf(p)+'">Pesan produk</button></article>';
+  const q=$("searchInput").value.toLowerCase().trim();
+  const groups=new Map();
+  catalog.forEach((p,index)=>{
+    if(!groups.has(p.product))groups.set(p.product,[]);
+    groups.get(p.product).push({...p,_index:index});
+  });
+  const visible=[...groups.entries()].map(([name,items])=>{
+    const platform=productPlatform(name);
+    const matches=items.filter(p=>!q||(p.product+" "+p.variant).toLowerCase().includes(q));
+    return {name,platform,items:matches.length?matches:[],allItems:items};
+  }).filter(g=>g.items.length&&(activeCategory==="all"||g.platform===activeCategory));
+  $("catalogSummary").textContent=visible.length+" produk · "+visible.reduce((n,g)=>n+g.items.length,0)+" varian tersedia";
+  if(!visible.length){$("productGrid").innerHTML='<div class="empty">Produk tidak ditemukan pada kategori ini.</div>';return;}
+  $("productGrid").innerHTML=visible.map((g,groupIndex)=>{
+    const first=g.items[0],available=g.items.filter(x=>x.inStock);
+    const current=first;
+    const optionMarkup=g.items.map(p=>'<option value="'+p._index+'" '+(p._index===current._index?'selected':'')+' '+(!p.inStock?'data-unavailable="true"':'')+'>'+esc(p.variant)+(p.inStock?'':' — Stok habis')+'</option>').join("");
+    const price=member?.resellerActive===true?current.resellerPrice:current.publicPrice;
+    return '<article class="product-card grouped-product" data-product-card="'+groupIndex+'"><div class="product-card-top"><span class="platform-tag">'+esc(g.platform)+'</span><span class="variant-count">'+g.items.length+' varian</span></div><h3>'+esc(g.name)+'</h3><p class="product-description">'+(available.length?available.length+' pilihan tersedia':'Stok sedang tidak tersedia')+'</p><label class="variant-picker-label">Pilih durasi / varian<select class="variant-picker" data-variant-picker="'+groupIndex+'">'+optionMarkup+'</select></label><div class="price-row"><div><div class="price-caption">'+(member?.resellerActive===true?"Harga reseller":"Harga publik")+'</div><div class="price-value" data-current-price>'+(!current.inStock?'Stok habis':price==null?'Konfirmasi admin':money(price))+'</div></div><span class="price-caption">IDR</span></div><button class="btn btn-primary" data-order="'+current._index+'" '+(!current.inStock?'disabled':'')+'>'+(current.inStock?'Pesan produk':'Stok tidak tersedia')+'</button></article>';
   }).join("");
+  document.querySelectorAll("[data-variant-picker]").forEach(select=>select.addEventListener("change",()=>{
+    const product=catalog[Number(select.value)],card=select.closest("[data-product-card]");
+    const reseller=member?.resellerActive===true,price=reseller?product.resellerPrice:product.publicPrice;
+    const button=card.querySelector("[data-order]"),priceNode=card.querySelector("[data-current-price]");
+    button.dataset.order=String(Number(select.value));button.disabled=!product.inStock;
+    button.textContent=product.inStock?"Pesan produk":"Stok tidak tersedia";
+    priceNode.textContent=!product.inStock?"Stok habis":price==null?"Konfirmasi admin":money(price);
+  }));
   document.querySelectorAll("[data-order]").forEach(b=>b.addEventListener("click",()=>openOrder(catalog[Number(b.dataset.order)])));
 }
 
