@@ -8,7 +8,7 @@ const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&
 const db=window.supabase?.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
 let members=[],payments=[],commissions=[],payouts=[],products=[],overview={},sales=[],payoutRequests=[],salesSummary={};
 function notice(message,type=""){const el=$("adminNotice");el.textContent=message;el.className="admin-alert "+type;}
-function badge(status){return '<span class="admin-badge '+esc(status)+'">'+esc(({active:"Aktif",inactive:"Nonaktif",none:"Belum ada",pending:"Menunggu",verified:"Terverifikasi",rejected:"Ditolak",paid:"Dibayar"}[status]||status))+'</span>';}
+function badge(status){return '<span class="admin-badge '+esc(status)+'">'+esc(({active:"Aktif",inactive:"Nonaktif",none:"Belum ada",pending:"Menunggu",verified:"Terverifikasi",rejected:"Ditolak",approved:"Disetujui",paid:"Dibayar"}[status]||status))+'</span>';}
 async function rpc(name,args={}){const r=await db.rpc(name,args);if(r.error)throw r.error;return r.data;}
 async function start(){
   $("adminLogout").addEventListener("click",logout);
