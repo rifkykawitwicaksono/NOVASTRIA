@@ -22,7 +22,7 @@
       <button class="admin-nav" data-tab="members"><span>♙</span> Anggota</button>
       <button class="admin-nav" data-tab="payments"><span>▣</span> Pembayaran</button>
       <button class="admin-nav" data-tab="commissions"><span>↗</span> Referral & Komisi</button>
-      <button class="admin-nav" data-tab="products"><span>▤</span> Produk & Harga</button>
+      <button class="admin-nav" data-tab="products"><span>▤</span> Produk & Harga</button><button class="admin-nav" data-tab="sales"><span>▧</span> Penjualan</button><button class="admin-nav" data-tab="requests"><span>⇩</span> Pengajuan Komisi</button>
       <button class="admin-nav" data-tab="reports"><span>▥</span> Laporan</button>
       <button class="admin-nav" data-tab="audit"><span>◷</span> Aktivitas Admin</button>
     </aside>
@@ -82,8 +82,21 @@
         <div class="admin-card"><h2>Daftar Produk & Harga</h2><div class="admin-toolbar"><input id="productSearch" type="search" placeholder="Cari produk / varian"><select id="productVisibility"><option value="">Semua</option><option value="active">Tampil di toko</option><option value="hidden">Disembunyikan</option></select></div><div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Produk / Varian</th><th>Harga publik</th><th>Harga reseller</th><th>Stok</th><th>Visibilitas</th><th>Aksi</th></tr></thead><tbody id="productsBody"><tr><td colspan="6" class="admin-empty">Memuat...</td></tr></tbody></table></div></div>
       </section>
 
-      <section class="admin-section" id="tab-reports" hidden>
-        <div class="admin-card"><h2>Laporan Keuangan Membership</h2><p class="admin-muted">Laporan berdasarkan tabel membership_payments. Ini belum mencakup penjualan produk yang masih diproses melalui WhatsApp.</p><div class="admin-stats"><div class="admin-stat"><span>Total pembayaran tercatat</span><strong id="reportCount">0</strong></div><div class="admin-stat"><span>Menunggu verifikasi</span><strong id="reportPending">0</strong></div><div class="admin-stat"><span>Disetujui</span><strong id="reportVerified">0</strong></div><div class="admin-stat"><span>Ditolak</span><strong id="reportRejected">0</strong></div></div><div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Periode</th><th>Referral terverifikasi</th><th>Reseller terverifikasi</th><th>Total masuk</th></tr></thead><tbody id="reportBody"><tr><td colspan="4" class="admin-empty">Memuat...</td></tr></tbody></table></div></div>
+      <section class="admin-section" id="tab-sales" hidden>
+<div class="admin-card"><h2>Catat Penjualan Produk</h2><p class="admin-muted">Catat pesanan dari WhatsApp. Isi modal per unit agar laba kotor dapat dihitung. Hanya status Dibayar dan Selesai masuk laporan pendapatan.</p>
+<form id="saleForm" class="admin-form-grid admin-product-form">
+<label>Nama pelanggan<input id="saleCustomer" required></label><label>WhatsApp pelanggan<input id="saleContact"></label>
+<label>Akun anggota (opsional)<select id="saleUser"><option value="">Pelanggan umum</option></select></label>
+<label>Produk<input id="saleProduct" required></label><label>Varian<input id="saleVariant" required></label>
+<label>Jumlah<input id="saleQuantity" type="number" min="1" value="1" required></label>
+<label>Harga jual satuan<input id="salePrice" type="number" min="0" required></label><label>Modal satuan<input id="saleCost" type="number" min="0" value="0" required></label>
+<label>Status<select id="saleStatus"><option value="pending">Menunggu pembayaran</option><option value="paid">Dibayar</option><option value="fulfilled">Selesai</option><option value="cancelled">Dibatalkan</option></select></label>
+<label>Metode pembayaran<input id="saleMethod"></label><label>Referensi pembayaran<input id="saleReference"></label><label>Catatan<textarea id="saleNotes"></textarea></label>
+<button class="btn admin-primary" type="submit">Simpan penjualan</button></form></div>
+<div class="admin-card"><h2>Riwayat Penjualan</h2><div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Pelanggan</th><th>Produk</th><th>Jumlah</th><th>Harga jual</th><th>Modal</th><th>Status</th><th>Aksi</th></tr></thead><tbody id="salesBody"><tr><td colspan="7" class="admin-empty">Memuat...</td></tr></tbody></table></div></div></section>
+<section class="admin-section" id="tab-requests" hidden><div class="admin-card"><h2>Pengajuan Pencairan Komisi</h2><p class="admin-muted">Setujui atau tolak permintaan anggota. Persetujuan bukan bukti transfer. Setelah transfer manual, catat di Riwayat Pencairan pada tab Referral & Komisi.</p><div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Anggota</th><th>Nominal</th><th>Tujuan</th><th>Catatan</th><th>Status</th><th>Aksi</th></tr></thead><tbody id="requestsBody"><tr><td colspan="6" class="admin-empty">Memuat...</td></tr></tbody></table></div></div></section>
+<section class="admin-section" id="tab-reports" hidden>
+        <div class="admin-card"><h2>Laporan Keuangan Membership & Penjualan</h2><p class="admin-muted">Laporan berdasarkan tabel membership_payments. Penjualan produk berasal dari catatan transaksi manual admin.</p><div class="admin-stats"><div class="admin-stat"><span>Pesanan produk</span><strong id="salesCount">0</strong></div><div class="admin-stat"><span>Penjualan produk</span><strong id="salesRevenue">Rp0</strong></div><div class="admin-stat"><span>Modal produk</span><strong id="salesCost">Rp0</strong></div><div class="admin-stat"><span>Laba kotor produk</span><strong id="salesProfit">Rp0</strong></div><div class="admin-stat"><span>Total pembayaran tercatat</span><strong id="reportCount">0</strong></div><div class="admin-stat"><span>Menunggu verifikasi</span><strong id="reportPending">0</strong></div><div class="admin-stat"><span>Disetujui</span><strong id="reportVerified">0</strong></div><div class="admin-stat"><span>Ditolak</span><strong id="reportRejected">0</strong></div></div><div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Periode</th><th>Referral terverifikasi</th><th>Reseller terverifikasi</th><th>Total masuk</th></tr></thead><tbody id="reportBody"><tr><td colspan="4" class="admin-empty">Memuat...</td></tr></tbody></table></div></div>
       </section>
 
       <section class="admin-section" id="tab-audit" hidden>
@@ -93,5 +106,5 @@
   </div>
 </main>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="assets/admin.js?v=20261111-4"></script>
+<script src="assets/admin.js?v=20261111-5"></script>
 </body></html>
