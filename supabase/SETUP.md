@@ -27,7 +27,10 @@ Jalankan seluruh file `supabase/admin-controller-v2.sql` satu kali di SQL Editor
 Setelah berhasil, logout lalu login kembali di website dan buka:
 `https://rifkykawitwicaksono.github.io/NOVASTRIA/admin.html`
 
-## 4. Alur operasional admin
+## 4. Upgrade operasional v3
+Setelah v2 berhasil, jalankan seluruh `supabase/admin-controller-v3.sql` satu kali. Migrasi ini menambah tabel penjualan produk dan pengajuan pencairan komisi anggota.
+
+## 5. Alur operasional admin
 ### Mencatat pembayaran
 1. Buka menu Pembayaran.
 2. Pilih anggota dan jenis membership.
@@ -44,11 +47,18 @@ Setelah berhasil, logout lalu login kembali di website dan buka:
 - Tanpa pengundang yang valid, komisi tidak dibuat.
 - Jangan menjanjikan komisi sebelum pembayaran berhasil diverifikasi.
 
-### Pencairan komisi
-1. Pastikan transfer kepada anggota benar-benar sudah dilakukan.
-2. Buka Referral & Komisi.
-3. Pilih penerima dan masukkan nominal serta referensi transfer.
-4. Simpan. Database menolak pencairan melebihi saldo tersedia.
+### Pengajuan dan pencairan komisi
+1. Anggota login, buka area akun, lalu mengisi nominal dan tujuan transfer.
+2. Sistem menolak pengajuan melebihi saldo komisi yang belum dibayarkan atau sedang dipesan pengajuan lain.
+3. Admin buka tab Pengajuan Komisi, lalu setujui atau tolak.
+4. Setelah transfer benar-benar dilakukan, klik Catat transfer selesai dan isi referensi. Sistem membuat catatan payout serta menandai pengajuan sebagai dibayar dalam satu transaksi database.
+5. Alternatif: pencairan manual tanpa pengajuan tetap tersedia pada tab Referral & Komisi.
+
+### Penjualan produk
+1. Buka tab Penjualan untuk mencatat pesanan yang masuk melalui WhatsApp.
+2. Isi pelanggan, produk, varian, jumlah, harga jual per unit, dan modal per unit.
+3. Gunakan status Menunggu saat belum dibayar; ubah menjadi Dibayar atau Selesai setelah pembayaran/pemenuhan benar-benar terjadi.
+4. Laporan menampilkan omzet, modal, dan estimasi laba kotor untuk transaksi Dibayar/Selesai.
 
 ### Produk dan harga
 - Edit harga/varian pada menu Produk & Harga.
@@ -56,14 +66,14 @@ Setelah berhasil, logout lalu login kembali di website dan buka:
 - Perubahan katalog tersimpan di Supabase dan dibaca oleh halaman toko.
 - Jika tabel katalog aktif kosong, toko menampilkan katalog kosong; file JSON hanya dipakai sebagai fallback jika tabel Supabase belum tersedia.
 
-## 5. Batasan saat ini
+## 6. Batasan saat ini
 - Belum ada integrasi iPaymu atau verifikasi transfer otomatis.
 - Bukti pembayaran belum diunggah ke Supabase Storage; admin dapat menyimpan URL bukti yang sudah diunggah di tempat tepercaya.
-- Belum ada formulir anggota untuk mengajukan pencairan komisi. Admin mencatat payout yang telah dilakukan.
-- Laporan keuangan hanya mencakup pembayaran membership. Penjualan produk melalui WhatsApp belum masuk database transaksi.
+- Penjualan produk dicatat manual oleh admin; belum ada checkout otomatis atau sinkronisasi pesanan WhatsApp.
+- Laporan penjualan merupakan estimasi berdasarkan data harga jual/modal yang dimasukkan admin, belum termasuk biaya gateway, refund, atau biaya operasional lain.
 - SMTP khusus Supabase disarankan untuk email verifikasi produksi.
 
-## 6. Keamanan
+## 7. Keamanan
 - Gunakan hanya Publishable Key di frontend.
 - Jangan menaruh Secret Key/service-role key atau password database di repository.
 - Jangan mengaktifkan membership sebelum dana benar-benar diterima.
