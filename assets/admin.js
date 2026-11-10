@@ -2,6 +2,7 @@ const SUPABASE_URL="https://hwtrqgtabamuixaqiscx.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY="sb_publishable_LBhpfEc_ANm5geSULymA6A_qINelIr6";
 const $=id=>document.getElementById(id);
 const money=n=>new Intl.NumberFormat("id-ID",{style:"currency",currency:"IDR",maximumFractionDigits:0}).format(Number(n||0));
+const priceLabel=n=>n===null||n===undefined?"Belum ditetapkan":money(n);
 const date=v=>v?new Date(v).toLocaleString("id-ID",{dateStyle:"medium",timeStyle:"short"}):"-";
 const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const db=window.supabase?.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
@@ -104,7 +105,8 @@ function renderPayments(){
   const q=$("paymentSearch").value.trim().toLowerCase(),filter=$("paymentFilter").value;
   const list=payments.filter(p=>(!filter||p.status===filter)&&[p.email,p.full_name,p.reference_code,p.payment_method].join(" ").toLowerCase().includes(q));
   $("paymentsBody").innerHTML=list.length?list.map(p=>{
-    const proof=p.proof_url?'<a href="'+esc(p.proof_url)+'" target="_blank" rel="noopener noreferrer">Buka bukti</a>':"Tidak ada";
+    const proofUrl=(()=>{try{const u=new URL(p.proof_url);return ["https:","http:"].includes(u.protocol)?u.href:"";}catch{return "";}})();
+    const proof=proofUrl?'<a href="'+esc(proofUrl)+'" target="_blank" rel="noopener noreferrer">Buka bukti</a>':"Tidak ada";
     const actions=p.status==="pending"?'<div class="admin-actions"><button data-review="verified" data-id="'+esc(p.id)+'">Verifikasi</button><button class="admin-danger" data-review="rejected" data-id="'+esc(p.id)+'">Tolak</button></div>':badge(p.status);
     return '<tr><td><strong>'+esc(p.full_name||"-")+'</strong><small>'+esc(p.email)+'</small></td><td>'+esc(p.membership_type==="referral"?"Referral Member":"Reseller Member")+'</td><td>'+money(p.amount)+'<small>'+esc(p.payment_method)+'</small></td><td>'+esc(p.reference_code||"-")+'<small>'+proof+'</small></td><td>'+badge(p.status)+'</td><td>'+esc(date(p.created_at))+'</td><td>'+actions+'</td></tr>';
   }).join(""):'<tr><td colspan="7" class="admin-empty">Belum ada pembayaran.</td></tr>';
