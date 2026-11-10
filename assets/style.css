@@ -21,3 +21,23 @@ button:disabled{opacity:.6;cursor:wait;transform:none}
 .auth-mode-btn:focus-visible,.icon-close:focus-visible{outline:2px solid #b6a1ff;outline-offset:3px}
 .icon-close{min-width:38px;min-height:38px;display:grid;place-items:center;border-radius:9px}
 .icon-close:hover{background:#ffffff12;color:#fff}
+
+/* Grouped catalog layout inspired by modern digital voucher storefronts */
+.category-tabs{display:flex;gap:9px;flex-wrap:wrap;margin:0 0 14px}
+.category-tab{border:1px solid #ffffff20;background:#11152a;color:#c1c6dc;padding:10px 17px;border-radius:999px;font:600 12px 'DM Sans';cursor:pointer;transition:.2s}
+.category-tab:hover{border-color:#9a75ff;color:#fff}
+.category-tab.active{background:linear-gradient(110deg,#8b68f1,#6555d8);border-color:transparent;color:#fff;box-shadow:0 7px 20px #755ce333}
+.catalog-summary{font-size:11px;color:#858da9;margin:0 0 15px}
+.grouped-product{min-height:245px;padding:19px}
+.product-card-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.platform-tag{display:inline-flex;align-items:center;padding:5px 9px;border-radius:7px;background:#8b68f126;color:#cbbaff;font-size:9px;font-weight:700;letter-spacing:.7px;text-transform:uppercase}
+.variant-count{font-size:10px;color:#8991ad}
+.grouped-product h3{font-size:16px;line-height:1.35;margin:4px 0 0}
+.product-description{font-size:10px;color:#8e96b1;margin:0}
+.variant-picker-label{display:grid;gap:7px;margin-top:3px;color:#9da5c0;font-size:10px}
+.variant-picker{width:100%;min-width:0;background:#0c1122;border:1px solid #303756;border-radius:9px;padding:11px 12px;color:#f4f5ff;font:12px 'DM Sans';outline:none}
+.variant-picker:focus{border-color:var(--purple);box-shadow:0 0 0 2px #9a75ff22}
+.grouped-product .price-row{padding-top:5px}
+.grouped-product .price-value{font-size:19px}
+.grouped-product button:disabled{opacity:.5;cursor:not-allowed;transform:none}
+@media(max-width:520px){.category-tabs{gap:7px}.category-tab{padding:9px 13px;font-size:11px}.grouped-product{min-height:230px}}
