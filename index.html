@@ -24,7 +24,7 @@
 <footer><a class="brand" href="#"><span class="brand-mark">N</span><span>NOVASTRIA<small>PREMIUM DIGITAL STORE</small></span></a><p>© <span id="year"></span> NOVASTRIA. Informasi produk dapat berubah mengikuti ketersediaan supplier.</p><a href="#" id="contactLink">Hubungi admin WhatsApp</a></footer>
 
 <dialog id="accountDialog">
-  <div class="dialog-head"><div><span class="eyebrow">NOVASTRIA ACCOUNT</span><h2 id="accountDialogTitle">Masuk ke akun</h2></div><button class="icon-close" id="closeAccount" aria-label="Tutup">×</button></div>
+  <div class="dialog-head"><div><span class="eyebrow">NOVASTRIA ACCOUNT</span><h2 id="accountDialogTitle">Masuk ke akun</h2></div><button class="icon-close" id="closeAccount" type="button" aria-label="Tutup dialog">×</button></div>
   <div class="dialog-body">
     <div id="authPanel">
       <p class="auth-intro" id="authIntro">Masuk untuk melihat profil dan status keanggotaan NOVASTRIA.</p>
@@ -37,7 +37,7 @@
         <button class="btn btn-primary full" id="authSubmit" type="submit">Masuk</button>
       </form>
       <p class="auth-message" id="authMessage" role="status" aria-live="polite"></p>
-      <button class="auth-switch" id="toggleAuthMode" type="button">Belum punya akun? Daftar sekarang</button>
+      <div class="auth-mode-tabs" role="group" aria-label="Pilih akses akun"><button class="auth-mode-btn active" id="loginModeBtn" type="button" aria-pressed="true">Masuk</button><button class="auth-mode-btn" id="signupModeBtn" type="button" aria-pressed="false">Buat akun</button></div>
     </div>
     <div id="profilePanel" hidden>
       <div class="status-card" id="memberStatus">Memuat profil...</div>
