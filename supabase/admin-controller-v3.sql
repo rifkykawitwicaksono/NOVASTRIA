@@ -148,3 +148,29 @@ REVOKE ALL ON FUNCTION public.admin_get_sales_summary() FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION public.member_request_commission_payout(BIGINT,TEXT,TEXT,TEXT),public.member_list_commission_payout_requests() TO authenticated;
 GRANT EXECUTE ON FUNCTION public.admin_list_payout_requests(),public.admin_review_payout_request(UUID,TEXT,TEXT),public.admin_list_sales(),public.admin_create_sale(UUID,TEXT,TEXT,TEXT,TEXT,INTEGER,BIGINT,BIGINT,TEXT,TEXT,TEXT,TEXT),public.admin_update_sale_status(UUID,TEXT,TEXT),public.admin_get_sales_summary() TO authenticated;
 NOTIFY pgrst,'reload schema';
+
+
+-- Finalisasi transfer pengajuan yang sudah disetujui.
+-- Satu transaksi: catat payout ledger + ubah status request menjadi paid.
+CREATE OR REPLACE FUNCTION public.admin_complete_payout_request(p_request_id UUID,p_reference TEXT DEFAULT NULL,p_notes TEXT DEFAULT NULL)
+RETURNS UUID LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $$
+DECLARE r public.commission_payout_requests%ROWTYPE; v_id UUID; v_available BIGINT;
+BEGIN
+ IF NOT public.is_novastria_admin() THEN RAISE EXCEPTION 'Akses admin diperlukan'; END IF;
+ SELECT * INTO r FROM public.commission_payout_requests WHERE id=p_request_id FOR UPDATE;
+ IF NOT FOUND OR r.status<>'approved' THEN RAISE EXCEPTION 'Pengajuan harus berstatus disetujui sebelum ditandai dibayar'; END IF;
+ PERFORM pg_advisory_xact_lock(hashtextextended(r.user_id::text,0));
+ SELECT COALESCE((SELECT sum(amount) FROM public.referral_commissions WHERE referrer_id=r.user_id),0)
+  -COALESCE((SELECT sum(amount) FROM public.commission_payouts WHERE user_id=r.user_id AND status='paid'),0)
+ INTO v_available;
+ IF r.amount>GREATEST(v_available,0) THEN RAISE EXCEPTION 'Saldo komisi tidak mencukupi'; END IF;
+ INSERT INTO public.commission_payouts(user_id,amount,payment_reference,notes,paid_by)
+ VALUES(r.user_id,r.amount,NULLIF(p_reference,''),COALESCE(NULLIF(p_notes,''),'Pencairan dari pengajuan anggota'),auth.uid())
+ RETURNING id INTO v_id;
+ UPDATE public.commission_payout_requests SET status='paid',admin_notes=COALESCE(NULLIF(p_notes,''),admin_notes),reviewed_by=auth.uid(),reviewed_at=now() WHERE id=r.id;
+ PERFORM public.novastria_admin_log('payout_request_paid','commission_payout_request',r.id::text,jsonb_build_object('payout_id',v_id,'amount',r.amount));
+ RETURN v_id;
+END; $$;
+REVOKE ALL ON FUNCTION public.admin_complete_payout_request(UUID,TEXT,TEXT) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.admin_complete_payout_request(UUID,TEXT,TEXT) TO authenticated;
+NOTIFY pgrst,'reload schema';
