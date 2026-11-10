@@ -217,6 +217,8 @@ BEGIN
   IF NOT public.is_novastria_admin() THEN RAISE EXCEPTION 'Akses admin diperlukan'; END IF;
   IF p_type NOT IN ('referral','reseller') THEN RAISE EXCEPTION 'Jenis membership tidak valid'; END IF;
   IF p_amount <= 0 THEN RAISE EXCEPTION 'Nominal harus lebih dari nol'; END IF;
+  IF p_type='referral' AND p_amount<>150000 THEN RAISE EXCEPTION 'Biaya Referral Member harus Rp150.000'; END IF;
+  IF p_type='reseller' AND p_amount<>100000 THEN RAISE EXCEPTION 'Biaya Reseller Member harus Rp100.000'; END IF;
   IF NOT EXISTS(SELECT 1 FROM auth.users WHERE id=p_user_id) THEN RAISE EXCEPTION 'Anggota tidak ditemukan'; END IF;
   INSERT INTO public.membership_payments(user_id,membership_type,amount,payment_method,reference_code,proof_url,notes)
   VALUES(p_user_id,p_type,p_amount,COALESCE(NULLIF(p_method,''),'manual'),NULLIF(p_reference,''),NULLIF(p_proof_url,''),NULLIF(p_notes,''))
@@ -245,7 +247,7 @@ BEGIN
     IF p.membership_type='referral' THEN
       SELECT referred_by INTO v_referrer FROM public.profiles WHERE id=p.user_id;
       IF v_referrer IS NOT NULL AND v_referrer<>p.user_id THEN
-        v_commission := LEAST(p.amount,100000);
+        v_commission := 100000;
         IF v_commission>0 THEN
           INSERT INTO public.referral_commissions(payment_id,referrer_id,referred_user_id,amount)
           VALUES(p.id,v_referrer,p.user_id,v_commission)
