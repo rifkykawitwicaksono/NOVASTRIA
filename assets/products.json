@@ -41,8 +41,8 @@
     {
       "product": "Drip Client Root",
       "variant": "1 Hari",
-      "inStock": false,
-      "resellerPrice": null,
+      "inStock": true,
+      "resellerPrice": 6000,
       "publicPrice": null
     },
     {
