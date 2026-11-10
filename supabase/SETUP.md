@@ -45,3 +45,20 @@ Simpan perubahan.
 - Tombol pendaftaran program saat ini masih mengirim permintaan instruksi ke WhatsApp admin. Integrasi pembayaran iPaymu belum diaktifkan oleh perubahan autentikasi ini.
 - Untuk pengiriman email produksi, konfigurasi SMTP khusus di Supabase disarankan; layanan email bawaan memiliki batas pengiriman.
 - Pengguna yang sudah dibuat sebelum trigger dipasang mungkin belum memiliki baris profil. Buat akun uji baru setelah SQL dijalankan.
+
+## 5. Aktifkan Admin Controller
+
+1. Pastikan akun `kitatopupin@gmail.com` sudah terdaftar di Authentication → Users.
+2. Buka file `supabase/setup-admin.sql` dari repository.
+3. Salin seluruh isi file ke Supabase → SQL Editor, lalu tekan Run.
+4. Di SQL Editor, verifikasi admin terdaftar dengan:
+   ```sql
+   SELECT email, user_id FROM public.novastria_admins
+   WHERE email = 'kitatopupin@gmail.com';
+   ```
+5. Login ke NOVASTRIA menggunakan akun tersebut, lalu buka:
+   https://rifkykawitwicaksono.github.io/NOVASTRIA/admin.html
+
+Jika query verifikasi tidak mengembalikan baris, akun belum terdaftar di Supabase Auth. Buat akun terlebih dahulu, lalu jalankan ulang `setup-admin.sql`.
+
+Admin Controller tahap pertama menyediakan daftar anggota, pencarian, ringkasan status, dan aktivasi/nonaktifkan membership yang sudah ada. Periksa bukti pembayaran secara manual sebelum aktivasi. Panel belum memproses pembayaran otomatis atau menghitung/membayar komisi.
