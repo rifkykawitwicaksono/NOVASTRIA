@@ -26,7 +26,7 @@ async function init(){
       const live=await supabaseClient.from("store_products")
         .select("product,variant,public_price,reseller_price,in_stock")
         .eq("is_active",true).order("sort_order").order("product").order("variant");
-      if(!live.error&&Array.isArray(live.data)&&live.data.length){
+      if(!live.error&&Array.isArray(live.data)){
         liveProducts=live.data.map(p=>({
           product:p.product,variant:p.variant,inStock:p.in_stock,
           publicPrice:p.public_price,resellerPrice:p.reseller_price
