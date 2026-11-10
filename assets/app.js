@@ -6,8 +6,8 @@ const $ = id => document.getElementById(id);
 const esc = v => String(v ?? "").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 let supabaseClient = null;
 try {
-  if (window.supabase && typeof window.supabaseClient.createClient === "function") {
-    supabaseClient = window.supabaseClient.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+  if (window.supabase && typeof window.supabase.createClient === "function") {
+    supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
       auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
     });
   }
