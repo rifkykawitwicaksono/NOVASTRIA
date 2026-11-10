@@ -56,6 +56,7 @@ async function init(){
   $("accountDialog").addEventListener("click",event=>{if(event.target===$("accountDialog"))$("accountDialog").close();});
   setAuthMode("login");
   $("saveProfile").addEventListener("click",saveProfile);
+  $("memberPayoutForm").addEventListener("submit",submitMemberPayout);
   $("logout").addEventListener("click",logout);
   $("sendOrder").addEventListener("click",sendOrder);
   $("requestJoin").addEventListener("click",requestJoin);
@@ -123,6 +124,7 @@ async function refreshMember(){
       referralActive:active.some(m=>m.membership_type==="referral"&&m.status==="active"),
       resellerActive:active.some(m=>m.membership_type==="reseller"&&m.status==="active")
     };
+    loadMemberPayoutHistory();
   }catch(error){
     memberLoadError=error?.message||"Gagal mengambil data anggota dari database.";
     console.error("Gagal memuat data anggota:",error);
@@ -151,6 +153,27 @@ function updateMemberUI(){
     $("memberStatus").textContent="Belum ada sesi akun aktif.";
   }
   renderProducts();
+}
+
+
+async function loadMemberPayoutHistory(){
+ const box=$("memberPayoutHistory");if(!box||!currentUser)return;
+ try{
+  const r=await supabaseClient.rpc("member_list_commission_payout_requests");if(r.error)throw r.error;
+  const labels={pending:"Menunggu",approved:"Disetujui",rejected:"Ditolak"};
+  box.innerHTML="<strong>Riwayat pengajuan</strong><br>"+(r.data?.length?r.data.map(x=>esc(new Date(x.created_at).toLocaleDateString("id-ID"))+" — "+esc(money(x.amount))+" — "+esc(labels[x.status]||x.status)+(x.admin_notes?" ("+esc(x.admin_notes)+")":"")).join("<br>"):"Belum ada pengajuan.");
+ }catch(e){box.textContent="Fitur ini aktif setelah migrasi database v3 dijalankan.";}
+}
+async function submitMemberPayout(e){
+ e.preventDefault();if(!currentUser){setProfileMessage("Silakan login terlebih dahulu.");return;}
+ const amount=Number($("memberPayoutAmount").value),method=$("memberPayoutMethod").value,account=$("memberPayoutAccount").value.trim(),notes=$("memberPayoutNotes").value.trim(),button=e.submitter;
+ button.disabled=true;
+ try{
+  const r=await supabaseClient.rpc("member_request_commission_payout",{p_amount:amount,p_method:method,p_account:account,p_notes:notes||null});
+  if(r.error)throw r.error;$("memberPayoutForm").reset();await loadMemberPayoutHistory();
+  setProfileMessage("Pengajuan pencairan terkirim dan menunggu pemeriksaan admin.","success");
+ }catch(err){setProfileMessage("Pengajuan gagal: "+err.message);}
+ finally{button.disabled=false;}
 }
 
 function openAccount(){
