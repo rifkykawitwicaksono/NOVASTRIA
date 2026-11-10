@@ -297,6 +297,8 @@ DECLARE v_available BIGINT; v_id UUID;
 BEGIN
  IF NOT public.is_novastria_admin() THEN RAISE EXCEPTION 'Akses admin diperlukan'; END IF;
  IF p_amount<=0 THEN RAISE EXCEPTION 'Nominal pencairan harus lebih dari nol'; END IF;
+ -- Serialisasi payout per penerima untuk mencegah dua admin memakai saldo yang sama bersamaan.
+ PERFORM pg_advisory_xact_lock(hashtextextended(p_user_id::text,0));
  SELECT COALESCE((SELECT sum(amount) FROM public.referral_commissions WHERE referrer_id=p_user_id),0)
    - COALESCE((SELECT sum(amount) FROM public.commission_payouts WHERE user_id=p_user_id AND status='paid'),0)
  INTO v_available;
