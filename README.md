@@ -1,39 +1,49 @@
 # NOVASTRIA — Premium Digital Store
 
-Website NOVASTRIA dengan katalog digital, pencarian, filter, harga publik/reseller, pemesanan WhatsApp, Supabase Auth, dan Admin Controller.
+Website NOVASTRIA menggunakan HTML/CSS/JavaScript, Supabase Auth, PostgreSQL, dan GitHub Pages.
 
-## Struktur penting
+## Struktur utama
 - `index.html` — halaman toko.
-- `admin.html` — dashboard admin.
+- `admin.html` — Admin Control Center.
 - `assets/app.js` — katalog, autentikasi, profil, dan pemesanan.
-- `assets/admin.js` — pemeriksaan admin dan pengelolaan status keanggotaan.
+- `assets/admin.js` — dashboard admin, pembayaran membership, komisi, payout, katalog, laporan, dan audit.
 - `assets/style.css` — desain responsif.
-- `assets/products.json` — data katalog dan harga.
-- `supabase/setup-auth.sql` — trigger profil otomatis dan backfill akun lama.
-- `supabase/setup-admin.sql` — otorisasi admin dan kebijakan RLS.
+- `assets/products.json` — fallback katalog statis.
+- `supabase/setup-auth.sql` — trigger profil dan referral code.
+- `supabase/setup-admin.sql` — identitas admin dan RLS dasar.
+- `supabase/admin-controller-v2.sql` — tabel operasional, RPC admin aman, seed 59 produk, komisi, payout, laporan, dan audit.
 
-## Setup Supabase
+## Setup database
+Jalankan berurutan melalui Supabase Dashboard → SQL Editor:
+1. `supabase/setup-auth.sql` (jika belum pernah dijalankan).
+2. `supabase/setup-admin.sql` (jika belum pernah dijalankan).
+3. `supabase/admin-controller-v2.sql` (wajib untuk Admin Control Center versi 2).
 
-1. Jalankan seluruh `supabase/setup-auth.sql` di Supabase SQL Editor.
-2. Pastikan akun `kitatopupin@gmail.com` sudah terdaftar di NOVASTRIA / Supabase Auth.
-3. Jalankan seluruh `supabase/setup-admin.sql` di SQL Editor untuk memberikan hak Admin Utama kepada akun tersebut.
-4. Pastikan query selesai tanpa error.
-5. Login dengan akun admin, lalu buka `https://rifkykawitwicaksono.github.io/NOVASTRIA/admin.html`.
+Pastikan akun `kitatopupin@gmail.com` sudah ada di Authentication → Users sebelum menjalankan setup-admin.sql. Verifikasi:
+```sql
+SELECT email,user_id FROM public.novastria_admins
+WHERE email='kitatopupin@gmail.com';
+```
 
-## Admin Controller tahap pertama
-- Memeriksa hak admin melalui fungsi database `is_novastria_admin()`.
-- Menampilkan daftar profil anggota.
-- Mencari anggota berdasarkan nama, nomor WhatsApp, dan kode referral.
-- Menampilkan status Referral dan Reseller.
-- Mengaktifkan atau menonaktifkan status yang sudah memiliki baris pada tabel `memberships`.
+## Modul Admin Control Center
+- Dashboard ringkasan anggota, membership aktif, pembayaran menunggu, pendapatan membership terverifikasi, komisi, payout, dan jumlah katalog.
+- Anggota: pencarian nama, email, WhatsApp, kode referral; status Referral dan Reseller; waktu pendaftaran.
+- Pembayaran: admin mencatat pembayaran manual sebagai pending, menautkan bukti/referensi, lalu memverifikasi atau menolak. Verifikasi mengaktifkan membership.
+- Referral & Komisi: saat pembayaran Referral Member Rp150.000 diverifikasi, pengundang yang tercatat menerima komisi Rp100.000. Pembayaran Reseller Member Rp100.000 tidak menghasilkan komisi.
+- Pencairan: admin mencatat payout setelah transfer benar-benar dilakukan; saldo dicek di database.
+- Produk & Harga: edit, tambah, sembunyikan, aktifkan stok, dan atur harga publik/reseller. Toko membaca katalog aktif dari Supabase setelah migrasi v2 dijalankan.
+- Laporan: rekap pembayaran membership terverifikasi per bulan.
+- Audit: riwayat aksi sensitif admin.
 
-**Verifikasi pembayaran tetap manual.** Aktifkan status hanya setelah bukti pembayaran diperiksa. Dashboard ini belum memproses pembayaran, membuat membership yang belum ada, mencatat komisi, atau mengirim payout.
+## Batasan operasional yang harus dipahami
+- Pembayaran belum terhubung ke iPaymu. Admin memasukkan pembayaran manual setelah memeriksa bukti/konfirmasi.
+- Bukti pembayaran berupa URL opsional; unggah file bukti belum dibuat.
+- Permintaan payout mandiri oleh anggota belum tersedia. Modul ini mencatat pencairan yang sudah dilakukan admin.
+- Penjualan produk yang diproses melalui WhatsApp belum tercatat sebagai transaksi/omzet di database. Laporan saat ini hanya laporan biaya membership.
+- Jangan mengaktifkan membership sebelum pembayaran benar-benar diterima.
+- Katalog harga harus diverifikasi dengan pemasok sebelum dipublikasikan.
 
 ## Keamanan
-- Browser menggunakan Supabase Publishable Key; jangan memasukkan Secret Key atau service-role key ke HTML/JavaScript.
-- Hak admin ditentukan oleh tabel `public.novastria_admins` dan fungsi database, bukan berdasarkan email yang diketik di browser.
-- Kebijakan RLS membatasi operasi admin. Jangan memberikan akses admin ke akun lain tanpa verifikasi.
-- Status keanggotaan tidak boleh diubah dari browser anggota biasa.
-
-## Katalog dan kontak
-Nomor WhatsApp admin diatur pada konstanta `ADMIN_WA` dalam `assets/app.js`. Data harga dan ketersediaan ada di `assets/products.json`; verifikasi dengan supplier sebelum menerima pesanan.
+- Browser menggunakan Supabase Publishable Key. Jangan pernah menaruh Secret Key atau service-role key di HTML/JavaScript.
+- Fungsi admin melakukan validasi hak akses di PostgreSQL; jangan mengandalkan pemeriksaan email di frontend.
+- Simpan SQL migration di repository dan jalankan hanya pada project Supabase NOVASTRIA.
