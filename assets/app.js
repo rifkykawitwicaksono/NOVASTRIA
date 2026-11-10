@@ -14,7 +14,7 @@ try {
 } catch (error) {
   console.error("Supabase gagal diinisialisasi:", error);
 }
-let catalog=[],selectedOrder=null,joinType="referral",currentUser=null,member=null,authMode="login";
+let catalog=[],selectedOrder=null,joinType="referral",currentUser=null,member=null,memberLoadError="",authMode="login";
 
 async function init(){
   $("year").textContent=new Date().getFullYear();
@@ -82,33 +82,41 @@ function renderProducts(){
 
 async function refreshMember(){
   member=null;
-  if(currentUser && supabaseClient){
-    const profileResult=await supabaseClient.from("profiles").select("id,full_name,phone,referral_code").eq("id",currentUser.id).maybeSingle();
-    const membershipResult=await supabaseClient.from("memberships").select("membership_type,status").eq("user_id",currentUser.id);
-    if(profileResult.error||membershipResult.error){
-      console.error("Gagal memuat data anggota:",profileResult.error||membershipResult.error);
-      setProfileMessage("Akun berhasil masuk, tetapi data profil belum tersedia. Pastikan SQL setup-auth.sql sudah dijalankan di Supabase.");
-    }else if(profileResult.data){
-      const active=membershipResult.data||[];
-      member={
-        id:currentUser.id,email:currentUser.email,
-        name:profileResult.data.full_name||currentUser.user_metadata?.full_name||"",
-        phone:profileResult.data.phone||currentUser.user_metadata?.phone||"",
-        referralCode:profileResult.data.referral_code||"",
-        referralActive:active.some(m=>m.membership_type==="referral"&&m.status==="active"),
-        resellerActive:active.some(m=>m.membership_type==="reseller"&&m.status==="active")
-      };
-    }else{
-      setProfileMessage("Profil akun belum ditemukan. Jalankan SQL setup-auth.sql di Supabase, lalu keluar dan masuk kembali.");
-    }
+  memberLoadError="";
+  if(!currentUser || !supabaseClient){
+    updateMemberUI();
+    return;
   }
-  updateMemberUI();
+  try{
+    const profileResult=await supabaseClient.from("profiles").select("id,full_name,phone,referral_code").eq("id",currentUser.id).maybeSingle();
+    if(profileResult.error) throw profileResult.error;
+    if(!profileResult.data){
+      throw new Error("Profil akun belum ditemukan. Pastikan trigger pembuatan profil pada SQL setup-auth.sql sudah dijalankan.");
+    }
+    const membershipResult=await supabaseClient.from("memberships").select("membership_type,status").eq("user_id",currentUser.id);
+    if(membershipResult.error) throw membershipResult.error;
+    const active=membershipResult.data||[];
+    member={
+      id:currentUser.id,email:currentUser.email,
+      name:profileResult.data.full_name||currentUser.user_metadata?.full_name||"",
+      phone:profileResult.data.phone||currentUser.user_metadata?.phone||"",
+      referralCode:profileResult.data.referral_code||"",
+      referralActive:active.some(m=>m.membership_type==="referral"&&m.status==="active"),
+      resellerActive:active.some(m=>m.membership_type==="reseller"&&m.status==="active")
+    };
+  }catch(error){
+    memberLoadError=error?.message||"Gagal mengambil data anggota dari database.";
+    console.error("Gagal memuat data anggota:",error);
+    setProfileMessage("Gagal memuat data anggota: "+memberLoadError);
+  }finally{
+    updateMemberUI();
+  }
 }
 
 function updateMemberUI(){
   $("accountStatus").textContent=member
     ?(member.name||member.email)+" • Referral: "+(member.referralActive?"Aktif":"Belum aktif")+" • Reseller: "+(member.resellerActive?"Aktif":"Belum aktif")
-    :(currentUser?"Memuat data anggota...":"Belum masuk");
+    :(currentUser?(memberLoadError?"Data anggota gagal dimuat":"Memuat data anggota..."):"Belum masuk");
   $("authPanel").hidden=!!currentUser;
   $("profilePanel").hidden=!currentUser;
   if(member){
@@ -117,7 +125,9 @@ function updateMemberUI(){
     $("memberPhone").value=member.phone;
     $("memberReferralCode").value=member.referralCode;
   }else if(currentUser){
-    $("memberStatus").textContent="Data profil belum tersedia. Pastikan migrasi database sudah dijalankan.";
+    $("memberStatus").textContent=memberLoadError
+      ?"Data anggota gagal dimuat: "+memberLoadError
+      :"Memuat data profil anggota...";
   }else{
     $("memberStatus").textContent="Belum ada sesi akun aktif.";
   }
