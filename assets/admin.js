@@ -6,7 +6,7 @@ const priceLabel=n=>n===null||n===undefined?"Belum ditetapkan":money(n);
 const date=v=>v?new Date(v).toLocaleString("id-ID",{dateStyle:"medium",timeStyle:"short"}):"-";
 const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const db=window.supabase?.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
-let members=[],payments=[],commissions=[],payouts=[],products=[],overview={},sales=[],payoutRequests=[],salesSummary={};
+let members=[],payments=[],commissions=[],payouts=[],products=[],overview={},sales=[],payoutRequests=[],salesSummary={},walletDeposits=[];
 function notice(message,type=""){const el=$("adminNotice");el.textContent=message;el.className="admin-alert "+type;}
 function badge(status){return '<span class="admin-badge '+esc(status)+'">'+esc(({active:"Aktif",inactive:"Nonaktif",none:"Belum ada",pending:"Menunggu",verified:"Terverifikasi",rejected:"Ditolak",approved:"Disetujui",paid:"Dibayar"}[status]||status))+'</span>';}
 async function rpc(name,args={}){const r=await db.rpc(name,args);if(r.error)throw r.error;return r.data;}
@@ -42,7 +42,7 @@ async function loadAll(){
   notice("Memperbarui data admin...");
   const tasks=[
     ["members","admin_list_members"],["overview","admin_get_overview"],["payments","admin_list_payments"],
-    ["commissions","admin_list_commissions"],["payouts","admin_list_payouts"],["products","admin_list_products"],["sales","admin_list_sales"],["salesSummary","admin_get_sales_summary"],["payoutRequests","admin_list_payout_requests"],["audit","admin_list_audit"]
+    ["commissions","admin_list_commissions"],["payouts","admin_list_payouts"],["products","admin_list_products"],["sales","admin_list_sales"],["salesSummary","admin_get_sales_summary"],["payoutRequests","admin_list_payout_requests"],["walletDeposits","admin_list_wallet_deposits"],["audit","admin_list_audit"]
   ];
   const results=await Promise.all(tasks.map(async ([key,fn])=>{try{return [key,await rpc(fn)];}catch(e){return [key,{__error:e.message}];}}));
   const errors=[];
@@ -57,13 +57,14 @@ async function loadAll(){
     else if(key==="sales")sales=value||[];
     else if(key==="salesSummary")salesSummary=value||{};
     else if(key==="payoutRequests")payoutRequests=value||[];
+    else if(key==="walletDeposits")walletDeposits=value||[];
     else if(key==="audit")renderAudit(value||[]);
   }
   renderAll();
   if(errors.length)notice("Sebagian modul gagal dimuat: "+errors.join(" | "), "error");
   else notice("Semua modul berhasil diperbarui dari Supabase.","success");
 }
-function renderAll(){renderStats();renderMembers();renderMemberOptions();renderPayments();renderCommissions();renderPayouts();renderProducts();renderSales();renderPayoutRequests();renderReports();}
+function renderAll(){renderStats();renderMembers();renderMemberOptions();renderPayments();renderCommissions();renderPayouts();renderProducts();renderSales();renderPayoutRequests();renderWalletDeposits();renderReports();}
 function renderStats(){
   $("statMembers").textContent=overview.members??members.length;
   $("statReferral").textContent=overview.referral_active??members.filter(m=>m.referral_status==="active").length;
@@ -211,6 +212,27 @@ function renderPayoutRequests(){
   const notes=prompt("Catatan admin (opsional):")||null;
   try{await rpc("admin_review_payout_request",{p_request_id:b.dataset.id,p_decision:b.dataset.request,p_notes:notes});await loadAll();notice("Pengajuan pencairan diproses.","success");}
   catch(e){notice("Gagal memproses pengajuan: "+e.message,"error");}
+ }));
+}
+
+function renderWalletDeposits(){
+ const labels={pending:"Menunggu",verified:"Terverifikasi",rejected:"Ditolak"};
+ $("walletDepositsBody").innerHTML=walletDeposits.length?walletDeposits.map(d=>{
+  const actions=d.status==="pending"?'<div class="admin-actions"><button data-wallet-decision="verified" data-id="'+esc(d.id)+'">Verifikasi & kreditkan</button><button class="admin-danger" data-wallet-decision="rejected" data-id="'+esc(d.id)+'">Tolak</button></div>':badge(d.status);
+  const proof=d.proof_url?'<a href="'+esc(d.proof_url)+'" target="_blank" rel="noopener">Buka bukti</a>':"Tidak dilampirkan";
+  return '<tr><td><strong>'+esc(d.full_name||"-")+'</strong><small>'+esc(d.email)+'</small><small>'+esc(d.phone||"-")+'</small></td><td><strong>'+money(d.amount)+'</strong></td><td>'+esc(d.payment_method)+'<small>Pengirim: '+esc(d.sender_name)+'</small><small>Ref: '+esc(d.payment_reference||"-")+'</small></td><td>'+proof+'</td><td>'+badge(d.status)+'<small>'+esc(d.admin_notes||"")+'</small><small>'+esc(date(d.created_at))+'</small></td><td>'+actions+'</td></tr>';
+ }).join(""):'<tr><td colspan="6" class="admin-empty">Belum ada pengajuan deposit.</td></tr>';
+ $("walletDepositsBody").querySelectorAll("[data-wallet-decision]").forEach(b=>b.addEventListener("click",async()=>{
+  const decision=b.dataset.walletDecision;
+  const promptText=decision==="verified"?"Pastikan dana benar-benar masuk dan nominal cocok. Database akan mengkreditkan saldo satu kali. Lanjutkan?":"Tolak pengajuan deposit ini?";
+  if(!confirm(promptText))return;
+  const notes=prompt(decision==="verified"?"Catatan verifikasi (opsional):":"Alasan penolakan (disarankan):")||null;
+  b.disabled=true;
+  try{
+   await rpc("admin_review_wallet_deposit",{p_request_id:b.dataset.id,p_decision:decision,p_notes:notes});
+   await loadAll();
+   notice(decision==="verified"?"Deposit diverifikasi dan saldo anggota dikreditkan.":"Pengajuan deposit ditolak.","success");
+  }catch(e){notice("Gagal memproses deposit: "+e.message,"error");b.disabled=false;}
  }));
 }
 
