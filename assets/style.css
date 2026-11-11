@@ -41,3 +41,6 @@ button:disabled{opacity:.6;cursor:wait;transform:none}
 .grouped-product .price-value{font-size:19px}
 .grouped-product button:disabled{opacity:.5;cursor:not-allowed;transform:none}
 @media(max-width:520px){.category-tabs{gap:7px}.category-tab{padding:9px 13px;font-size:11px}.grouped-product{min-height:230px}}
+
+/* Member wallet */
+.wallet-card{margin:18px 0}.wallet-balance{display:flex;justify-content:space-between;align-items:center;padding:18px;border:1px solid #51417c;border-radius:14px;background:linear-gradient(120deg,#211b3d,#142b39);margin:14px 0}.wallet-balance span{color:#c3bfd8;font-size:13px}.wallet-balance strong{font:700 24px 'Space Grotesk';color:#8ef0df}.wallet-instructions{font-size:13px;line-height:1.6;color:#c3c8dc;padding:12px;border:1px solid #343958;border-radius:10px;margin-bottom:14px}.wallet-instructions a{color:#8fe9e1;text-decoration:underline}.wallet-card h4{margin:16px 0 8px}.wallet-history{margin-top:18px}.wallet-history-item{padding:10px 0;border-bottom:1px solid #ffffff16;line-height:1.5}.wallet-history-item small{display:block;color:#9da4bf;font-size:11px}.wallet-credit{color:#73e2bd}.wallet-debit{color:#ff9d9d}
