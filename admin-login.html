@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#090b18"><title>Login Admin — NOVASTRIA</title>
+<link rel="stylesheet" href="assets/style.css">
+<style>
+.admin-login-wrap{min-height:calc(100vh - 76px);display:grid;place-items:center;padding:32px 18px}
+.admin-login-card{width:min(100%,440px);padding:30px;border:1px solid #ffffff20;border-radius:20px;background:linear-gradient(145deg,#171b34,#0e1225);box-shadow:0 24px 80px #0005}
+.admin-login-kicker{font-size:10px;letter-spacing:2px;font-weight:800;color:var(--cyan)}
+.admin-login-card h1{font-size:30px;margin:9px 0}.admin-login-desc{font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:24px}
+.admin-login-form{display:grid;gap:14px}.admin-login-form label{display:grid;gap:7px;font-size:12px;color:#c7cce0}
+.admin-login-form input{width:100%;padding:13px 14px;border:1px solid #ffffff24;border-radius:10px;background:#0b1021;color:white;font:14px 'DM Sans';outline:none}
+.admin-login-form input:focus{border-color:#9c83ff;box-shadow:0 0 0 3px #9c83ff22}
+.admin-password{display:flex;gap:8px}.admin-password input{flex:1;min-width:0}.admin-password button{border:1px solid #ffffff24;border-radius:10px;background:#ffffff0b;color:white;padding:0 12px;cursor:pointer}
+.admin-login-btn{width:100%;margin-top:5px}.admin-login-message{display:none;padding:12px;border-radius:10px;font-size:12px;line-height:1.6;background:#ffffff0b;color:#d8dcef;overflow-wrap:anywhere}.admin-login-message.show{display:block}.admin-login-message.error{border:1px solid #b95b5b;color:#ffc4bd}.admin-login-message.success{border:1px solid #398b7e;color:#a5f2e5}
+.admin-login-foot{margin-top:20px;text-align:center;font-size:12px;color:var(--muted)}.admin-login-foot a{color:#c9baff}
+</style>
+</head>
+<body>
+<header class="topbar"><a class="brand" href="index.html"><span class="brand-mark">N</span><span>NOVASTRIA<small>ADMIN ACCESS</small></span></a><a class="admin-back" href="index.html">← Kembali ke toko</a></header>
+<main class="admin-login-wrap">
+<section class="admin-login-card">
+<div class="admin-login-kicker">NOVASTRIA / RESTRICTED AREA</div>
+<h1>Login Admin</h1>
+<p class="admin-login-desc">Masuk menggunakan akun administrator yang telah didaftarkan dan diberi hak akses di Supabase. Akun anggota biasa tidak dapat membuka panel ini.</p>
+<div id="loginMessage" class="admin-login-message" role="status" aria-live="polite"></div>
+<form id="adminLoginForm" class="admin-login-form">
+<label>Email administrator<input id="adminEmail" type="email" autocomplete="username" placeholder="admin@domain.com" required></label>
+<label>Password<div class="admin-password"><input id="adminPassword" type="password" autocomplete="current-password" placeholder="Masukkan password" required><button type="button" id="togglePassword" aria-label="Tampilkan password">Lihat</button></div></label>
+<button class="btn btn-primary admin-login-btn" id="adminLoginSubmit" type="submit">Masuk ke Admin</button>
+</form>
+<div class="admin-login-foot"><a href="index.html">Kembali ke halaman NOVASTRIA</a></div>
+</section>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="assets/admin-login.js?v=20261111-1"></script>
+</body></html>
