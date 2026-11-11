@@ -57,6 +57,7 @@ async function init(){
   setAuthMode("login");
   $("saveProfile").addEventListener("click",saveProfile);
   $("memberPayoutForm").addEventListener("submit",submitMemberPayout);
+  $("walletDepositForm").addEventListener("submit",submitWalletDeposit);
   $("logout").addEventListener("click",logout);
   $("sendOrder").addEventListener("click",sendOrder);
   $("requestJoin").addEventListener("click",requestJoin);
@@ -160,6 +161,7 @@ async function refreshMember(){
       resellerActive:active.some(m=>m.membership_type==="reseller"&&m.status==="active")
     };
     loadMemberPayoutHistory();
+    loadMemberWallet();
   }catch(error){
     memberLoadError=error?.message||"Gagal mengambil data anggota dari database.";
     console.error("Gagal memuat data anggota:",error);
@@ -210,6 +212,39 @@ async function submitMemberPayout(e){
  }catch(err){setProfileMessage("Pengajuan gagal: "+err.message);}
  finally{button.disabled=false;}
 }
+
+async function loadMemberWallet(){
+ const balance=$("walletBalance"),deposits=$("walletDepositHistory"),transactions=$("walletTransactionHistory");
+ if(!currentUser||!supabaseClient)return;
+ try{
+  const r=await supabaseClient.rpc("member_get_wallet");if(r.error)throw r.error;
+  const data=r.data||{};balance.textContent=money(Number(data.balance||0));
+  const statuses={pending:"Menunggu verifikasi",verified:"Terverifikasi",rejected:"Ditolak"};
+  deposits.innerHTML=(data.deposits||[]).length?(data.deposits||[]).map(d=>'<div class="wallet-history-item"><strong>'+esc(money(d.amount))+'</strong> · '+esc(d.payment_method)+' · '+esc(statuses[d.status]||d.status)+'<small>'+esc(new Date(d.created_at).toLocaleString("id-ID"))+(d.admin_notes?' · Catatan admin: '+esc(d.admin_notes):'')+'</small></div>').join(""):"Belum ada pengajuan deposit.";
+  transactions.innerHTML=(data.transactions||[]).length?(data.transactions||[]).map(t=>'<div class="wallet-history-item"><strong class="'+(t.direction==="credit"?"wallet-credit":"wallet-debit")+'">'+(t.direction==="credit"?"+":"−")+esc(money(t.amount))+'</strong> · '+esc(t.description)+'<small>'+esc(new Date(t.created_at).toLocaleString("id-ID"))+'</small></div>').join(""):"Belum ada transaksi saldo.";
+ }catch(e){
+  balance.textContent="Belum tersedia";
+  deposits.textContent="Fitur saldo menunggu migrasi database wallet-v1.sql.";
+  transactions.textContent="Fitur saldo menunggu migrasi database wallet-v1.sql.";
+  console.warn("Wallet belum tersedia:",e.message);
+ }
+}
+async function submitWalletDeposit(e){
+ e.preventDefault();if(!currentUser||!supabaseClient){setWalletMessage("Silakan login terlebih dahulu.");return;}
+ const amount=Number($("walletDepositAmount").value),method=$("walletDepositMethod").value;
+ const sender=$("walletSenderName").value.trim(),reference=$("walletPaymentReference").value.trim(),proof=$("walletProofUrl").value.trim();
+ if(!Number.isSafeInteger(amount)||amount<10000){setWalletMessage("Minimal deposit Rp10.000.");return;}
+ if(proof&&!/^https:\/\//i.test(proof)){setWalletMessage("Tautan bukti pembayaran harus menggunakan HTTPS.");return;}
+ const button=e.submitter;button.disabled=true;button.textContent="Mengirim...";
+ try{
+  const r=await supabaseClient.rpc("member_create_wallet_deposit",{p_amount:amount,p_method:method,p_sender_name:sender,p_reference:reference||null,p_proof_url:proof||null});
+  if(r.error)throw r.error;
+  $("walletDepositForm").reset();await loadMemberWallet();
+  setWalletMessage("Pengajuan deposit tercatat dan menunggu verifikasi admin. Saldo belum bertambah.","success");
+ }catch(err){setWalletMessage("Pengajuan gagal: "+err.message);}
+ finally{button.disabled=false;button.textContent="Kirim pengajuan deposit";}
+}
+function setWalletMessage(message,type="error"){$("walletMessage").textContent=message;$("walletMessage").className="auth-message "+type;}
 
 function openAccount(){
   setAuthMessage("");setProfileMessage("");
