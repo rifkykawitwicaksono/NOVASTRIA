@@ -45,7 +45,24 @@
       <label>Nomor WhatsApp<input id="memberPhone" type="tel" autocomplete="tel" placeholder="08xxxxxxxxxx"></label>
       <label>Kode referral pribadi<input id="memberReferralCode" readonly></label>
       <button class="btn btn-outline full" id="saveProfile" type="button">Simpan perubahan profil</button>
-      <div class="status-card"><h3>Pengajuan pencairan komisi</h3><p class="fineprint">Ajukan pencairan jika memiliki saldo komisi referral. Admin memeriksa pengajuan dan melakukan transfer secara manual.</p><form id="memberPayoutForm" class="auth-form"><label>Nominal (Rp)<input id="memberPayoutAmount" type="number" min="1" required placeholder="Contoh: 100000"></label><label>Metode<select id="memberPayoutMethod"><option value="Bank">Transfer bank</option><option value="DANA">DANA</option><option value="OVO">OVO</option><option value="GoPay">GoPay</option><option value="ShopeePay">ShopeePay</option></select></label><label>Nomor rekening / akun tujuan<input id="memberPayoutAccount" required minlength="4" placeholder="Nomor rekening atau e-wallet"></label><label>Catatan<input id="memberPayoutNotes" placeholder="Nama pemilik rekening"></label><button class="btn btn-primary full" type="submit">Kirim pengajuan</button></form><div id="memberPayoutHistory" class="fineprint">Riwayat pengajuan akan tampil di sini.</div></div><button class="btn btn-primary full" id="logout" type="button">Keluar dari akun</button>
+      <div class="status-card"><h3>Pengajuan pencairan komisi</h3><p class="fineprint">Ajukan pencairan jika memiliki saldo komisi referral. Admin memeriksa pengajuan dan melakukan transfer secara manual.</p><form id="memberPayoutForm" class="auth-form"><label>Nominal (Rp)<input id="memberPayoutAmount" type="number" min="1" required placeholder="Contoh: 100000"></label><label>Metode<select id="memberPayoutMethod"><option value="Bank">Transfer bank</option><option value="DANA">DANA</option><option value="OVO">OVO</option><option value="GoPay">GoPay</option><option value="ShopeePay">ShopeePay</option></select></label><label>Nomor rekening / akun tujuan<input id="memberPayoutAccount" required minlength="4" placeholder="Nomor rekening atau e-wallet"></label><label>Catatan<input id="memberPayoutNotes" placeholder="Nama pemilik rekening"></label><button class="btn btn-primary full" type="submit">Kirim pengajuan</button></form><div id="memberPayoutHistory" class="fineprint">Riwayat pengajuan akan tampil di sini.</div></div><div class="status-card wallet-card">
+  <h3>Saldo NOVASTRIA</h3>
+  <p class="fineprint">Saldo tersedia hanya bertambah setelah admin memverifikasi transfer. Minimal deposit Rp10.000.</p>
+  <div class="wallet-balance"><span>Saldo tersedia</span><strong id="walletBalance">Rp0</strong></div>
+  <div class="wallet-instructions">Sebelum transfer, <a href="https://wa.me/62895429626389?text=Halo%20admin%20NOVASTRIA%2C%20saya%20ingin%20meminta%20informasi%20rekening%20deposit%20saldo." target="_blank" rel="noopener">hubungi admin untuk rekening/e-wallet resmi</a>. Jangan transfer ke rekening yang tidak dikonfirmasi admin.</div>
+  <form id="walletDepositForm" class="auth-form">
+    <h4>Ajukan deposit manual</h4>
+    <label>Nominal deposit (Rp)<input id="walletDepositAmount" type="number" min="10000" step="1000" required placeholder="Minimal 10000"></label>
+    <label>Metode pembayaran<select id="walletDepositMethod" required><option value="Transfer bank">Transfer bank</option><option value="DANA">DANA</option><option value="OVO">OVO</option><option value="GoPay">GoPay</option><option value="ShopeePay">ShopeePay</option><option value="QRIS">QRIS</option></select></label>
+    <label>Nama pengirim<input id="walletSenderName" required minlength="2" maxlength="100" placeholder="Nama sesuai rekening/e-wallet"></label>
+    <label>Nomor referensi transaksi<input id="walletPaymentReference" maxlength="120" placeholder="Opsional, tetapi disarankan"></label>
+    <label>Tautan bukti pembayaran (HTTPS)<input id="walletProofUrl" type="url" placeholder="https://... (opsional)"></label>
+    <button class="btn btn-primary full" type="submit">Kirim pengajuan deposit</button>
+  </form>
+  <p id="walletMessage" class="auth-message" role="status" aria-live="polite"></p>
+  <div class="wallet-history"><h4>Riwayat deposit</h4><div id="walletDepositHistory" class="fineprint">Memuat...</div></div>
+  <div class="wallet-history"><h4>Riwayat transaksi saldo</h4><div id="walletTransactionHistory" class="fineprint">Memuat...</div></div>
+</div><button class="btn btn-primary full" id="logout" type="button">Keluar dari akun</button>
       <p class="fineprint">Status referral dan reseller dibaca dari database. Status hanya berubah setelah pembayaran diverifikasi admin.</p>
       <p class="auth-message" id="profileMessage" role="status" aria-live="polite"></p>
     </div>
