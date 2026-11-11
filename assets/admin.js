@@ -25,11 +25,11 @@ async function start(){
   $("resetProduct").addEventListener("click",resetProductForm);
   if(!db){notice("Supabase JS tidak termuat. Periksa koneksi internet lalu muat ulang.","error");return;}
   const {data,error}=await db.auth.getSession();
-  if(error||!data.session){notice("Silakan login melalui halaman toko terlebih dahulu.","error");$("adminIdentity").textContent="Belum login";return;}
+  if(error||!data.session){location.replace("admin-login.html?next=admin");return;}
   $("adminIdentity").textContent="Login sebagai "+(data.session.user.email||"akun terautentikasi");
   try{
     const allowed=await rpc("is_novastria_admin");
-    if(allowed!==true){notice("Akses ditolak. Akun ini tidak memiliki hak Admin NOVASTRIA.","error");return;}
+    if(allowed!==true){notice("Akses ditolak. Akun ini tidak memiliki hak Admin NOVASTRIA. Silakan gunakan akun admin.","error");$("adminIdentity").textContent="Akun bukan admin";setTimeout(()=>location.replace("admin-login.html?reason=not-admin"),1200);return;}
     $("adminPanel").hidden=false;notice("Hak admin terverifikasi. Memuat modul operasional...","success");
     await loadAll();
   }catch(e){notice("Gagal memeriksa hak admin / memuat sistem: "+e.message+". Pastikan setup-admin.sql dan admin-controller-v2.sql sudah dijalankan.","error");}
