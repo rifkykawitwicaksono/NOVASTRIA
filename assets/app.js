@@ -374,8 +374,17 @@ async function logout(){
 function openOrder(product){
   selectedOrder=product;
   const reseller=member?.resellerActive===true,price=reseller?product.resellerPrice:product.publicPrice;
+  const validPrice=Number.isSafeInteger(Number(price))&&Number(price)>0;
   $("orderTitle").textContent=product.product;
-  $("orderDescription").textContent=productDescription(product.product)+" Varian: "+product.variant+" — "+(price==null?"Harga perlu dikonfirmasi admin":money(price))+". Pesanan diteruskan ke admin melalui WhatsApp.";
+  $("orderDescription").textContent=productDescription(product.product)+" Varian: "+product.variant+" — "+(validPrice?money(Number(price)):"Harga perlu dikonfirmasi admin")+". Pesanan diteruskan ke admin melalui WhatsApp.";
+  const paymentBox=$("orderPaymentInstructions"),resellerNote=$("resellerWalletNotice");
+  paymentBox.hidden=reseller||!validPrice;
+  resellerNote.hidden=!reseller;
+  if(!reseller&&validPrice){
+    const walletQris=$("walletPaymentInstructions")?.querySelector("img");
+    if(walletQris)$("orderQrisImage").src=walletQris.src;
+    $("orderPaymentAmount").textContent=money(Number(price));
+  }
   $("orderName").value=member?.name||"";$("orderPhone").value=member?.phone||"";
   $("orderDialog").showModal();
 }
@@ -384,8 +393,11 @@ function sendOrder(){
   if(!selectedOrder)return;
   const name=$("orderName").value.trim(),phone=$("orderPhone").value.trim(),detail=$("orderDetail").value.trim();
   if(!name||!phone){alert("Isi nama dan nomor WhatsApp.");return;}
-  const price=member?.resellerActive?selectedOrder.resellerPrice:selectedOrder.publicPrice;
-  const msg="Halo admin NOVASTRIA, saya ingin memesan:\nProduk: "+selectedOrder.product+"\nVarian: "+selectedOrder.variant+"\nHarga: "+(price==null?"Konfirmasi admin":money(price))+"\nNama: "+name+"\nWhatsApp: "+phone+"\nDetail akun: "+(detail||"-");
+  const reseller=member?.resellerActive===true;
+  const price=reseller?selectedOrder.resellerPrice:selectedOrder.publicPrice;
+  const validPrice=Number.isSafeInteger(Number(price))&&Number(price)>0;
+  const paymentLine=reseller?"Pembayaran: menggunakan saldo reseller (konfirmasi saldo dan pemotongan dilakukan admin).":validPrice?"Pembayaran: QRIS sebesar "+money(Number(price))+". Saya akan mengirim bukti pembayaran untuk diverifikasi admin.":"Pembayaran: mohon konfirmasi nominal dan instruksi pembayaran dari admin.";
+  const msg="Halo admin NOVASTRIA, saya ingin memesan:\nProduk: "+selectedOrder.product+"\nVarian: "+selectedOrder.variant+"\nHarga: "+(validPrice?money(Number(price)):"Konfirmasi admin")+"\n"+paymentLine+"\nNama: "+name+"\nWhatsApp: "+phone+"\nDetail akun: "+(detail||"-");
   window.open("https://wa.me/"+ADMIN_WA+"?text="+encodeURIComponent(msg),"_blank");
 }
 
