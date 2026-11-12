@@ -18,7 +18,7 @@ let catalog=[],selectedOrder=null,joinType="referral",currentUser=null,member=nu
 
 async function init(){
   $("year").textContent=new Date().getFullYear();
-  $("contactLink").href="https://wa.me/"+ADMIN_WA+"?text="+encodeURIComponent("Halo admin NOVASTRIA, saya ingin bertanya.");
+  $("contactLink").href="https://wa.me/"+ADMIN_WA+"?text="+encodeURIComponent("Halo admin Dukun Tikus, saya ingin bertanya.");
   loadStoreActivity();
   setInterval(loadStoreActivity,120000);
   setInterval(renderStoreActivity,8000);
@@ -149,7 +149,7 @@ function productPlatform(name){
 
 function productVisual(name){
   const n=String(name||"").toLowerCase();
-  // Logo produk dari tautan gambar yang diberikan pemilik NOVASTRIA.
+  // Logo produk dari tautan gambar yang diberikan pemilik Dukun Tikus.
   const images=[
     ["nexora","https://i.ibb.co/3y1DSTHk/1b69d74b-4b25-4a45-bab7-f52b7555e157.png"],
     ["phantom","https://i.ibb.co/35mxHncP/adf97f78-365c-46dd-b1a3-c68fb4a2c23a.webp"],
@@ -258,7 +258,7 @@ function updateMemberUI(){
   $("authPanel").hidden=!!currentUser;
   $("profilePanel").hidden=!currentUser;
   if(member){
-    $("memberStatus").innerHTML="<strong>"+esc(member.name||"Anggota NOVASTRIA")+"</strong><br>Email: "+esc(member.email||"-")+"<br>Referral: "+(member.referralActive?"Aktif":"Belum aktif")+"<br>Reseller: "+(member.resellerActive?"Aktif":"Belum aktif");
+    $("memberStatus").innerHTML="<strong>"+esc(member.name||"Anggota Dukun Tikus")+"</strong><br>Email: "+esc(member.email||"-")+"<br>Referral: "+(member.referralActive?"Aktif":"Belum aktif")+"<br>Reseller: "+(member.resellerActive?"Aktif":"Belum aktif");
     $("memberName").value=member.name;
     $("memberPhone").value=member.phone;
     $("memberReferralCode").value=member.referralCode;
@@ -351,7 +351,7 @@ function openAccount(){
 function setAuthMode(mode){
   authMode=mode;
   const signup=mode==="signup";
-  $("accountDialogTitle").textContent=signup?"Buat akun NOVASTRIA":"Masuk ke akun";
+  $("accountDialogTitle").textContent=signup?"Buat akun Dukun Tikus":"Masuk ke akun";
   $("authIntro").textContent=signup?"Buat akun dengan email aktif. Tautan verifikasi akan dikirim ke email Anda.":"Masuk untuk melihat profil dan status keanggotaan NOVASTRIA.";
   document.querySelectorAll(".signup-only").forEach(el=>el.hidden=!signup);
   $("authName").required=signup;
@@ -478,7 +478,7 @@ async function sendOrder(){
     $("orderCreatedCode").innerHTML="<strong>Kode pesanan kamu</strong><div style='font-size:24px;font-weight:800;letter-spacing:2px;margin:8px 0'>"+esc(code)+"</div><span class='fineprint'>Simpan kode ini untuk melacak status pesanan.</span>";
     if(reseller){
       const balance=Number(order.wallet_balance);
-      const msg="Halo admin NOVASTRIA, pesanan reseller saya berhasil dibuat dan saldo sudah dipotong otomatis.\nKode Pesanan: "+code+"\nProduk: "+selectedOrder.product+"\nVarian: "+selectedOrder.variant+"\nJumlah: 1\nTotal terpotong: "+money(total)+"\nSisa saldo: "+money(balance)+"\nNama: "+name+"\nWhatsApp: "+phone+"\nDetail akun: "+(detail||"-");
+      const msg="Halo admin Dukun Tikus, pesanan reseller saya berhasil dibuat dan saldo sudah dipotong otomatis.\nKode Pesanan: "+code+"\nProduk: "+selectedOrder.product+"\nVarian: "+selectedOrder.variant+"\nJumlah: 1\nTotal terpotong: "+money(total)+"\nSisa saldo: "+money(balance)+"\nNama: "+name+"\nWhatsApp: "+phone+"\nDetail akun: "+(detail||"-");
       const waUrl="https://wa.me/"+ADMIN_WA+"?text="+encodeURIComponent(msg);
       if(waWindow)waWindow.location.href=waUrl;
       else alert("Pesanan berhasil dan saldo sudah dipotong. Kode: "+code+". Popup WhatsApp diblokir; hubungi admin melalui tombol WhatsApp.");
@@ -487,7 +487,7 @@ async function sendOrder(){
     }else{
       $("orderPaymentInstructions").hidden=false;
       $("orderPaymentAmount").textContent=money(total);
-      $("orderQrisImage").alt="QRIS NOVASTRIA untuk pembayaran pesanan "+code;
+      $("orderQrisImage").alt="QRIS Dukun Tikus untuk pembayaran pesanan "+code;
       $("orderDescription").textContent="Pesanan tercatat. Pindai QRIS berikut dan bayar tepat "+money(total)+". Kode pesanan: "+code+". Pembayaran akan diverifikasi admin secara manual.";
       $("sendOrder").hidden=true;
     }
@@ -533,7 +533,7 @@ function openJoin(type){
 function requestJoin(){
   if(!member)return;
   const fee=joinType==="referral"?150000:100000,program=joinType==="referral"?"Referral Member":"Reseller Member";
-  const msg="Halo admin NOVASTRIA, saya ingin mendaftar "+program+".\nNama: "+member.name+"\nEmail: "+member.email+"\nNomor WhatsApp: "+member.phone+"\nKode referral pribadi: "+member.referralCode+"\nBiaya: "+money(fee)+"\nMohon instruksi pembayaran dan verifikasi.";
+  const msg="Halo admin Dukun Tikus, saya ingin mendaftar "+program+".\nNama: "+member.name+"\nEmail: "+member.email+"\nNomor WhatsApp: "+member.phone+"\nKode referral pribadi: "+member.referralCode+"\nBiaya: "+money(fee)+"\nMohon instruksi pembayaran dan verifikasi.";
   window.open("https://wa.me/"+ADMIN_WA+"?text="+encodeURIComponent(msg),"_blank");
 }
 
