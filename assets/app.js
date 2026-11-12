@@ -396,7 +396,7 @@ function sendOrder(){
   const reseller=member?.resellerActive===true;
   const price=reseller?selectedOrder.resellerPrice:selectedOrder.publicPrice;
   const validPrice=Number.isSafeInteger(Number(price))&&Number(price)>0;
-  const paymentLine=reseller?"Pembayaran: menggunakan saldo reseller (konfirmasi saldo dan pemotongan dilakukan admin).":validPrice?"Pembayaran: QRIS sebesar "+money(Number(price))+". Saya akan mengirim bukti pembayaran untuk diverifikasi admin.":"Pembayaran: mohon konfirmasi nominal dan instruksi pembayaran dari admin.";
+  const paymentLine=reseller?"Pembayaran: saldo reseller perlu dikonfirmasi admin; pemotongan saldo otomatis melalui website belum tersedia.":validPrice?"Pembayaran: QRIS sebesar "+money(Number(price))+". Saya akan mengirim bukti pembayaran untuk diverifikasi admin.":"Pembayaran: mohon konfirmasi nominal dan instruksi pembayaran dari admin.";
   const msg="Halo admin NOVASTRIA, saya ingin memesan:\nProduk: "+selectedOrder.product+"\nVarian: "+selectedOrder.variant+"\nHarga: "+(validPrice?money(Number(price)):"Konfirmasi admin")+"\n"+paymentLine+"\nNama: "+name+"\nWhatsApp: "+phone+"\nDetail akun: "+(detail||"-");
   window.open("https://wa.me/"+ADMIN_WA+"?text="+encodeURIComponent(msg),"_blank");
 }
