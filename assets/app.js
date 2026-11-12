@@ -380,7 +380,7 @@ function openOrder(product){
   const reseller=member?.resellerActive===true,price=reseller?product.resellerPrice:product.publicPrice;
   const validPrice=Number.isSafeInteger(Number(price))&&Number(price)>0;
   $("orderTitle").textContent=product.product;
-  $("orderDescription").textContent=productDescription(product.product)+" Varian: "+product.variant+" — "+(validPrice?money(Number(price)):"Harga perlu dikonfirmasi admin")+". Pesanan diteruskan ke admin melalui WhatsApp.";
+  $("orderDescription").textContent=productDescription(product.product)+" Varian: "+product.variant+" — "+(validPrice?money(Number(price)):"Harga perlu dikonfirmasi admin")+". Pesanan akan tercatat dan dapat dilacak dengan kode unik.";
   const paymentBox=$("orderPaymentInstructions"),resellerNote=$("resellerWalletNotice");
   paymentBox.hidden=reseller||!validPrice;
   resellerNote.hidden=!reseller;
