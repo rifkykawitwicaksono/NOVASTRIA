@@ -75,3 +75,5 @@ button:disabled{opacity:.6;cursor:wait;transform:none}
   .dialog-body{padding:17px}
   footer{padding:25px 18px}
 }
+
+.product-icon img{width:100%;height:100%;display:block;object-fit:cover;border-radius:12px;}
