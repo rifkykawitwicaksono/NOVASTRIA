@@ -97,19 +97,18 @@ function productPlatform(name){
 
 function productVisual(name){
   const n=String(name||"").toLowerCase();
+  // Logo produk dari tautan gambar yang diberikan pemilik NOVASTRIA.
   const images=[
-    ["drip client apk","https://viprezkaofc.com/uploads/products/64537568-03c7-49f0-9fdd-86ada3948b75.jpeg"],
-    ["drip client root","https://viprezkaofc.com/uploads/products/f63a0183-b954-481e-a429-4419ec25d7d6.jpeg"],
-    ["hg cheats","https://viprezkaofc.com/uploads/products/dadf8694-c3c2-42ef-8ab4-96f8cebdcebb.png"],
-    ["pato team","https://viprezkaofc.com/uploads/products/8c2ad532-5797-479e-b880-2e7900ac2cc4.png"],
-    ["prime hook","https://viprezkaofc.com/uploads/products/ea205347-7423-448e-bf61-eeef24ba04a7.jpeg"],
-    ["silent cheats","https://viprezkaofc.com/uploads/products/489e82c1-3e16-42ce-b930-83eb176f91fc.webp"],
-    ["certificate gbox","https://viprezkaofc.com/uploads/products/0c73abf9-a04a-4e0d-8f69-2737af1ef05b.png"],
-    ["migul","https://viprezkaofc.com/uploads/products/bdb54de0-076b-41f6-b871-b05ad5e30905.png"],
-    ["drip client wire","https://viprezkaofc.com/uploads/products/a4e1b5f1-1cc2-4a4a-a4ee-c5eda07e806d.jpeg"],
-    ["phantom","https://viprezkaofc.com/uploads/products/adf97f78-365c-46dd-b1a3-c68fb4a2c23a.webp"],
-    ["xreg","https://viprezkaofc.com/uploads/products/0c3a311d-1b27-4cc3-850d-c1a8d1076210.jpeg"],
-    ["rezzx","https://viprezkaofc.com/uploads/products/1b69d74b-4b25-4a45-bab7-f52b7555e157.png"]
+    ["nexora","https://i.ibb.co/qMt1t2HS/1b69d74b-4b25-4a45-bab7-f52b7555e157.png"],
+    ["phantom","https://i.ibb.co/prX2VtKv/adf97f78-365c-46dd-b1a3-c68fb4a2c23a.webp"],
+    ["migul","https://i.ibb.co/RTLS07mL/bdb54de0-076b-41f6-b871-b05ad5e30905.png"],
+    ["esign","https://i.ibb.co/V09f8LhB/0c73abf9-a04a-4e0d-8f69-2737af1ef05b.png"],
+    ["silent cheats","https://i.ibb.co/F43mmJJz/489e82c1-3e16-42ce-b930-83eb176f91fc.webp"],
+    ["prime hook","https://i.ibb.co/mFzLLfzJ/ea205347-7423-448e-bf61-eeef24ba04a7.jpg"],
+    ["pato","https://i.ibb.co/GQVm4YPz/8c2ad532-5797-479e-b880-2e7900ac2cc4.png"],
+    ["hg cheats","https://i.ibb.co/XkkX9PQN/dadf8694-c3c2-42ef-8ab4-96f8cebdcebb.png"],
+    ["xreg","https://i.ibb.co/YFtCWzsD/0c3a311d-1b27-4cc3-850d-c1a8d1076210.jpg"],
+    ["drip client","https://i.ibb.co/35wLB5Vc/a4e1b5f1-1cc2-4a4a-a4ee-c5eda07e806d.jpg"]
   ];
   const match=images.find(([key])=>n.includes(key));
   return match?'<img src="'+match[1]+'" alt="'+esc(name)+'" loading="lazy" referrerpolicy="no-referrer">':'◆';
