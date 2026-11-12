@@ -44,3 +44,34 @@ button:disabled{opacity:.6;cursor:wait;transform:none}
 
 /* Member wallet */
 .wallet-card{margin:18px 0}.wallet-balance{display:flex;justify-content:space-between;align-items:center;padding:18px;border:1px solid #51417c;border-radius:14px;background:linear-gradient(120deg,#211b3d,#142b39);margin:14px 0}.wallet-balance span{color:#c3bfd8;font-size:13px}.wallet-balance strong{font:700 24px 'Space Grotesk';color:#8ef0df}.wallet-instructions{font-size:13px;line-height:1.6;color:#c3c8dc;padding:12px;border:1px solid #343958;border-radius:10px;margin-bottom:14px}.wallet-instructions a{color:#8fe9e1;text-decoration:underline}.wallet-card h4{margin:16px 0 8px}.wallet-history{margin-top:18px}.wallet-history-item{padding:10px 0;border-bottom:1px solid #ffffff16;line-height:1.5}.wallet-history-item small{display:block;color:#9da4bf;font-size:11px}.wallet-credit{color:#73e2bd}.wallet-debit{color:#ff9d9d}
+
+/* Product visual identity, descriptive catalog cards and accessibility */
+.product-visual{display:flex;align-items:center;gap:13px;min-height:76px;padding:12px;border:1px solid #ffffff12;border-radius:13px;background:linear-gradient(115deg,#201b3c,#111d30)}
+.product-icon{width:52px;height:52px;flex:0 0 52px;display:grid;place-items:center;border-radius:13px;background:linear-gradient(145deg,#8d70ef33,#59d9d033);border:1px solid #a996ff55;font-size:27px;box-shadow:inset 0 0 18px #9a75ff18}
+.product-visual-copy{display:grid;gap:5px;min-width:0}
+.product-visual-copy span{font-size:9px;letter-spacing:1.6px;color:#8ee5df;font-weight:700}
+.product-visual-copy strong{font-size:11px;color:#d9dcef;font-weight:600}
+.product-description{font-size:11px;line-height:1.55;color:#a6aec7;min-height:34px}
+.grouped-product{min-height:0}
+.variant-picker option{background:#11152a;color:#f4f5ff}
+.product-card button:focus-visible,.variant-picker:focus-visible,.category-tab:focus-visible{outline:2px solid #b6a1ff;outline-offset:3px}
+.catalog-summary{line-height:1.6}
+@media(max-width:800px){
+  .topbar{gap:10px}
+  .topbar .btn{padding:10px 12px;font-size:11px}
+  .hero-panel{max-width:100%}
+  .section-heading h2,.account-box h2{font-size:clamp(25px,6vw,32px)}
+}
+@media(max-width:520px){
+  .topbar{height:64px;padding:0 15px}
+  .brand{font-size:13px;letter-spacing:.8px}
+  .brand-mark{width:33px;height:33px}
+  .topbar .btn{padding:9px 10px;font-size:10px}
+  .product-grid{gap:12px}
+  .grouped-product{padding:16px}
+  .product-visual{min-height:68px}
+  .product-icon{width:46px;height:46px;flex-basis:46px;font-size:24px}
+  .price-value{font-size:18px}
+  .dialog-body{padding:17px}
+  footer{padding:25px 18px}
+}
