@@ -401,6 +401,7 @@ async function sendOrder(){
   const price=reseller?selectedOrder.resellerPrice:selectedOrder.publicPrice;
   const validPrice=Number.isSafeInteger(Number(price))&&Number(price)>0;
   const button=$("sendOrder");
+  const waWindow=window.open("about:blank","_blank");
   button.disabled=true;button.textContent="Membuat kode pesanan...";
   try{
     const paymentMethod=reseller?"Saldo reseller (konfirmasi manual)":"QRIS";
@@ -415,8 +416,11 @@ async function sendOrder(){
     $("orderCreatedCode").innerHTML="<strong>Kode pesanan kamu</strong><div style='font-size:24px;font-weight:800;letter-spacing:2px;margin:8px 0'>"+esc(code)+"</div><span class='fineprint'>Simpan kode ini. Untuk melacak, masukkan kode dan nomor WhatsApp pembelian.</span>";
     const paymentLine=reseller?"Pembayaran: saldo reseller perlu dikonfirmasi admin; pemotongan saldo otomatis melalui website belum tersedia.":validPrice?"Pembayaran: QRIS sebesar "+money(Number(price))+". Saya akan mengirim bukti pembayaran untuk diverifikasi admin.":"Pembayaran: mohon konfirmasi nominal dan instruksi pembayaran dari admin.";
     const msg="Halo admin NOVASTRIA, saya ingin memesan:\nKode Pesanan: "+code+"\nProduk: "+selectedOrder.product+"\nVarian: "+selectedOrder.variant+"\nHarga: "+(validPrice?money(Number(price)):"Konfirmasi admin")+"\n"+paymentLine+"\nNama: "+name+"\nWhatsApp: "+phone+"\nDetail akun: "+(detail||"-");
-    window.open("https://wa.me/"+ADMIN_WA+"?text="+encodeURIComponent(msg),"_blank");
+    const waUrl="https://wa.me/"+ADMIN_WA+"?text="+encodeURIComponent(msg);
+    if(waWindow)waWindow.location.href=waUrl;
+    else alert("Kode pesanan "+code+" berhasil dibuat. Popup WhatsApp diblokir; salin kode tersebut dan hubungi admin melalui tombol WhatsApp di halaman.");
   }catch(error){
+    if(waWindow)waWindow.close();
     console.error("Pembuatan pesanan gagal:",error);
     alert("Pesanan belum tersimpan: "+(error.message||"Terjadi kesalahan")+". Pastikan migration pelacakan pesanan sudah dijalankan.");
   }finally{
