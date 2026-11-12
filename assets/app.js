@@ -60,6 +60,8 @@ async function init(){
   $("saveProfile").addEventListener("click",saveProfile);
   $("memberPayoutForm").addEventListener("submit",submitMemberPayout);
   $("walletDepositForm").addEventListener("submit",submitWalletDeposit);
+  $("walletDepositAmount").addEventListener("input",updateWalletPaymentAmount);
+  updateWalletPaymentAmount();
   $("logout").addEventListener("click",logout);
   $("sendOrder").addEventListener("click",sendOrder);
   $("requestJoin").addEventListener("click",requestJoin);
@@ -226,6 +228,12 @@ async function submitMemberPayout(e){
  finally{button.disabled=false;}
 }
 
+
+function updateWalletPaymentAmount(){
+ const amount=Number($("walletDepositAmount")?.value||0);
+ const target=$("walletPaymentAmount");
+ if(target)target.textContent=amount>=10000&&Number.isSafeInteger(amount)?money(amount):"Masukkan nominal minimal Rp10.000";
+}
 
 async function loadPublicPaymentInstructions(){
  const box=$("walletPaymentInstructions");if(!box||!supabaseClient)return;
