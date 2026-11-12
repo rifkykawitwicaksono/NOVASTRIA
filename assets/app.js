@@ -380,10 +380,11 @@ function openOrder(product){
   const reseller=member?.resellerActive===true,price=reseller?product.resellerPrice:product.publicPrice;
   const validPrice=Number.isSafeInteger(Number(price))&&Number(price)>0;
   $("orderTitle").textContent=product.product;
-  $("orderDescription").textContent=productDescription(product.product)+" Varian: "+product.variant+" — "+(validPrice?money(Number(price)):"Harga perlu dikonfirmasi admin")+". Pesanan akan tercatat dan dapat dilacak dengan kode unik.";
+  $("orderDescription").textContent=productDescription(product.product)+" Varian: "+product.variant+" — "+(validPrice?money(Number(price)):"Harga perlu dikonfirmasi admin")+". "+(reseller?"Jika pesanan berhasil, saldo reseller dipotong otomatis dan detail diteruskan ke WhatsApp.":"Pindai QRIS yang ditampilkan untuk membayar. Pesanan tercatat dan dapat dilacak dengan kode unik.");
   const paymentBox=$("orderPaymentInstructions"),resellerNote=$("resellerWalletNotice");
   paymentBox.hidden=reseller||!validPrice;
   resellerNote.hidden=!reseller;
+  $("sendOrder").textContent=reseller?"Potong saldo & lanjut WhatsApp":"Buat pesanan & tampilkan QR";
   if(!reseller&&validPrice){
     const walletQris=$("walletPaymentInstructions")?.querySelector("img");
     if(walletQris)$("orderQrisImage").src=walletQris.src;
@@ -401,24 +402,51 @@ async function sendOrder(){
   const price=reseller?selectedOrder.resellerPrice:selectedOrder.publicPrice;
   const validPrice=Number.isSafeInteger(Number(price))&&Number(price)>0;
   const button=$("sendOrder");
-  button.disabled=true;button.textContent="Membuat kode pesanan...";
+  const waWindow=reseller?window.open("about:blank","_blank"):null;
+  button.disabled=true;button.textContent=reseller?"Memproses potongan saldo...":"Membuat pesanan...";
   try{
-    const paymentMethod=reseller?"Saldo reseller (konfirmasi manual)":"QRIS";
-    const {data,error}=await supabaseClient.rpc("create_public_order",{
-      p_customer_name:name,p_customer_phone:phone,p_product:selectedOrder.product,p_variant:selectedOrder.variant,
-      p_account_detail:detail||null,p_quantity:1,p_unit_price:validPrice?Number(price):0,p_payment_method:paymentMethod
-    });
+    let data,error;
+    if(reseller){
+      ({data,error}=await supabaseClient.rpc("create_reseller_order",{
+        p_customer_name:name,p_customer_phone:phone,p_product:selectedOrder.product,p_variant:selectedOrder.variant,
+        p_account_detail:detail||null,p_quantity:1
+      }));
+    }else{
+      ({data,error}=await supabaseClient.rpc("create_public_order",{
+        p_customer_name:name,p_customer_phone:phone,p_product:selectedOrder.product,p_variant:selectedOrder.variant,
+        p_account_detail:detail||null,p_quantity:1,p_unit_price:validPrice?Number(price):0,p_payment_method:"QRIS"
+      }));
+    }
     if(error)throw error;
-    const code=Array.isArray(data)?data[0]?.order_code:data?.order_code;
+    const order=Array.isArray(data)?data[0]:data;
+    const code=order?.order_code;
     if(!code)throw new Error("Kode pesanan tidak diterima dari server.");
+    const serverPrice=Number(order.unit_price??price);
+    const total=Number(order.total_price??serverPrice);
     $("orderCreatedCode").hidden=false;
-    $("orderCreatedCode").innerHTML="<strong>Kode pesanan kamu</strong><div style='font-size:24px;font-weight:800;letter-spacing:2px;margin:8px 0'>"+esc(code)+"</div><span class='fineprint'>Simpan kode ini. Untuk melacak, masukkan kode dan nomor WhatsApp pembelian.</span>";
-    alert("Pesanan berhasil dibuat. Kode: "+code+". Simpan kode dan nomor WhatsApp untuk melacak status pesanan.");
+    $("orderCreatedCode").innerHTML="<strong>Kode pesanan kamu</strong><div style='font-size:24px;font-weight:800;letter-spacing:2px;margin:8px 0'>"+esc(code)+"</div><span class='fineprint'>Simpan kode ini untuk melacak status pesanan.</span>";
+    if(reseller){
+      const balance=Number(order.wallet_balance);
+      const msg="Halo admin NOVASTRIA, pesanan reseller saya berhasil dibuat dan saldo sudah dipotong otomatis.\nKode Pesanan: "+code+"\nProduk: "+selectedOrder.product+"\nVarian: "+selectedOrder.variant+"\nJumlah: 1\nTotal terpotong: "+money(total)+"\nSisa saldo: "+money(balance)+"\nNama: "+name+"\nWhatsApp: "+phone+"\nDetail akun: "+(detail||"-");
+      const waUrl="https://wa.me/"+ADMIN_WA+"?text="+encodeURIComponent(msg);
+      if(waWindow)waWindow.location.href=waUrl;
+      else alert("Pesanan berhasil dan saldo sudah dipotong. Kode: "+code+". Popup WhatsApp diblokir; hubungi admin melalui tombol WhatsApp.");
+      $("resellerWalletNotice").textContent="Pesanan berhasil dibuat. Saldo dipotong "+money(total)+". Sisa saldo: "+money(balance)+". Detail pesanan diteruskan ke WhatsApp.";
+      $("resellerWalletNotice").hidden=false;
+    }else{
+      $("orderPaymentInstructions").hidden=false;
+      $("orderPaymentAmount").textContent=money(total);
+      $("orderQrisImage").alt="QRIS NOVASTRIA untuk pembayaran pesanan "+code;
+      $("orderDescription").textContent="Pesanan tercatat. Pindai QRIS berikut dan bayar tepat "+money(total)+". Kode pesanan: "+code+". Pembayaran akan diverifikasi admin secara manual.";
+      $("sendOrder").hidden=true;
+    }
   }catch(error){
+    if(waWindow)waWindow.close();
     console.error("Pembuatan pesanan gagal:",error);
-    alert("Pesanan belum tersimpan: "+(error.message||"Terjadi kesalahan")+". Pastikan migration pelacakan pesanan sudah dijalankan.");
+    alert("Pesanan belum dibuat: "+(error.message||"Terjadi kesalahan")+". Periksa saldo, status reseller, dan migration checkout-wallet-v2.sql.");
   }finally{
-    button.disabled=false;button.textContent="Buat pesanan";
+    button.disabled=false;
+    button.textContent=reseller?"Potong saldo & lanjut WhatsApp":"Buat pesanan & tampilkan QR";
   }
 }
 
