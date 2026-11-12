@@ -4,8 +4,9 @@
 -- Keep order <-> wallet ledger linkage so cancellation can refund exactly once.
 ALTER TABLE public.wallet_transactions
   ADD COLUMN IF NOT EXISTS store_order_id UUID REFERENCES public.store_orders(id) ON DELETE RESTRICT;
-CREATE UNIQUE INDEX IF NOT EXISTS wallet_transactions_store_order_once
-  ON public.wallet_transactions(store_order_id)
+DROP INDEX IF EXISTS public.wallet_transactions_store_order_once;
+CREATE UNIQUE INDEX IF NOT EXISTS wallet_transactions_store_order_type_once
+  ON public.wallet_transactions(store_order_id,transaction_type)
   WHERE store_order_id IS NOT NULL;
 
 -- Customer order: price and stock are read from the server-side catalog, never trusted from browser.
@@ -108,7 +109,7 @@ BEGIN
     SELECT wt.user_id,'credit','refund',wt.amount,'Pengembalian saldo pesanan '||o.order_code,o.id,auth.uid()
     FROM public.wallet_transactions wt
     WHERE wt.store_order_id=o.id AND wt.transaction_type='purchase'
-    ON CONFLICT (store_order_id) WHERE store_order_id IS NOT NULL DO NOTHING;
+    ON CONFLICT (store_order_id,transaction_type) WHERE store_order_id IS NOT NULL DO NOTHING;
   END IF;
 
   UPDATE public.store_orders SET status=p_status,admin_note=nullif(trim(coalesce(p_admin_note,'')),''),updated_at=now() WHERE id=o.id;
