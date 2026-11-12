@@ -26,11 +26,13 @@ async function init(){
       const live=await supabaseClient.from("store_products")
         .select("product,variant,public_price,reseller_price,in_stock")
         .eq("is_active",true).order("sort_order").order("product").order("variant");
-      if(!live.error&&Array.isArray(live.data)){
+      if(!live.error&&Array.isArray(live.data)&&live.data.length>0){
         liveProducts=live.data.map(p=>({
           product:p.product,variant:p.variant,inStock:p.in_stock,
           publicPrice:p.public_price,resellerPrice:p.reseller_price
         }));
+      }else if(!live.error&&Array.isArray(live.data)&&live.data.length===0){
+        console.warn("Katalog Supabase kosong; memakai katalog cadangan.");
       }else if(live.error){
         console.warn("Katalog Supabase belum tersedia; memakai katalog statis:",live.error.message);
       }
@@ -91,6 +93,17 @@ function productPlatform(name){
   return "Android";
 }
 
+function productVisual(name){
+  const n=String(name||"").toLowerCase();
+  const icons=[["drip client apk","🌀"],["drip client root","🛠️"],["hg cheats","🎯"],["pato team","🛡️"],["prime hook","⚡"],["silent cheats","◉"],["certificate gbox","📜"],["migul","🍎"],["drip client wire","🔌"],["phantom","👻"],["xreg","✦"],["nexora","◈"]];
+  return icons.find(([key])=>n.includes(key))?.[1]||"◆";
+}
+function productDescription(name){
+  const n=String(name||"").toLowerCase();
+  const descriptions=[["drip client root","Paket akses digital Android untuk perangkat dengan kebutuhan root. Periksa kompatibilitas perangkat."],["drip client apk","Paket akses digital Android. Pilih masa aktif yang sesuai sebelum memesan."],["hg cheats","Paket akses digital Android dengan pilihan masa aktif."],["pato team","Paket akses digital dengan pilihan varian Orange dan Blue."],["prime hook","Paket akses digital Android dengan beberapa pilihan masa aktif."],["silent cheats","Paket akses digital Android. Ketersediaan mengikuti stok tiap varian."],["certificate gbox","Layanan sertifikat untuk ekosistem iOS. Perhatikan masa berlaku dan ketentuan garansi."],["migul","Paket akses digital iOS dengan pilihan masa aktif."],["drip client wire","Paket akses digital untuk Android dan iOS. Pastikan kompatibilitas perangkat."],["phantom","Paket akses digital lintas platform dengan beberapa pilihan durasi."],["xreg","Paket akses digital lintas platform. Pilih durasi yang tersedia."],["nexora","Paket akses digital lintas platform dengan beberapa pilihan masa aktif."]];
+  return descriptions.find(([key])=>n.includes(key))?.[1]||"Pilih varian yang tersedia dan periksa detail pesanan sebelum melanjutkan.";
+}
+
 function populateCategories(){
   const counts={Android:0,"iOS":0};
   const groups=new Map();
@@ -119,11 +132,11 @@ function renderProducts(){
   $("catalogSummary").textContent=visible.length+" produk · "+visible.reduce((n,g)=>n+g.items.length,0)+" varian tersedia";
   if(!visible.length){$("productGrid").innerHTML='<div class="empty">Produk tidak ditemukan pada kategori ini.</div>';return;}
   $("productGrid").innerHTML=visible.map((g,groupIndex)=>{
-    const first=g.items[0],available=g.items.filter(x=>x.inStock);
-    const current=first;
+    const available=g.items.filter(x=>x.inStock);
+    const current=available[0]||g.items[0];
     const optionMarkup=g.items.map(p=>'<option value="'+p._index+'" '+(p._index===current._index?'selected':'')+' '+(!p.inStock?'data-unavailable="true"':'')+'>'+esc(p.variant)+(p.inStock?'':' — Stok habis')+'</option>').join("");
     const price=member?.resellerActive===true?current.resellerPrice:current.publicPrice;
-    return '<article class="product-card grouped-product" data-product-card="'+groupIndex+'"><div class="product-card-top"><span class="platform-tag">'+esc(g.platform)+'</span><span class="variant-count">'+g.items.length+' varian</span></div><h3>'+esc(g.name)+'</h3><p class="product-description">'+(available.length?available.length+' pilihan tersedia':'Stok sedang tidak tersedia')+'</p><label class="variant-picker-label">Pilih durasi / varian<select class="variant-picker" data-variant-picker="'+groupIndex+'">'+optionMarkup+'</select></label><div class="price-row"><div><div class="price-caption">'+(member?.resellerActive===true?"Harga reseller":"Harga publik")+'</div><div class="price-value" data-current-price>'+(!current.inStock?'Stok habis':price==null?'Konfirmasi admin':money(price))+'</div></div><span class="price-caption">IDR</span></div><button class="btn btn-primary" data-order="'+current._index+'" '+(!current.inStock?'disabled':'')+'>'+(current.inStock?'Pesan produk':'Stok tidak tersedia')+'</button></article>';
+    return '<article class="product-card grouped-product" data-product-card="'+groupIndex+'"><div class="product-card-top"><span class="platform-tag">'+esc(g.platform)+'</span><span class="variant-count">'+g.items.length+' varian</span></div><div class="product-visual"><span class="product-icon" aria-hidden="true">'+productVisual(g.name)+'</span><div class="product-visual-copy"><span>PRODUK DIGITAL</span><strong>'+(available.length?available.length+' varian tersedia':'Stok belum tersedia')+'</strong></div></div><h3>'+esc(g.name)+'</h3><p class="product-description">'+esc(productDescription(g.name))+'</p><label class="variant-picker-label">Pilih durasi / varian<select class="variant-picker" data-variant-picker="'+groupIndex+'">'+optionMarkup+'</select></label><div class="price-row"><div><div class="price-caption">'+(member?.resellerActive===true?"Harga reseller":"Harga publik")+'</div><div class="price-value" data-current-price>'+(!current.inStock?'Stok habis':price==null?'Harga belum ditetapkan':money(price))+'</div></div><span class="price-caption">IDR</span></div><button class="btn btn-primary" data-order="'+current._index+'" '+(!current.inStock?'disabled':'')+'>'+(current.inStock?'Pesan produk':'Stok tidak tersedia')+'</button></article>';
   }).join("");
   document.querySelectorAll("[data-variant-picker]").forEach(select=>select.addEventListener("change",()=>{
     const product=catalog[Number(select.value)],card=select.closest("[data-product-card]");
@@ -131,7 +144,7 @@ function renderProducts(){
     const button=card.querySelector("[data-order]"),priceNode=card.querySelector("[data-current-price]");
     button.dataset.order=String(Number(select.value));button.disabled=!product.inStock;
     button.textContent=product.inStock?"Pesan produk":"Stok tidak tersedia";
-    priceNode.textContent=!product.inStock?"Stok habis":price==null?"Konfirmasi admin":money(price);
+    priceNode.textContent=!product.inStock?"Stok habis":price==null?"Harga belum ditetapkan":money(price);
   }));
   document.querySelectorAll("[data-order]").forEach(b=>b.addEventListener("click",()=>openOrder(catalog[Number(b.dataset.order)])));
 }
@@ -330,7 +343,7 @@ function openOrder(product){
   selectedOrder=product;
   const reseller=member?.resellerActive===true,price=reseller?product.resellerPrice:product.publicPrice;
   $("orderTitle").textContent=product.product;
-  $("orderDescription").textContent=product.variant+" — "+(price==null?"Harga perlu dikonfirmasi admin":money(price))+". Pesanan diteruskan ke admin melalui WhatsApp.";
+  $("orderDescription").textContent=productDescription(product.product)+" Varian: "+product.variant+" — "+(price==null?"Harga perlu dikonfirmasi admin":money(price))+". Pesanan diteruskan ke admin melalui WhatsApp.";
   $("orderName").value=member?.name||"";$("orderPhone").value=member?.phone||"";
   $("orderDialog").showModal();
 }
