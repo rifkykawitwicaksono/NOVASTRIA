@@ -21,7 +21,8 @@ async function start(){
   $("paymentForm").addEventListener("submit",createPayment);
   $("payoutForm").addEventListener("submit",createPayout);
   $("productForm").addEventListener("submit",saveProduct);
-  $("saleForm").addEventListener("submit",createSale);\n  $("paymentSettingsForm").addEventListener("submit",savePaymentSettings);
+  $("saleForm").addEventListener("submit",createSale);
+  $("paymentSettingsForm").addEventListener("submit",savePaymentSettings);
   $("resetProduct").addEventListener("click",resetProductForm);
   if(!db){notice("Supabase JS tidak termuat. Periksa koneksi internet lalu muat ulang.","error");return;}
   const {data,error}=await db.auth.getSession();
@@ -215,7 +216,29 @@ function renderPayoutRequests(){
  }));
 }
 
-\nfunction renderPaymentSettings(s){\n  $("paymentAccountNumber").value=s.account_number||"";\n  $("paymentAccountName").value=s.account_name||"";\n  $("paymentInstructions").value=s.instructions||"Transfer sesuai nominal. Admin akan memeriksa pembayaran sebelum pesanan diproses.";\n  $("paymentIsActive").checked=!!s.is_active;\n  $("paymentSettingsStatus").textContent=s.is_active?"Tujuan DANA aktif. Informasi rekening akan ditampilkan di halaman pembayaran.":"Tujuan DANA belum aktif. Isi data dan aktifkan setelah siap menerima pembayaran." ;\n}\nasync function savePaymentSettings(e){\n  e.preventDefault();\n  const account=$("paymentAccountNumber").value.trim(),name=$("paymentAccountName").value.trim(),instructions=$("paymentInstructions").value.trim(),active=$("paymentIsActive").checked;\n  if(active&&(!account||!name)){notice("Isi nomor DANA dan nama penerima sebelum mengaktifkan pembayaran.","error");return;}\n  const b=e.submitter;b.disabled=true;\n  try{await rpc("admin_save_payment_settings",{p_account_number:account,p_account_name:name,p_instructions:instructions,p_is_active:active});\n    $("paymentSettingsStatus").textContent=active?"Pengaturan DANA tersimpan dan aktif.":"Pengaturan tersimpan tetapi pembayaran dinonaktifkan.";\n    notice("Pengaturan penerimaan DANA berhasil disimpan di Supabase.","success");\n  }catch(err){notice("Gagal menyimpan pengaturan DANA: "+err.message+". Pastikan migration payment-settings-v1.sql sudah dijalankan.","error");}\n  finally{b.disabled=false;}\n}\n\nfunction renderWalletDeposits(){
+
+
+function renderPaymentSettings(s){
+  $("paymentAccountNumber").value=s.account_number||"";
+  $("paymentAccountName").value=s.account_name||"";
+  $("paymentInstructions").value=s.instructions||"Transfer sesuai nominal. Admin akan memeriksa pembayaran sebelum pesanan diproses.";
+  $("paymentIsActive").checked=!!s.is_active;
+  $("paymentSettingsStatus").textContent=s.is_active?"Tujuan DANA aktif. Informasi rekening akan ditampilkan di halaman pembayaran.":"Tujuan DANA belum aktif. Isi data dan aktifkan setelah siap menerima pembayaran.";
+}
+async function savePaymentSettings(e){
+  e.preventDefault();
+  const account=$("paymentAccountNumber").value.trim(),name=$("paymentAccountName").value.trim(),instructions=$("paymentInstructions").value.trim(),active=$("paymentIsActive").checked;
+  if(active&&(!account||!name)){notice("Isi nomor DANA dan nama penerima sebelum mengaktifkan pembayaran.","error");return;}
+  const b=e.submitter;b.disabled=true;
+  try{
+    await rpc("admin_save_payment_settings",{p_account_number:account,p_account_name:name,p_instructions:instructions,p_is_active:active});
+    $("paymentSettingsStatus").textContent=active?"Pengaturan DANA tersimpan dan aktif.":"Pengaturan tersimpan tetapi pembayaran dinonaktifkan.";
+    notice("Pengaturan penerimaan DANA berhasil disimpan di Supabase.","success");
+  }catch(err){notice("Gagal menyimpan pengaturan DANA: "+err.message+". Pastikan migration payment-settings-v1.sql sudah dijalankan.","error");}
+  finally{b.disabled=false;}
+}
+
+function renderWalletDeposits(){
  const labels={pending:"Menunggu",verified:"Terverifikasi",rejected:"Ditolak"};
  $("walletDepositsBody").innerHTML=walletDeposits.length?walletDeposits.map(d=>{
   const actions=d.status==="pending"?'<div class="admin-actions"><button data-wallet-decision="verified" data-id="'+esc(d.id)+'">Verifikasi & kreditkan</button><button class="admin-danger" data-wallet-decision="rejected" data-id="'+esc(d.id)+'">Tolak</button></div>':badge(d.status);
