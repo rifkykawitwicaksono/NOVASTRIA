@@ -77,3 +77,14 @@ button:disabled{opacity:.6;cursor:wait;transform:none}
 }
 
 .product-icon img{width:100%;height:100%;display:block;object-fit:cover;border-radius:12px;}
+
+/* Verified store activity notifications */
+.store-activity-toast{position:fixed;left:22px;bottom:22px;z-index:20;display:flex;align-items:center;gap:12px;width:min(340px,calc(100vw - 28px));padding:14px 16px;border:1px solid #ffffff24;border-radius:14px;background:linear-gradient(125deg,#171c35f5,#101629f5);box-shadow:0 14px 45px #0009;backdrop-filter:blur(14px);animation:activity-enter .28s ease-out}
+.store-activity-toast[hidden]{display:none}
+.activity-indicator{width:10px;height:10px;flex:0 0 10px;border-radius:50%;background:#66e2dc;box-shadow:0 0 0 5px #66e2dc20,0 0 16px #66e2dc88}
+.activity-copy{display:grid;gap:3px;min-width:0}
+.activity-copy strong{font-size:12px;color:#f4f5ff}
+.activity-copy span{font-size:11px;line-height:1.4;color:#c1c8df;overflow-wrap:anywhere}
+.activity-copy small{font-size:10px;color:#8ee5df}
+@keyframes activity-enter{from{opacity:0;transform:translateY(9px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:520px){.store-activity-toast{left:14px;bottom:14px;padding:12px 14px;width:min(320px,calc(100vw - 28px))}}
