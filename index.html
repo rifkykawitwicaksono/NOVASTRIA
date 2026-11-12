@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#090b18">
 <meta name="description" content="NOVASTRIA Premium Digital Store"><title>NOVASTRIA — Premium Digital Store</title>
-<link rel="stylesheet" href="assets/style.css?v=catalog-2">
+<link rel="stylesheet" href="assets/style.css?v=payment-settings-1">
 </head>
 <body>
 <header class="topbar">
@@ -49,7 +49,7 @@
   <h3>Saldo NOVASTRIA</h3>
   <p class="fineprint">Saldo tersedia hanya bertambah setelah admin memverifikasi transfer. Minimal deposit Rp10.000.</p>
   <div class="wallet-balance"><span>Saldo tersedia</span><strong id="walletBalance">Rp0</strong></div>
-  <div class="wallet-instructions">Sebelum transfer, <a href="https://wa.me/62895429626389?text=Halo%20admin%20NOVASTRIA%2C%20saya%20ingin%20meminta%20informasi%20rekening%20deposit%20saldo." target="_blank" rel="noopener">hubungi admin untuk rekening/e-wallet resmi</a>. Jangan transfer ke rekening yang tidak dikonfirmasi admin.</div>
+  <div class="wallet-instructions" id="walletPaymentInstructions">Memuat tujuan pembayaran DANA dari pengaturan admin...</div>
   <form id="walletDepositForm" class="auth-form">
     <h4>Ajukan deposit manual</h4>
     <label>Nominal deposit (Rp)<input id="walletDepositAmount" type="number" min="10000" step="1000" required placeholder="Minimal 10000"></label>
@@ -74,5 +74,5 @@
 <dialog id="joinDialog"><div class="dialog-head"><div><span class="eyebrow">PENDAFTARAN</span><h2 id="joinTitle">Program anggota</h2></div><button class="icon-close" data-close="joinDialog" aria-label="Tutup">×</button></div><div class="dialog-body"><div class="status-card" id="joinSummary"></div><p id="joinAccountNote" class="fineprint"></p><button class="btn btn-primary full" id="requestJoin" type="button">Minta instruksi pembayaran via WhatsApp</button><p class="fineprint">Keanggotaan tidak aktif sebelum pembayaran diperiksa dan diverifikasi admin. Pembayaran otomatis iPaymu belum diaktifkan.</p></div></dialog>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="assets/app.js?v=catalog-2"></script>
+<script src="assets/app.js?v=payment-settings-1"></script>
 </body></html>
