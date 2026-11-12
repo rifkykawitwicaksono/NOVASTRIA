@@ -226,7 +226,18 @@ async function submitMemberPayout(e){
  finally{button.disabled=false;}
 }
 
-async function loadPublicPaymentInstructions(){\n const box=$("walletPaymentInstructions");if(!box||!supabaseClient)return;\n try{const r=await supabaseClient.rpc("get_public_payment_instructions");if(r.error)throw r.error;const p=r.data||{};\n  if(!p.available){box.textContent="Pembayaran DANA belum diaktifkan admin. Hubungi admin sebelum melakukan transfer.";return;}\n  box.innerHTML="<strong>Transfer DANA</strong><br>Nomor: <strong>"+esc(p.account_number)+"</strong><br>Nama penerima: <strong>"+esc(p.account_name)+"</strong><br>"+esc(p.instructions)+"<br><small>Pastikan nama dan nomor penerima cocok sebelum transfer.</small>";\n }catch(e){box.textContent="Tujuan pembayaran belum dapat dimuat. Hubungi admin sebelum transfer.";console.warn("Payment instructions:",e.message);}\n}\n\nasync function loadMemberWallet(){
+
+async function loadPublicPaymentInstructions(){
+ const box=$("walletPaymentInstructions");if(!box||!supabaseClient)return;
+ try{
+  const r=await supabaseClient.rpc("get_public_payment_instructions");if(r.error)throw r.error;
+  const p=r.data||{};
+  if(!p.available){box.textContent="Pembayaran DANA belum diaktifkan admin. Hubungi admin sebelum melakukan transfer.";return;}
+  box.innerHTML="<strong>Transfer DANA</strong><br>Nomor: <strong>"+esc(p.account_number)+"</strong><br>Nama penerima: <strong>"+esc(p.account_name)+"</strong><br>"+esc(p.instructions)+"<br><small>Pastikan nama dan nomor penerima cocok sebelum transfer.</small>";
+ }catch(e){box.textContent="Tujuan pembayaran belum dapat dimuat. Hubungi admin sebelum transfer.";console.warn("Payment instructions:",e.message);}
+}
+
+async function loadMemberWallet(){
  const balance=$("walletBalance"),deposits=$("walletDepositHistory"),transactions=$("walletTransactionHistory");
  if(!currentUser||!supabaseClient)return;
  try{
