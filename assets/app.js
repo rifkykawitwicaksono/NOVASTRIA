@@ -375,6 +375,7 @@ async function logout(){
 
 function openOrder(product){
   selectedOrder=product;
+  $("sendOrder").hidden=false;
   $("orderCreatedCode").hidden=true;
   $("orderCreatedCode").textContent="";
   const reseller=member?.resellerActive===true,price=reseller?product.resellerPrice:product.publicPrice;
