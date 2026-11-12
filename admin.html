@@ -23,7 +23,7 @@
       <button class="admin-nav" data-tab="payments"><span>▣</span> Pembayaran</button>
       <button class="admin-nav" data-tab="commissions"><span>↗</span> Referral & Komisi</button>
       <button class="admin-nav" data-tab="products"><span>▤</span> Produk & Harga</button><button class="admin-nav" data-tab="sales"><span>▧</span> Penjualan</button><button class="admin-nav" data-tab="orders"><span>⌕</span> Lacak Pesanan</button><button class="admin-nav" data-tab="requests"><span>⇩</span> Pengajuan Komisi</button><button class="admin-nav" data-tab="wallet"><span>◈</span> Deposit Saldo</button>\n      <button class="admin-nav" data-tab="payment-settings"><span>▣</span> Pengaturan Pembayaran</button>
-      <button class="admin-nav" data-tab="reports"><span>▥</span> Laporan</button>
+      <button class="admin-nav" data-tab="transactions"><span>▤</span> Semua Transaksi</button><button class="admin-nav" data-tab="reports"><span>▥</span> Laporan</button>
       <button class="admin-nav" data-tab="audit"><span>◷</span> Aktivitas Admin</button>
     </aside>
     <div class="admin-main">
@@ -114,6 +114,18 @@
   </div>
 </section>
 <section class="admin-section" id="tab-requests" hidden><div class="admin-card"><h2>Pengajuan Pencairan Komisi</h2><p class="admin-muted">Setujui atau tolak permintaan anggota. Persetujuan bukan bukti transfer. Setelah transfer manual, catat di Riwayat Pencairan pada tab Referral & Komisi.</p><div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Anggota</th><th>Nominal</th><th>Tujuan</th><th>Catatan</th><th>Status</th><th>Aksi</th></tr></thead><tbody id="requestsBody"><tr><td colspan="6" class="admin-empty">Memuat...</td></tr></tbody></table></div></div></section>
+<section class="admin-section" id="tab-transactions" hidden>
+  <div class="admin-card">
+    <h2>Semua Transaksi NOVASTRIA</h2>
+    <p class="admin-muted">Gabungan pembelian produk, pendaftaran membership, deposit saldo, penjualan manual, dan pencairan komisi. Data berasal dari catatan transaksi asli; tidak membuat salinan transaksi baru.</p>
+    <div class="admin-stats">
+      <div class="admin-stat"><span>Jumlah catatan</span><strong id="allTransactionsCount">0</strong></div>
+      <div class="admin-stat"><span>Uang masuk terverifikasi/selesai</span><strong id="allTransactionsIn">Rp0</strong></div>
+      <div class="admin-stat"><span>Pencairan komisi</span><strong id="allTransactionsOut">Rp0</strong></div>
+    </div>
+    <div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Waktu / Referensi</th><th>Pelanggan / Anggota</th><th>Jenis Transaksi</th><th>Rincian</th><th>Nominal</th><th>Metode</th><th>Status</th></tr></thead><tbody id="allTransactionsBody"><tr><td colspan="7" class="admin-empty">Memuat...</td></tr></tbody></table></div>
+  </div>
+</section>
 <section class="admin-section" id="tab-reports" hidden>
         <div class="admin-card"><h2>Laporan Keuangan Membership & Penjualan</h2><p class="admin-muted">Laporan berdasarkan tabel membership_payments. Penjualan produk berasal dari catatan transaksi manual admin.</p><div class="admin-stats"><div class="admin-stat"><span>Pesanan produk</span><strong id="salesCount">0</strong></div><div class="admin-stat"><span>Penjualan produk</span><strong id="salesRevenue">Rp0</strong></div><div class="admin-stat"><span>Modal produk</span><strong id="salesCost">Rp0</strong></div><div class="admin-stat"><span>Laba kotor produk</span><strong id="salesProfit">Rp0</strong></div><div class="admin-stat"><span>Total pembayaran tercatat</span><strong id="reportCount">0</strong></div><div class="admin-stat"><span>Menunggu verifikasi</span><strong id="reportPending">0</strong></div><div class="admin-stat"><span>Disetujui</span><strong id="reportVerified">0</strong></div><div class="admin-stat"><span>Ditolak</span><strong id="reportRejected">0</strong></div></div><div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Periode</th><th>Referral terverifikasi</th><th>Reseller terverifikasi</th><th>Total masuk</th></tr></thead><tbody id="reportBody"><tr><td colspan="4" class="admin-empty">Memuat...</td></tr></tbody></table></div></div>
       </section>
@@ -125,5 +137,5 @@
   </div>
 </main>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="assets/admin.js?v=order-tracking-1"></script>
+<script src="assets/admin.js?v=all-transactions-v1"></script>
 </body></html>
