@@ -30,7 +30,7 @@ async function start(){
   $("adminIdentity").textContent="Login sebagai "+(data.session.user.email||"akun terautentikasi");
   try{
     const allowed=await rpc("is_novastria_admin");
-    if(allowed!==true){notice("Akses ditolak. Akun ini tidak memiliki hak Admin NOVASTRIA. Silakan gunakan akun admin.","error");$("adminIdentity").textContent="Akun bukan admin";setTimeout(()=>location.replace("admin-login.html?reason=not-admin"),1200);return;}
+    if(allowed!==true){notice("Akses ditolak. Akun ini tidak memiliki hak Admin Dukun Tikus. Silakan gunakan akun admin.","error");$("adminIdentity").textContent="Akun bukan admin";setTimeout(()=>location.replace("admin-login.html?reason=not-admin"),1200);return;}
     $("adminPanel").hidden=false;notice("Hak admin terverifikasi. Memuat modul operasional...","success");
     await loadAll();
   }catch(e){notice("Gagal memeriksa hak admin / memuat sistem: "+e.message+". Pastikan setup-admin.sql dan admin-controller-v2.sql sudah dijalankan.","error");}
