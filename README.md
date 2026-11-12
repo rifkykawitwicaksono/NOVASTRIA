@@ -1,6 +1,6 @@
-# NOVASTRIA — Premium Digital Store
+# Dukun Tikus — Premium Digital Store
 
-Website NOVASTRIA menggunakan HTML/CSS/JavaScript, Supabase Auth, PostgreSQL, dan GitHub Pages.
+Website Dukun Tikus menggunakan HTML/CSS/JavaScript, Supabase Auth, PostgreSQL, dan GitHub Pages.
 
 ## Struktur utama
 - `index.html` — halaman toko.
@@ -23,7 +23,7 @@ Jalankan berurutan melalui Supabase Dashboard → SQL Editor:
 
 Pastikan akun `kitatopupin@gmail.com` sudah ada di Authentication → Users sebelum menjalankan setup-admin.sql. Verifikasi:
 ```sql
-SELECT email,user_id FROM public.novastria_admins
+SELECT email,user_id FROM public.Dukun Tikus_admins
 WHERE email='kitatopupin@gmail.com';
 ```
 
@@ -49,4 +49,4 @@ WHERE email='kitatopupin@gmail.com';
 ## Keamanan
 - Browser menggunakan Supabase Publishable Key. Jangan pernah menaruh Secret Key atau service-role key di HTML/JavaScript.
 - Fungsi admin melakukan validasi hak akses di PostgreSQL; jangan mengandalkan pemeriksaan email di frontend.
-- Simpan SQL migration di repository dan jalankan hanya pada project Supabase NOVASTRIA.
+- Simpan SQL migration di repository dan jalankan hanya pada project Supabase Dukun Tikus.
