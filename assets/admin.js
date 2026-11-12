@@ -278,7 +278,7 @@ function renderWalletDeposits(){
 
 function renderAllTransactions(){
  const rows=allTransactions||[];
- const totalIn=rows.filter(x=>Number(x.amount)>0&&["verified","completed","fulfilled","paid"].includes(x.status)).reduce((a,x)=>a+Number(x.amount),0);
+ const totalIn=rows.filter(x=>Number(x.amount)>0&&["verified","processing","completed","fulfilled","paid"].includes(x.status)).reduce((a,x)=>a+Number(x.amount),0);
  const totalOut=rows.filter(x=>Number(x.amount)<0&&x.status==="paid").reduce((a,x)=>a+Math.abs(Number(x.amount)),0);
  $("allTransactionsCount").textContent=rows.length;
  $("allTransactionsIn").textContent=money(totalIn);
