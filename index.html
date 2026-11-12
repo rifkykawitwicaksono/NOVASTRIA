@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#090b18">
 <meta name="description" content="NOVASTRIA Premium Digital Store"><title>NOVASTRIA — Premium Digital Store</title>
-<link rel="stylesheet" href="assets/style.css?v=payment-settings-1">
+<link rel="stylesheet" href="assets/style.css?v=qris-deposit-1">
 </head>
 <body>
 <header class="topbar">
@@ -49,11 +49,11 @@
   <h3>Saldo NOVASTRIA</h3>
   <p class="fineprint">Saldo tersedia hanya bertambah setelah admin memverifikasi transfer. Minimal deposit Rp10.000.</p>
   <div class="wallet-balance"><span>Saldo tersedia</span><strong id="walletBalance">Rp0</strong></div>
-  <div class="wallet-instructions" id="walletPaymentInstructions">Memuat tujuan pembayaran DANA dari pengaturan admin...</div>
+  <div class="wallet-instructions" id="walletPaymentInstructions"><strong>Pembayaran isi saldo NOVASTRIA — QRIS</strong><p class="fineprint">QRIS ini berlaku untuk pengisian saldo member maupun reseller. Pindai QRIS, lalu masukkan nominal yang sama dengan pengajuan isi saldo.</p><div style="display:flex;justify-content:center;padding:12px;background:#fff;border-radius:12px;margin:12px auto;max-width:360px"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAcgAAAHIAQAAAADi2kdHAAADkklEQVR42u1cwY4bUQizq/7/L7sHMLz00qononpXm51MwgUEGOM3FP7x5wdiGctYxjKWsfxfLX8CAOtaVL0RAFB1X+B8JH8zvr0czw5gBUwg1eEUAUoEHXRN/OPbw5Yk32ARFCBBgFj3peeb8e03WBKEBKmykwAhdL463vHt11gKEqu0EiJIiFCH+DOc8e3h/ulQVW2lKBYscnEFRQpvjsa3Fy0hSZuef/xdo/j2oiX10T9FoLqnUF3zGVGY/vkl86ccSXxMKpO37HlU9ZL583j/pEgU5HHYZMQrI1tj3vj2fr1lwyDMaNIXPZLK3JBopBvfnrUki0HoBNRCH1WKVo4KUvLzG/KTpmmn5FZGdqusKWY+Dn97P55a/p3uln1LvuzkLG4+vr1sKRbXJxQXRIg7q9DjSyFgxbe387MnzZ0/zRJ1NBcW1TVTb69bcobM3ZAV20fJjG7PMam3x+fPysRqnHJMyYFCUPG4FV6m3t6fP3eybPjKvTFYyd9Nfl6PZzfHHS8b1E6Ae3TZ9hrfHuYTViLkv5YOqXdkRAtRdmcW3561FJuNp8UJTQwVJKruKVJvCse3p/mE1fIZwg574B3aSMIyr9zGtyMUqqjRqVod1I3zt7E0vr1sOWuVCuRINCmpGyeBZ10W3x6ePzGvssrPXDyWjp9SHDx0u39u1mnX12bnxU9xvN/Ht4ctBam49u6bzfN1fLm11u0zvr1tubhHs9k2Vy/LcKsOM749Xm81WpPGr1NlO9Y7dk5bjW/v8gmtCAO5/ZQiS4kytJFmcIlvj+fnh/JrlbgDbxfmKr49n5+z45TIZ6dtEGQotKvR+PZwfg7pQ6vApgi7Y77a+OxXjvMJi3eWyH1WaY9IkzmP9AXx7ILrdfbIpzVnHR79n4mF+PYyvq2D1yUy0efahX36kz7cm/75BfwQBr3u4xLq8Qlz7KFAUvSa9+stt9o2n8DnfOAc9hV2Go1vL+NbZ6fluGaL8PtzalYWFt+exrevom8OhA6lIG+6vSKNby/n57yZpdjD484J3tHRx7fn89NBnIeELRaq9QpGP5/95/3501Gl0/DVJ5gj+rgT396tt0UeuLJSj2hhEdBznjB833dYcp6esIMKh2uA1dTBt9fr7ZZVHwikeXh8nO5d3UJ8ezmeVvg18NHuPGd1VlA3vv0KfgjzzwexS7MpvnttU4LBt98xf8ZDsYxlLGMZy1j+1c8v3LEwmN2fgPcAAAAASUVORK5CYII=" alt="QRIS NOVASTRIA untuk pembayaran isi saldo" style="display:block;width:100%;max-width:330px;height:auto;image-rendering:pixelated"></div><p style="text-align:center;margin:8px 0">Nominal transfer:</p><strong id="walletPaymentAmount" style="display:block;text-align:center;font-size:20px">Masukkan nominal minimal Rp10.000</strong><p class="fineprint">Saldo belum bertambah setelah transfer. Admin akan memeriksa pembayaran dan menyetujui deposit terlebih dahulu.</p></div>
   <form id="walletDepositForm" class="auth-form">
     <h4>Ajukan deposit manual</h4>
     <label>Nominal deposit (Rp)<input id="walletDepositAmount" type="number" min="10000" step="1000" required placeholder="Minimal 10000"></label>
-    <label>Metode pembayaran<select id="walletDepositMethod" required><option value="Transfer bank">Transfer bank</option><option value="DANA">DANA</option><option value="OVO">OVO</option><option value="GoPay">GoPay</option><option value="ShopeePay">ShopeePay</option><option value="QRIS">QRIS</option></select></label>
+    <label>Metode pembayaran<select id="walletDepositMethod" required><option value="QRIS" selected>QRIS</option></select></label>
     <label>Nama pengirim<input id="walletSenderName" required minlength="2" maxlength="100" placeholder="Nama sesuai rekening/e-wallet"></label>
     <label>Nomor referensi transaksi<input id="walletPaymentReference" maxlength="120" placeholder="Opsional, tetapi disarankan"></label>
     <label>Tautan bukti pembayaran (HTTPS)<input id="walletProofUrl" type="url" placeholder="https://... (opsional)"></label>
@@ -74,5 +74,5 @@
 <dialog id="joinDialog"><div class="dialog-head"><div><span class="eyebrow">PENDAFTARAN</span><h2 id="joinTitle">Program anggota</h2></div><button class="icon-close" data-close="joinDialog" aria-label="Tutup">×</button></div><div class="dialog-body"><div class="status-card" id="joinSummary"></div><p id="joinAccountNote" class="fineprint"></p><button class="btn btn-primary full" id="requestJoin" type="button">Minta instruksi pembayaran via WhatsApp</button><p class="fineprint">Keanggotaan tidak aktif sebelum pembayaran diperiksa dan diverifikasi admin. Pembayaran otomatis iPaymu belum diaktifkan.</p></div></dialog>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="assets/app.js?v=payment-settings-1"></script>
+<script src="assets/app.js?v=qris-deposit-1"></script>
 </body></html>
