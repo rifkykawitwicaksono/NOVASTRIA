@@ -130,7 +130,7 @@ function renderStoreActivity(){
   const qty=Number(item.quantity||1);
   $("storeActivityTitle").textContent="Pesanan baru diproses";
   $("storeActivityDetail").textContent=String(item.product||"Produk digital")+(item.variant?" · "+item.variant:"")+(qty>1?" · "+qty+" item":"");
-  const created=Date.parse(item.created_at||"");
+  const created=Date.parse(item.activity_at||"");
   let relative="Hari ini";
   if(Number.isFinite(created)){
     const minutes=Math.max(0,Math.floor((Date.now()-created)/60000));
