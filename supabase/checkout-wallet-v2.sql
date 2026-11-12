@@ -10,6 +10,8 @@ CREATE UNIQUE INDEX IF NOT EXISTS wallet_transactions_store_order_type_once
   WHERE store_order_id IS NOT NULL;
 
 -- Customer order: price and stock are read from the server-side catalog, never trusted from browser.
+-- Drop old return signature before recreating with server-confirmed unit_price.
+DROP FUNCTION IF EXISTS public.create_public_order(text,text,text,text,text,integer,bigint,text);
 CREATE OR REPLACE FUNCTION public.create_public_order(
   p_customer_name text, p_customer_phone text, p_product text, p_variant text,
   p_account_detail text DEFAULT NULL, p_quantity integer DEFAULT 1,
