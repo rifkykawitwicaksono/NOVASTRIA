@@ -352,7 +352,7 @@ function setAuthMode(mode){
   authMode=mode;
   const signup=mode==="signup";
   $("accountDialogTitle").textContent=signup?"Buat akun Dukun Tikus":"Masuk ke akun";
-  $("authIntro").textContent=signup?"Buat akun dengan email aktif. Tautan verifikasi akan dikirim ke email Anda.":"Masuk untuk melihat profil dan status keanggotaan NOVASTRIA.";
+  $("authIntro").textContent=signup?"Buat akun dengan email aktif. Tautan verifikasi akan dikirim ke email Anda.":"Masuk untuk melihat profil dan status keanggotaan Dukun Tikus.";
   document.querySelectorAll(".signup-only").forEach(el=>el.hidden=!signup);
   $("authName").required=signup;
   $("authPhone").required=signup;
