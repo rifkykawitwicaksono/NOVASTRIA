@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#090b18">
 <meta name="description" content="NOVASTRIA Premium Digital Store"><title>NOVASTRIA — Premium Digital Store</title>
-<link rel="stylesheet" href="assets/style.css?v=qris-visible-1">
+<link rel="stylesheet" href="assets/style.css?v=store-activity-v1">
 </head>
 <body>
 <header class="topbar">
@@ -13,7 +13,8 @@
 </header>
 <main>
 <section class="hero"><div class="hero-copy"><span class="eyebrow">DIGITAL ACCESS • SIMPLE • FAST</span><h1>Upgrade pengalaman digitalmu bersama <em>NOVASTRIA.</em></h1><p>Pilih produk digital, cek masa aktif, lalu lanjutkan pemesanan melalui WhatsApp admin.</p><div class="hero-actions"><a class="btn btn-primary" href="#katalog">Jelajahi katalog</a><a class="btn btn-outline" href="#program">Lihat program anggota</a></div><div class="hero-points"><span>✓ Katalog terstruktur</span><span>✓ Harga anggota</span><span>✓ Bantuan admin</span></div></div><div class="hero-panel"><div class="panel-glow"></div><div class="panel-label">NOVASTRIA MEMBER</div><div class="panel-logo">N<span>.</span></div><div class="panel-bottom"><span>PREMIUM DIGITAL STORE</span><strong>ACCESS YOUR NEXT LEVEL</strong></div></div></section>
-<section class="stats"><div><strong id="productCount">—</strong><span>Varian katalog</span></div><div><strong>2</strong><span>Program keanggotaan</span></div><div><strong>24/7</strong><span>Form pemesanan</span></div></section>
+<section class="stats"><div><strong id="productCount">—</strong><span>Varian katalog</span></div><div><strong id="todaySoldCount">0</strong><span>Produk terjual hari ini</span></div><div><strong>2</strong><span>Program keanggotaan</span></div></section>
+<div class="store-activity-toast" id="storeActivityToast" hidden role="status" aria-live="polite"><span class="activity-indicator"></span><div class="activity-copy"><strong id="storeActivityTitle">Pesanan baru diproses</strong><span id="storeActivityDetail"></span><small id="storeActivityTime"></small></div></div>
 <section class="section" id="katalog"><div class="section-heading"><div><span class="eyebrow">JELAJAHI KATALOG</span><h2>Temukan produk digital</h2><p>Produk dikelompokkan berdasarkan platform. Pilih produk, tentukan varian, lalu pesan.</p></div><div class="catalog-tools"><input id="searchInput" type="search" placeholder="Cari nama produk atau durasi..."></div></div><div class="category-tabs" id="categoryTabs" role="group" aria-label="Filter platform"><button class="category-tab active" data-category="all" type="button">Semua produk</button><button class="category-tab" data-category="Android" type="button">Android</button><button class="category-tab" data-category="iOS" type="button">iOS</button></div><div class="catalog-summary" id="catalogSummary"></div><div class="product-grid" id="productGrid"><div class="loading">Memuat katalog...</div></div></section>
 <section class="section" id="lacak-pesanan">
   <div class="section-heading"><div><span class="eyebrow">ORDER TRACKING</span><h2>Lacak pesanan</h2><p>Masukkan kode pesanan dan nomor WhatsApp yang digunakan saat membeli.</p></div></div>
@@ -83,5 +84,5 @@
 <dialog id="joinDialog"><div class="dialog-head"><div><span class="eyebrow">PENDAFTARAN</span><h2 id="joinTitle">Program anggota</h2></div><button class="icon-close" data-close="joinDialog" aria-label="Tutup">×</button></div><div class="dialog-body"><div class="status-card" id="joinSummary"></div><p id="joinAccountNote" class="fineprint"></p><button class="btn btn-primary full" id="requestJoin" type="button">Minta instruksi pembayaran via WhatsApp</button><p class="fineprint">Keanggotaan tidak aktif sebelum pembayaran diperiksa dan diverifikasi admin. Pembayaran otomatis iPaymu belum diaktifkan.</p></div></dialog>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="assets/app.js?v=checkout-wallet-v2"></script>
+<script src="assets/app.js?v=store-activity-v1"></script>
 </body></html>
