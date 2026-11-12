@@ -19,6 +19,9 @@ let catalog=[],selectedOrder=null,joinType="referral",currentUser=null,member=nu
 async function init(){
   $("year").textContent=new Date().getFullYear();
   $("contactLink").href="https://wa.me/"+ADMIN_WA+"?text="+encodeURIComponent("Halo admin NOVASTRIA, saya ingin bertanya.");
+  loadStoreActivity();
+  setInterval(loadStoreActivity,120000);
+  setInterval(renderStoreActivity,8000);
   try{
     let liveProducts=null;
     // Prioritaskan katalog Supabase agar perubahan admin langsung muncul di toko.
@@ -88,6 +91,53 @@ async function init(){
     updateMemberUI();
     setAuthMessage("Katalog tetap tersedia, tetapi layanan akun gagal terhubung. Coba muat ulang.");
   }
+}
+
+
+let storeActivityItems=[],storeActivityIndex=0,storeActivityLoaded=false,storeActivityLoading=false;
+async function loadStoreActivity(){
+  if(!supabaseClient||storeActivityLoading)return;
+  storeActivityLoading=true;
+  try{
+    const {data,error}=await supabaseClient.rpc("get_public_store_activity");
+    if(error)throw error;
+    const payload=data&&typeof data==="object"?data:{};
+    storeActivityItems=Array.isArray(payload.activities)?payload.activities:[];
+    storeActivityIndex=0;
+    storeActivityLoaded=true;
+    const count=Number(payload.total_sold||0);
+    $("todaySoldCount").textContent=count.toLocaleString("id-ID");
+    renderStoreActivity();
+  }catch(error){
+    console.warn("Aktivitas toko belum dapat dimuat:",error.message||error);
+    if(!storeActivityLoaded){
+      $("todaySoldCount").textContent="—";
+      $("storeActivityToast").hidden=true;
+    }
+  }finally{
+    storeActivityLoading=false;
+  }
+}
+function renderStoreActivity(){
+  const toast=$("storeActivityToast");
+  if(!toast)return;
+  if(!storeActivityItems.length){
+    toast.hidden=true;
+    return;
+  }
+  toast.hidden=false;
+  const item=storeActivityItems[storeActivityIndex%storeActivityItems.length];
+  const qty=Number(item.quantity||1);
+  $("storeActivityTitle").textContent="Pesanan baru diproses";
+  $("storeActivityDetail").textContent=String(item.product||"Produk digital")+(item.variant?" · "+item.variant:"")+(qty>1?" · "+qty+" item":"");
+  const created=Date.parse(item.created_at||"");
+  let relative="Hari ini";
+  if(Number.isFinite(created)){
+    const minutes=Math.max(0,Math.floor((Date.now()-created)/60000));
+    relative=minutes<1?"Baru saja":minutes<60?minutes+" menit yang lalu":Math.floor(minutes/60)<24?Math.floor(minutes/60)+" jam yang lalu":"Hari ini";
+  }
+  $("storeActivityTime").textContent="Pesanan terverifikasi · "+relative;
+  storeActivityIndex=(storeActivityIndex+1)%storeActivityItems.length;
 }
 
 function productPlatform(name){
