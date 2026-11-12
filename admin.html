@@ -22,7 +22,7 @@
       <button class="admin-nav" data-tab="members"><span>♙</span> Anggota</button>
       <button class="admin-nav" data-tab="payments"><span>▣</span> Pembayaran</button>
       <button class="admin-nav" data-tab="commissions"><span>↗</span> Referral & Komisi</button>
-      <button class="admin-nav" data-tab="products"><span>▤</span> Produk & Harga</button><button class="admin-nav" data-tab="sales"><span>▧</span> Penjualan</button><button class="admin-nav" data-tab="requests"><span>⇩</span> Pengajuan Komisi</button><button class="admin-nav" data-tab="wallet"><span>◈</span> Deposit Saldo</button>\n      <button class="admin-nav" data-tab="payment-settings"><span>▣</span> Pengaturan Pembayaran</button>
+      <button class="admin-nav" data-tab="products"><span>▤</span> Produk & Harga</button><button class="admin-nav" data-tab="sales"><span>▧</span> Penjualan</button><button class="admin-nav" data-tab="orders"><span>⌕</span> Lacak Pesanan</button><button class="admin-nav" data-tab="requests"><span>⇩</span> Pengajuan Komisi</button><button class="admin-nav" data-tab="wallet"><span>◈</span> Deposit Saldo</button>\n      <button class="admin-nav" data-tab="payment-settings"><span>▣</span> Pengaturan Pembayaran</button>
       <button class="admin-nav" data-tab="reports"><span>▥</span> Laporan</button>
       <button class="admin-nav" data-tab="audit"><span>◷</span> Aktivitas Admin</button>
     </aside>
@@ -94,6 +94,10 @@
 <label>Metode pembayaran<input id="saleMethod"></label><label>Referensi pembayaran<input id="saleReference"></label><label>Catatan<textarea id="saleNotes"></textarea></label>
 <button class="btn admin-primary" type="submit">Simpan penjualan</button></form></div>
 <div class="admin-card"><h2>Riwayat Penjualan</h2><div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Pelanggan</th><th>Produk</th><th>Jumlah</th><th>Harga jual</th><th>Modal</th><th>Status</th><th>Aksi</th></tr></thead><tbody id="salesBody"><tr><td colspan="7" class="admin-empty">Memuat...</td></tr></tbody></table></div></div></section>
+<section class="admin-section" id="tab-orders" hidden>
+  <div class="admin-card"><h2>Pesanan pelanggan</h2><p class="admin-muted">Cari kode RKW, periksa pembayaran, lalu perbarui status pesanan. Perubahan status langsung terlihat pada halaman Lacak Pesanan.</p>
+  <div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Kode / Waktu</th><th>Pelanggan</th><th>Produk / Detail</th><th>Total</th><th>Status</th><th>Aksi</th></tr></thead><tbody id="storeOrdersBody"><tr><td colspan="6" class="admin-empty">Memuat...</td></tr></tbody></table></div></div>
+</section>
 <section class="admin-section" id="tab-wallet" hidden><div class="admin-card"><h2>Verifikasi Deposit Saldo</h2><p class="admin-muted">Periksa kecocokan nominal, metode, nama pengirim, referensi, dan bukti transfer sebelum menyetujui. Saldo hanya dikreditkan oleh database saat status diubah menjadi terverifikasi. Persetujuan tidak dapat dibatalkan dari panel ini.</p><div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Anggota</th><th>Nominal</th><th>Transfer</th><th>Bukti</th><th>Status</th><th>Aksi</th></tr></thead><tbody id="walletDepositsBody"><tr><td colspan="6" class="admin-empty">Memuat...</td></tr></tbody></table></div></div></section>
 <section class="admin-section" id="tab-payment-settings" hidden>
   <div class="admin-card"><h2>Pengaturan Penerimaan DANA</h2>
@@ -121,5 +125,5 @@
   </div>
 </main>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="assets/admin.js?v=payment-settings-1"></script>
+<script src="assets/admin.js?v=order-tracking-1"></script>
 </body></html>
