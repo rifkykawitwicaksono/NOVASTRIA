@@ -6,7 +6,7 @@ const priceLabel=n=>n===null||n===undefined?"Belum ditetapkan":money(n);
 const date=v=>v?new Date(v).toLocaleString("id-ID",{dateStyle:"medium",timeStyle:"short"}):"-";
 const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const db=window.supabase?.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
-let members=[],payments=[],commissions=[],payouts=[],products=[],overview={},sales=[],storeOrders=[],payoutRequests=[],salesSummary={},walletDeposits=[];
+let members=[],payments=[],commissions=[],payouts=[],products=[],overview={},sales=[],storeOrders=[],payoutRequests=[],salesSummary={},walletDeposits=[],allTransactions=[];
 function notice(message,type=""){const el=$("adminNotice");el.textContent=message;el.className="admin-alert "+type;}
 function badge(status){return '<span class="admin-badge '+esc(status)+'">'+esc(({active:"Aktif",inactive:"Nonaktif",none:"Belum ada",pending:"Menunggu",verified:"Terverifikasi",rejected:"Ditolak",approved:"Disetujui",paid:"Dibayar",pending_payment:"Menunggu pembayaran",pending_verification:"Menunggu verifikasi",processing:"Diproses",completed:"Selesai",cancelled:"Dibatalkan"}[status]||status))+'</span>';}
 async function rpc(name,args={}){const r=await db.rpc(name,args);if(r.error)throw r.error;return r.data;}
@@ -43,7 +43,7 @@ async function loadAll(){
   notice("Memperbarui data admin...");
   const tasks=[
     ["members","admin_list_members"],["overview","admin_get_overview"],["payments","admin_list_payments"],
-    ["commissions","admin_list_commissions"],["payouts","admin_list_payouts"],["products","admin_list_products"],["sales","admin_list_sales"],["storeOrders","admin_list_store_orders"],["salesSummary","admin_get_sales_summary"],["payoutRequests","admin_list_payout_requests"],["walletDeposits","admin_list_wallet_deposits"],["paymentSettings","admin_get_payment_settings"],["audit","admin_list_audit"]
+    ["commissions","admin_list_commissions"],["payouts","admin_list_payouts"],["products","admin_list_products"],["sales","admin_list_sales"],["storeOrders","admin_list_store_orders"],["salesSummary","admin_get_sales_summary"],["payoutRequests","admin_list_payout_requests"],["walletDeposits","admin_list_wallet_deposits"],["allTransactions","admin_list_all_transactions"],["paymentSettings","admin_get_payment_settings"],["audit","admin_list_audit"]
   ];
   const results=await Promise.all(tasks.map(async ([key,fn])=>{try{return [key,await rpc(fn)];}catch(e){return [key,{__error:e.message}];}}));
   const errors=[];
@@ -60,13 +60,14 @@ async function loadAll(){
     else if(key==="salesSummary")salesSummary=value||{};
     else if(key==="payoutRequests")payoutRequests=value||[];
     else if(key==="walletDeposits")walletDeposits=value||[];
+    else if(key==="allTransactions")allTransactions=value||[];
     else if(key==="audit")renderAudit(value||[]);
   }
   renderAll();
   if(errors.length)notice("Sebagian modul gagal dimuat: "+errors.join(" | "), "error");
   else notice("Semua modul berhasil diperbarui dari Supabase.","success");
 }
-function renderAll(){renderStats();renderMembers();renderMemberOptions();renderPayments();renderCommissions();renderPayouts();renderProducts();renderSales();renderStoreOrders();renderPayoutRequests();renderWalletDeposits();renderReports();}
+function renderAll(){renderStats();renderMembers();renderMemberOptions();renderPayments();renderCommissions();renderPayouts();renderProducts();renderSales();renderStoreOrders();renderPayoutRequests();renderWalletDeposits();renderAllTransactions();renderReports();}
 function renderStats(){
   $("statMembers").textContent=overview.members??members.length;
   $("statReferral").textContent=overview.referral_active??members.filter(m=>m.referral_status==="active").length;
@@ -275,6 +276,19 @@ function renderWalletDeposits(){
  }));
 }
 
+function renderAllTransactions(){
+ const rows=allTransactions||[];
+ const totalIn=rows.filter(x=>Number(x.amount)>0&&["verified","completed","fulfilled","paid"].includes(x.status)).reduce((a,x)=>a+Number(x.amount),0);
+ const totalOut=rows.filter(x=>Number(x.amount)<0&&x.status==="paid").reduce((a,x)=>a+Math.abs(Number(x.amount)),0);
+ $("allTransactionsCount").textContent=rows.length;
+ $("allTransactionsIn").textContent=money(totalIn);
+ $("allTransactionsOut").textContent=money(totalOut);
+ $("allTransactionsBody").innerHTML=rows.length?rows.map(x=>{
+  const amount=Number(x.amount||0);
+  const amountText=(amount<0?"−":"")+money(Math.abs(amount));
+  return '<tr><td><strong>'+esc(date(x.created_at))+'</strong><small>'+esc(x.reference||"-")+'</small></td><td><strong>'+esc(x.customer_name||"-")+'</strong><small>'+esc(x.contact||"-")+'</small></td><td>'+esc(x.category)+'</td><td>'+esc(x.description||"-")+'</td><td><strong>'+amountText+'</strong></td><td>'+esc(x.payment_method||"-")+'</td><td>'+badge(x.status)+'</td></tr>';
+ }).join(""):'<tr><td colspan="7" class="admin-empty">Belum ada transaksi tercatat.</td></tr>';
+}
 function renderReports(){
  $("salesCount").textContent=salesSummary.orders??0;$("salesRevenue").textContent=money(salesSummary.revenue);$("salesCost").textContent=money(salesSummary.cost);$("salesProfit").textContent=money(salesSummary.profit);
   $("reportCount").textContent=payments.length;
