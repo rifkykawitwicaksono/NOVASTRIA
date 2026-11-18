@@ -47,13 +47,14 @@ async function init(){
       if(!r.ok)throw new Error("Katalog gagal dimuat.");
       catalog=(await r.json()).products||[];
     }
+    catalog=catalog.map(p=>({...p,product:/^NEXORA iOS & Android$/i.test(p.product)?"RezzX iOS & Android":p.product}));
     // Ambil konten detail agar pelanggan dapat membacanya langsung di kartu katalog.
     productDetails={};
     if(supabaseClient){
       const detailResult=await supabaseClient.from("store_product_details")
         .select("product,platform,operational_status,description,instructions,requirements,warranty,additional_info");
       if(!detailResult.error){
-        (detailResult.data||[]).forEach(item=>{productDetails[item.product]=item;});
+        (detailResult.data||[]).forEach(item=>{const key=/^NEXORA iOS & Android$/i.test(item.product)?"RezzX iOS & Android":item.product;productDetails[key]=item;});
       }else{
         console.warn("Konten detail produk belum dapat dimuat:",detailResult.error.message);
       }
@@ -162,7 +163,7 @@ function productVisual(name){
   const n=String(name||"").toLowerCase();
   // Logo produk dari tautan gambar yang diberikan pemilik DUKUN CHEAT.
   const images=[
-    ["nexora","https://i.ibb.co/3y1DSTHk/1b69d74b-4b25-4a45-bab7-f52b7555e157.png"],
+    ["rezzx","https://i.ibb.co/3y1DSTHk/1b69d74b-4b25-4a45-bab7-f52b7555e157.png"],
     ["phantom","https://i.ibb.co/35mxHncP/adf97f78-365c-46dd-b1a3-c68fb4a2c23a.webp"],
     ["migul","https://i.ibb.co/08j0Ffj/bdb54de0-076b-41f6-b871-b05ad5e30905.png"],
     ["esign","https://i.ibb.co/gbj9wtwS/0c73abf9-a04a-4e0d-8f69-2737af1ef05b.png"],
@@ -288,7 +289,7 @@ function renderProducts(){
     const current=available[0]||g.items[0];
     const optionMarkup=g.items.map(p=>'<option value="'+p._index+'" '+(p._index===current._index?'selected':'')+' '+(!p.inStock?'data-unavailable="true"':'')+'>'+esc(p.variant)+(p.inStock?'':' — Stok habis')+'</option>').join("");
     const price=member?.resellerActive===true?current.resellerPrice:current.publicPrice;
-    return '<article class="product-card grouped-product" data-product-card="'+groupIndex+'"><div class="product-card-top"><span class="platform-tag">'+esc(g.platform)+'</span><span class="variant-count">'+g.items.length+' varian</span></div><div class="product-visual"><span class="product-icon" aria-hidden="true">'+productVisual(g.name)+'</span><div class="product-visual-copy"><span>PRODUK DIGITAL</span><strong>'+(available.length?available.length+' varian tersedia':'Stok belum tersedia')+'</strong></div></div><h3>'+esc(g.name)+'</h3><label class="variant-picker-label">Pilih durasi / varian<select class="variant-picker" data-variant-picker="'+groupIndex+'">'+optionMarkup+'</select></label><div class="price-row"><div><div class="price-caption">'+(member?.resellerActive===true?"Harga reseller":"Harga publik")+'</div><div class="price-value" data-current-price>'+(!current.inStock?'Stok habis':price==null?'Harga belum ditetapkan':money(price))+'</div></div><span class="price-caption">IDR</span></div><button class="btn btn-primary" data-order="'+current._index+'" '+(!current.inStock?'disabled':'')+'>'+(current.inStock?'Pesan produk':'Stok tidak tersedia')+'</button></article>';
+    return '<article class="product-card grouped-product" data-product-card="'+groupIndex+'"><div class="product-card-top"><span class="platform-tag">'+(["drip client wire ios & android","rezzx ios & android"].includes(g.name.toLowerCase())?"Cheat &amp; Tools · ":"")+esc(g.platform)+'</span><span class="variant-count">'+g.items.length+' varian</span></div><div class="product-visual"><span class="product-icon" aria-hidden="true">'+productVisual(g.name)+'</span><div class="product-visual-copy"><span>PRODUK DIGITAL</span><strong>'+(available.length?available.length+' varian tersedia':'Stok belum tersedia')+'</strong></div></div><h3>'+esc(g.name)+'</h3><label class="variant-picker-label">Pilih durasi / varian<select class="variant-picker" data-variant-picker="'+groupIndex+'">'+optionMarkup+'</select></label><div class="price-row"><div><div class="price-caption">'+(member?.resellerActive===true?"Harga reseller":"Harga publik")+'</div><div class="price-value" data-current-price>'+(!current.inStock?'Stok habis':price==null?'Harga belum ditetapkan':money(price))+'</div></div><span class="price-caption">IDR</span></div><button class="btn btn-primary" data-order="'+current._index+'" '+(!current.inStock?'disabled':'')+'>'+(current.inStock?'Pesan produk':'Stok tidak tersedia')+'</button></article>';
   }).join("");
   document.querySelectorAll("[data-variant-picker]").forEach(select=>select.addEventListener("change",()=>{
     const product=catalog[Number(select.value)],card=select.closest("[data-product-card]");
