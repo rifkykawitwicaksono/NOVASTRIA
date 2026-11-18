@@ -79,7 +79,17 @@
           <label class="admin-check"><input id="productActive" type="checkbox" checked> Tampilkan di toko</label>
           <div class="admin-row" style="grid-column:1/-1"><button class="btn admin-primary" type="submit">Simpan produk</button><button class="btn btn-outline" type="button" id="resetProduct">Kosongkan form</button></div>
         </form></div>
-        <div class="admin-card"><h2>Daftar Produk & Harga</h2><div class="admin-toolbar"><input id="productSearch" type="search" placeholder="Cari produk / varian"><select id="productVisibility"><option value="">Semua</option><option value="active">Tampil di toko</option><option value="hidden">Disembunyikan</option></select></div><div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Produk / Varian</th><th>Harga publik</th><th>Harga reseller</th><th>Stok</th><th>Visibilitas</th><th>Aksi</th></tr></thead><tbody id="productsBody"><tr><td colspan="6" class="admin-empty">Memuat...</td></tr></tbody></table></div></div>
+        <div class="admin-card"><h2>Konten Detail Produk</h2><p class="admin-muted">Isi konten satu kali per nama produk. Data ini tampil pada halaman detail publik.</p><form id="productDetailForm" class="admin-form-grid admin-product-form">
+<label>Nama produk<input id="detailProductName" required placeholder="Harus sama dengan nama produk di katalog"></label>
+<label>Platform<input id="detailPlatform" placeholder="Android, iOS, Windows, atau lainnya"></label>
+<label>Status operasional<select id="detailOperationalStatus"><option value="unknown">Unknown — belum diketahui</option><option value="online">Online — aman digunakan</option><option value="offline">Offline — maintenance</option></select></label>
+<label>URL file / unduhan<input id="detailFileUrl" type="url" placeholder="https://..."></label>
+<label style="grid-column:1/-1">Deskripsi produk<textarea id="detailDescription" rows="4"></textarea></label>
+<label style="grid-column:1/-1">Cara top up / instalasi / aktivasi<textarea id="detailInstructions" rows="5"></textarea></label>
+<label style="grid-column:1/-1">Persyaratan perangkat<textarea id="detailRequirements" rows="3"></textarea></label>
+<label style="grid-column:1/-1">Garansi & ketentuan<textarea id="detailWarranty" rows="3"></textarea></label>
+<label style="grid-column:1/-1">Informasi tambahan<textarea id="detailAdditional" rows="3"></textarea></label>
+<button class="btn admin-primary" type="submit">Simpan konten detail</button></form><div id="productDetailNotice" class="admin-alert">Isi nama produk, lalu simpan konten detailnya.</div></div><div class="admin-card"><h2>Daftar Produk & Harga</h2><div class="admin-toolbar"><input id="productSearch" type="search" placeholder="Cari produk / varian"><select id="productVisibility"><option value="">Semua</option><option value="active">Tampil di toko</option><option value="hidden">Disembunyikan</option></select></div><div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Produk / Varian</th><th>Harga publik</th><th>Harga reseller</th><th>Stok</th><th>Visibilitas</th><th>Aksi</th></tr></thead><tbody id="productsBody"><tr><td colspan="6" class="admin-empty">Memuat...</td></tr></tbody></table></div></div>
       </section>
 
       <section class="admin-section" id="tab-sales" hidden>
@@ -137,5 +147,5 @@
   </div>
 </main>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="assets/admin.js?v=all-transactions-v1"></script>
+<script src="assets/admin.js?v=product-details-v1"></script>
 </body></html>
