@@ -98,3 +98,17 @@ button:disabled{opacity:.6;cursor:wait;transform:none}
 .status-led.unknown{background:#ffc857;box-shadow:0 0 5px #ffc857,0 0 12px #ffc857aa}
 @keyframes status-led-pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.35;transform:scale(.78)}}
 @media(prefers-reduced-motion:reduce){.status-led{animation:none}}
+
+/* Detail produk dibuka langsung dari kartu katalog */
+.inline-product-details{border:1px solid #ffffff20;border-radius:11px;background:#0c1122;overflow:hidden}
+.inline-product-details summary{list-style:none;cursor:pointer;padding:11px 12px;color:#bcaaff;font-size:11px;font-weight:700}
+.inline-product-details summary::-webkit-details-marker{display:none}
+.inline-product-details summary::after{content:"＋";float:right;color:#8ee5df}
+.inline-product-details[open] summary::after{content:"−"}
+.inline-detail-body{padding:0 13px 14px;border-top:1px solid #ffffff12}
+.inline-detail-status{display:flex;align-items:center;margin:12px 0 8px;font-size:11px;font-weight:700;color:#d9def2;line-height:1.5}
+.inline-detail-platform{display:inline-block;padding:4px 8px;margin:0 0 7px;border-radius:6px;background:#8b68f126;color:#cbbaff;font-size:10px}
+.inline-detail-section{padding-top:9px}
+.inline-detail-section h4{margin:0 0 5px;font-size:11px;color:#8ee5df}
+.inline-detail-section p,.inline-detail-empty{margin:0;color:#b9c0d7;font-size:11px;line-height:1.7;white-space:pre-line;overflow-wrap:anywhere}
+.inline-detail-empty{padding:10px 0}
