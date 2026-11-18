@@ -195,18 +195,6 @@ function populateCategories(){
   document.querySelector('[data-category="iOS"]').textContent="iOS · "+counts.iOS;
 }
 
-function renderInlineProductDetails(name){
-  const d=productDetails[name];
-  if(!d)return '<details class="inline-product-details"><summary>Lihat detail produk</summary><div class="inline-detail-body"><p class="inline-detail-empty">Detail produk belum diisi admin.</p></div></details>';
-  const status=["online","offline","unknown"].includes(String(d.operational_status||"unknown").toLowerCase())?String(d.operational_status||"unknown").toLowerCase():"unknown";
-  const labels={online:"Online — aman digunakan",offline:"Offline — sedang maintenance, jangan ditransaksikan",unknown:"Unknown — status belum diketahui"};
-  const section=(title,value)=>value?'<section class="inline-detail-section"><h4>'+title+'</h4><p>'+esc(value)+'</p></section>':'';
-  return '<details class="inline-product-details"><summary>Lihat detail produk</summary><div class="inline-detail-body"><div class="inline-detail-status"><span class="status-led '+status+'" aria-hidden="true"></span>'+labels[status]+'</div>'+
-    (d.platform?'<span class="inline-detail-platform">'+esc(d.platform)+'</span>':'')+
-    section("Deskripsi produk",d.description)+section("Cara top up / instalasi",d.instructions)+section("Persyaratan perangkat",d.requirements)+section("Garansi & ketentuan",d.warranty)+section("Informasi tambahan",d.additional_info)+
-    '</div></details>';
-}
-
 function renderProducts(){
   const q=$("searchInput").value.toLowerCase().trim();
   const groups=new Map();
