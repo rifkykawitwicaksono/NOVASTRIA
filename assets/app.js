@@ -14,7 +14,7 @@ try {
 } catch (error) {
   console.error("Supabase gagal diinisialisasi:", error);
 }
-let catalog=[],productDetails={},selectedOrder=null,joinType="referral",currentUser=null,member=null,memberLoadError="",authMode="login",activeCategory="all";
+let catalog=[],productDetails={},selectedOrder=null,joinType="referral",currentUser=null,member=null,memberLoadError="",authMode="login",activeCategory="all",productBannerIndex=0,productBannerTimer=null,productBannerControlsBound=false;
 
 async function init(){
   $("year").textContent=new Date().getFullYear();
@@ -59,7 +59,7 @@ async function init(){
       }
     }
     $("productCount").textContent=catalog.length;
-    populateCategories();renderProducts();
+    populateCategories();renderProducts();renderProductShowcase();
   }catch(error){$("productGrid").innerHTML='<div class="empty">Katalog belum bisa dimuat. Periksa koneksi dan sumber katalog.</div>';}
   $("searchInput").addEventListener("input",renderProducts);
   $("categoryTabs").addEventListener("click",event=>{const button=event.target.closest("[data-category]");if(!button)return;activeCategory=button.dataset.category;document.querySelectorAll(".category-tab").forEach(x=>x.classList.toggle("active",x===button));renderProducts();});
@@ -207,6 +207,68 @@ function renderInlineProductDetails(name){
     '</div></details>';
 }
 
+
+function setProductBanner(index){
+  const track=$("productBannerTrack"),dots=$("productBannerDots");
+  if(!track||!dots)return;
+  const slides=track.querySelectorAll(".product-banner-slide");
+  if(!slides.length)return;
+  productBannerIndex=(index+slides.length)%slides.length;
+  track.style.transform="translateX(-"+(productBannerIndex*100)+"%)";
+  dots.querySelectorAll("button").forEach((dot,i)=>{
+    dot.classList.toggle("active",i===productBannerIndex);
+    dot.setAttribute("aria-current",i===productBannerIndex?"true":"false");
+  });
+}
+function stopProductBannerAuto(){
+  if(productBannerTimer){clearInterval(productBannerTimer);productBannerTimer=null;}
+}
+function startProductBannerAuto(){
+  stopProductBannerAuto();
+  if(window.matchMedia?.("(prefers-reduced-motion: reduce)").matches)return;
+  if($("productBannerTrack")?.querySelectorAll(".product-banner-slide").length>1){
+    productBannerTimer=setInterval(()=>setProductBanner(productBannerIndex+1),4800);
+  }
+}
+function renderProductShowcase(){
+  const track=$("productBannerTrack"),dots=$("productBannerDots"),carousel=$("productBannerCarousel");
+  if(!track||!dots||!carousel)return;
+  const groups=[...new Map(catalog.map(p=>[p.product,null])).keys()].map(name=>({
+    name,items:catalog.map((p,index)=>({...p,_index:index})).filter(p=>p.product===name)
+  }));
+  if(!groups.length){track.innerHTML='<div class="empty">Belum ada produk untuk ditampilkan.</div>';dots.innerHTML="";return;}
+  track.innerHTML=groups.map((group,index)=>{
+    const available=group.items.filter(p=>p.inStock);
+    const chosen=available[0]||group.items[0];
+    const prices=available.map(p=>Number(member?.resellerActive===true?p.resellerPrice:p.publicPrice)).filter(n=>Number.isFinite(n)&&n>0);
+    const startingPrice=prices.length?'<span class="product-banner-price">Mulai '+money(Math.min(...prices))+'</span>':'<span class="product-banner-price">Harga / stok perlu dikonfirmasi</span>';
+    return '<article class="product-banner-slide" aria-label="Produk '+(index+1)+' dari '+groups.length+'">'+
+      '<div class="product-banner-art"><span class="product-banner-orbit"></span><span class="product-banner-icon" aria-hidden="true">'+productVisual(group.name)+'</span><span class="product-banner-art-label">DIGITAL PRODUCT</span></div>'+
+      '<div class="product-banner-copy"><span class="platform-tag">'+esc(productPlatform(group.name))+'</span><span class="product-banner-count">'+(available.length?available.length+' dari '+group.items.length+' varian tersedia':'Stok belum tersedia')+'</span>'+
+      '<h3>'+esc(group.name)+'</h3><p>'+esc(productDescription(group.name))+'</p>'+startingPrice+
+      '<button class="btn btn-primary product-banner-order" type="button" data-banner-order="'+chosen._index+'" '+(!available.length?'disabled':'')+'>'+(available.length?'Pesan produk':'Stok tidak tersedia')+' <span aria-hidden="true">↗</span></button></div></article>';
+  }).join("");
+  dots.innerHTML=groups.map((group,index)=>'<button type="button" class="'+(index===0?'active':'')+'" data-banner-slide="'+index+'" aria-label="Tampilkan banner '+esc(group.name)+'" aria-current="'+(index===0?'true':'false')+'"></button>').join("");
+  if(!productBannerControlsBound){
+    carousel.addEventListener("click",event=>{
+      const order=event.target.closest("[data-banner-order]");
+      if(order&&!order.disabled){openOrder(catalog[Number(order.dataset.bannerOrder)]);return;}
+      const dot=event.target.closest("[data-banner-slide]");
+      if(dot)setProductBanner(Number(dot.dataset.bannerSlide));
+    });
+    $("productBannerPrev").addEventListener("click",()=>setProductBanner(productBannerIndex-1));
+    $("productBannerNext").addEventListener("click",()=>setProductBanner(productBannerIndex+1));
+    carousel.addEventListener("mouseenter",stopProductBannerAuto);
+    carousel.addEventListener("mouseleave",startProductBannerAuto);
+    carousel.addEventListener("focusin",stopProductBannerAuto);
+    carousel.addEventListener("focusout",event=>{if(!carousel.contains(event.relatedTarget))startProductBannerAuto();});
+    productBannerControlsBound=true;
+  }
+  productBannerIndex=Math.min(productBannerIndex,groups.length-1);
+  setProductBanner(productBannerIndex);
+  startProductBannerAuto();
+}
+
 function renderProducts(){
   const q=$("searchInput").value.toLowerCase().trim();
   const groups=new Map();
@@ -293,6 +355,7 @@ function updateMemberUI(){
     $("memberStatus").textContent="Belum ada sesi akun aktif.";
   }
   renderProducts();
+  renderProductShowcase();
 }
 
 

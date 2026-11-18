@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#090b18">
 <meta name="description" content="DUKUN CHEAT Premium Digital Store"><title>DUKUN CHEAT — Premium Digital Store</title>
-<link rel="stylesheet" href="assets/style.css?v=store-activity-v1">
+<link rel="stylesheet" href="assets/style.css?v=product-running-banner-v1">
 </head>
 <body>
 <header class="topbar">
@@ -13,6 +13,14 @@
 </header>
 <main>
 <div class="promo-ticker" aria-label="Informasi toko"><div class="promo-ticker-track"><span>✦ PRODUK DIGITAL ANDROID & iOS</span><span>✦ PILIH VARIAN SESUAI KEBUTUHAN</span><span>✦ DETAIL PRODUK TERSEDIA SAAT PEMESANAN</span><span>✦ BANTUAN ADMIN</span><span>✦ PRODUK DIGITAL ANDROID & iOS</span><span>✦ PILIH VARIAN SESUAI KEBUTUHAN</span><span>✦ DETAIL PRODUK TERSEDIA SAAT PEMESANAN</span><span>✦ BANTUAN ADMIN</span></div></div><section class="hero promo-hero"><div class="hero-copy"><span class="eyebrow">WELCOME TO DUKUN CHEAT</span><h1>Temukan akses digital yang tepat untukmu.</h1><p>Jelajahi pilihan produk Android dan iOS, pilih varian yang tersedia, lalu periksa informasi lengkap sebelum melakukan pemesanan.</p><div class="hero-actions"><a class="btn btn-primary" href="#katalog">Jelajahi produk <span aria-hidden="true">↗</span></a><a class="btn btn-outline" href="#lacak-pesanan">Lacak pesanan</a></div><div class="hero-points"><span>✓ Pilihan produk terkurasi</span><span>✓ Detail sebelum pesan</span><span>✓ Dukungan admin</span></div></div><div class="hero-panel promo-art"><div class="promo-orbit orbit-one"></div><div class="promo-orbit orbit-two"></div><div class="promo-art-glow"></div><span class="promo-art-kicker">YOUR DIGITAL STORE</span><div class="promo-art-title">LEVEL<br><em>UP.</em></div><div class="promo-art-bottom"><span>ANDROID • iOS</span><strong>DUKUN CHEAT</strong></div><span class="promo-spark spark-one">✦</span><span class="promo-spark spark-two">✧</span></div></section>
+<section class="product-showcase section" id="banner-produk">
+  <div class="section-heading"><div><span class="eyebrow">PRODUCT SPOTLIGHT</span><h2>Jelajahi semua produk</h2><p>Banner berjalan otomatis. Pilih produk untuk langsung membuka pemesanan.</p></div><div class="product-banner-controls"><button class="icon-close" id="productBannerPrev" type="button" aria-label="Produk sebelumnya">‹</button><button class="icon-close" id="productBannerNext" type="button" aria-label="Produk berikutnya">›</button></div></div>
+  <div class="product-banner-carousel" id="productBannerCarousel" aria-roledescription="carousel" aria-label="Semua banner produk">
+    <div class="product-banner-viewport"><div class="product-banner-track" id="productBannerTrack"><div class="loading">Memuat banner produk...</div></div></div>
+    <div class="product-banner-dots" id="productBannerDots" aria-label="Pilih banner produk"></div>
+  </div>
+</section>
+<div class="buyer-notice" role="note" aria-label="Peringatan sebelum membeli"><div class="buyer-notice-track"><span>⚠ PERHATIAN PEMBELI — Baca deskripsi, kompatibilitas, dan ketentuan produk sebelum membeli. Konsekuensi akibat penggunaan yang tidak sesuai menjadi tanggung jawab pembeli. Hak konsumen tetap mengikuti hukum yang berlaku.</span><span aria-hidden="true">⚠ PERHATIAN PEMBELI — Baca deskripsi, kompatibilitas, dan ketentuan produk sebelum membeli. Konsekuensi akibat penggunaan yang tidak sesuai menjadi tanggung jawab pembeli. Hak konsumen tetap mengikuti hukum yang berlaku.</span></div></div>
 <section class="stats"><div><strong id="productCount">—</strong><span>Varian katalog</span></div><div><strong id="todaySoldCount">0</strong><span>Produk terjual hari ini</span></div><div><strong>2</strong><span>Program keanggotaan</span></div></section>
 <div class="store-activity-toast" id="storeActivityToast" hidden role="status" aria-live="polite"><span class="activity-indicator"></span><div class="activity-copy"><strong id="storeActivityTitle">Pesanan baru diproses</strong><span id="storeActivityDetail"></span><small id="storeActivityTime"></small></div></div>
 <section class="section" id="katalog"><div class="section-heading"><div><span class="eyebrow">JELAJAHI KATALOG</span><h2>Temukan produk digital</h2><p>Produk dikelompokkan berdasarkan platform. Pilih produk, tentukan varian, lalu pesan.</p></div><div class="catalog-tools"><input id="searchInput" type="search" placeholder="Cari nama produk atau durasi..."></div></div><div class="category-tabs" id="categoryTabs" role="group" aria-label="Filter platform"><button class="category-tab active" data-category="all" type="button">Semua produk</button><button class="category-tab" data-category="Android" type="button">Android</button><button class="category-tab" data-category="iOS" type="button">iOS</button></div><div class="catalog-summary" id="catalogSummary"></div><div class="product-grid" id="productGrid"><div class="loading">Memuat katalog...</div></div></section>
@@ -84,5 +92,5 @@
 <dialog id="joinDialog"><div class="dialog-head"><div><span class="eyebrow">PENDAFTARAN</span><h2 id="joinTitle">Program anggota</h2></div><button class="icon-close" data-close="joinDialog" aria-label="Tutup">×</button></div><div class="dialog-body"><div class="status-card" id="joinSummary"></div><p id="joinAccountNote" class="fineprint"></p><button class="btn btn-primary full" id="requestJoin" type="button">Minta instruksi pembayaran via WhatsApp</button><p class="fineprint">Keanggotaan tidak aktif sebelum pembayaran diperiksa dan diverifikasi admin. Pembayaran otomatis iPaymu belum diaktifkan.</p></div></dialog>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="assets/app.js?v=inline-details-v1"></script>
+<script src="assets/app.js?v=product-running-banner-v1"></script>
 </body></html>

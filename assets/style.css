@@ -116,3 +116,33 @@ button:disabled{opacity:.6;cursor:wait;transform:none}
 
 /* Homepage promotional banner inspired by VipRezka layout; no fabricated sales claims. */
 .promo-ticker{overflow:hidden;border-top:1px solid #ffffff12;border-bottom:1px solid #ffffff12;background:linear-gradient(90deg,#17132d,#10182a);padding:12px 0}.promo-ticker-track{display:flex;align-items:center;justify-content:space-around;gap:34px;width:max-content;min-width:100%;animation:promo-marquee 32s linear infinite}.promo-ticker span{font-size:10px;font-weight:700;letter-spacing:1.4px;color:#c8c2e7;white-space:nowrap}.promo-ticker span:nth-child(4n+1){color:#83e5df}@keyframes promo-marquee{from{transform:translateX(0)}to{transform:translateX(-50%)}}.promo-hero{padding-top:72px;padding-bottom:72px;min-height:490px}.promo-hero .hero-copy h1{max-width:620px}.promo-hero .hero-copy p{font-size:14px}.promo-art{height:350px;background:radial-gradient(ellipse at 72% 28%,#7057c8 0,transparent 38%),linear-gradient(135deg,#27204e 0%,#171b38 52%,#102b3b 100%);border-color:#b6a2ff44;isolation:isolate}.promo-art-glow{position:absolute;width:190px;height:190px;border-radius:50%;background:#65e2d855;filter:blur(58px);right:12%;bottom:-65px;z-index:-1}.promo-art-kicker{position:relative;font-size:9px;letter-spacing:3px;color:#c7c2e9}.promo-art-title{position:absolute;left:28px;top:72px;font:700 clamp(68px,9vw,112px)/.82 "Space Grotesk";letter-spacing:-7px;color:#fff;text-shadow:0 12px 45px #08081788}.promo-art-title em{font-style:normal;color:#9eece4}.promo-art-bottom{position:absolute;bottom:25px;left:28px;right:28px;display:flex;justify-content:space-between;gap:10px;font-size:9px;letter-spacing:1.5px;color:#c2c7e0}.promo-art-bottom strong{color:#9eece4}.promo-orbit{position:absolute;border:1px solid #c5b8ff45;border-radius:50%;transform:rotate(-25deg);pointer-events:none}.orbit-one{width:390px;height:155px;right:-55px;top:65px}.orbit-two{width:320px;height:115px;right:-18px;top:84px;border-color:#7ce7df55}.promo-spark{position:absolute;color:#c8baff}.spark-one{right:22%;top:25%;font-size:28px}.spark-two{right:12%;bottom:28%;font-size:36px;color:#8ce9e0}@media(max-width:800px){.promo-hero{padding-top:48px;padding-bottom:48px}.promo-art{height:265px}.promo-art-title{font-size:82px;top:58px}.promo-ticker-track{animation-duration:25s}}@media(prefers-reduced-motion:reduce){.promo-ticker-track{animation:none;flex-wrap:wrap;justify-content:center;width:100%;padding:0 12px}.promo-ticker{padding:10px 0}}
+
+
+/* Auto-running banner for every active catalog product */
+.product-banner-controls{display:flex;gap:8px}
+.product-banner-controls .icon-close{width:40px;height:40px;border:1px solid #ffffff25;background:#ffffff09;font-size:27px}
+.product-banner-carousel{position:relative;overflow:hidden;border:1px solid #ffffff1c;border-radius:22px;background:#10152a;box-shadow:0 20px 65px #0005}
+.product-banner-viewport{overflow:hidden}
+.product-banner-track{display:flex;transition:transform .65s cubic-bezier(.22,.7,.2,1);will-change:transform}
+.product-banner-slide{position:relative;display:grid;grid-template-columns:.82fr 1.18fr;gap:35px;align-items:center;flex:0 0 100%;min-width:0;min-height:310px;padding:30px 42px;background:radial-gradient(ellipse at 12% 50%,#7355c633,transparent 48%),linear-gradient(120deg,#1b1c3b,#111b2e 72%,#102c38)}
+.product-banner-art{position:relative;display:grid;place-items:center;min-height:235px;overflow:hidden;border:1px solid #b7a4ff33;border-radius:18px;background:radial-gradient(circle at 50% 45%,#7c68c955,transparent 48%),linear-gradient(145deg,#29244c,#102b39)}
+.product-banner-icon{position:relative;z-index:1;display:grid;place-items:center;width:142px;height:142px;padding:12px;border:1px solid #ffffff30;border-radius:30px;background:#090d1ddd;box-shadow:0 20px 55px #0008;font-size:58px;color:#bdaeff}
+.product-banner-icon img{width:100%;height:100%;object-fit:contain;border-radius:20px}
+.product-banner-orbit{position:absolute;width:310px;height:125px;border:1px solid #a99aff55;border-radius:50%;transform:rotate(-27deg)}
+.product-banner-art-label{position:absolute;bottom:15px;left:17px;font-size:9px;font-weight:700;letter-spacing:2.5px;color:#9de9e1}
+.product-banner-copy{min-width:0}
+.product-banner-copy h3{font-size:clamp(25px,4vw,39px);line-height:1.12;margin:15px 0 9px;overflow-wrap:anywhere}
+.product-banner-copy p{max-width:540px;color:#b4bdd3;font-size:13px;line-height:1.7;margin:0 0 13px}
+.product-banner-count{display:inline-block;margin-left:9px;color:#9aa5c0;font-size:10px}
+.product-banner-price{display:block;margin:8px 0 18px;color:#9cece2;font:700 17px 'Space Grotesk'}
+.product-banner-order{min-width:160px}
+.product-banner-order:disabled{opacity:.55;cursor:not-allowed;transform:none}
+.product-banner-dots{display:flex;justify-content:center;align-items:center;gap:7px;padding:15px 12px;border-top:1px solid #ffffff12;background:#0d1224}
+.product-banner-dots button{width:7px;height:7px;padding:0;border:0;border-radius:99px;background:#626b88;cursor:pointer;transition:width .2s,background .2s}
+.product-banner-dots button.active{width:24px;background:#9c83ff}
+.buyer-notice{overflow:hidden;border-top:1px solid #8d672b66;border-bottom:1px solid #8d672b66;background:linear-gradient(90deg,#2a2115,#211b18);padding:12px 0}
+.buyer-notice-track{display:flex;gap:50px;width:max-content;animation:buyer-notice-run 42s linear infinite}
+.buyer-notice span{white-space:nowrap;color:#f3d49b;font-size:10px;font-weight:700;letter-spacing:.35px}
+@keyframes buyer-notice-run{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+@media(max-width:700px){.product-banner-slide{grid-template-columns:1fr;gap:18px;padding:20px;min-height:0}.product-banner-art{min-height:170px}.product-banner-icon{width:105px;height:105px;border-radius:23px}.product-banner-copy h3{font-size:27px}.product-banner-copy p{font-size:12px}.product-banner-controls .icon-close{width:36px;height:36px}}
+@media(prefers-reduced-motion:reduce){.product-banner-track,.product-banner-dots button{transition:none}.buyer-notice-track{animation:none;flex-wrap:wrap;width:100%;padding:0 14px}.buyer-notice{padding:10px 0}}
