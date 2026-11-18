@@ -21,6 +21,7 @@ async function start(){
   $("paymentForm").addEventListener("submit",createPayment);
   $("payoutForm").addEventListener("submit",createPayout);
   $("productForm").addEventListener("submit",saveProduct);
+  $("productDetailForm").addEventListener("submit",saveProductDetails);
   $("saleForm").addEventListener("submit",createSale);
   $("paymentSettingsForm").addEventListener("submit",savePaymentSettings);
   $("resetProduct").addEventListener("click",resetProductForm);
@@ -143,6 +144,19 @@ async function createPayout(e){
 function renderPayouts(){
   $("payoutsBody").innerHTML=payouts.length?payouts.map(p=>'<tr><td><strong>'+esc(p.full_name||"-")+'</strong><small>'+esc(p.email)+'</small></td><td>'+money(p.amount)+'</td><td>'+esc(p.payment_reference||"-")+'</td><td>'+esc(date(p.paid_at||p.created_at))+'</td><td>'+badge(p.status)+'</td></tr>').join(""):'<tr><td colspan="5" class="admin-empty">Belum ada pencairan komisi.</td></tr>';
 }
+async function saveProductDetails(e){
+ e.preventDefault();const product=$("detailProductName").value.trim();if(!product){notice("Nama produk wajib diisi.","error");return;}
+ const rawUrl=$("detailFileUrl").value.trim();let fileUrl=null;
+ if(rawUrl){try{const u=new URL(rawUrl);if(!["https:","http:"].includes(u.protocol))throw new Error();fileUrl=u.href;}catch{notice("URL file harus menggunakan http atau https.","error");return;}}
+ const b=e.submitter;b.disabled=true;
+ try{await rpc("admin_save_product_details",{p_product:product,p_platform:$("detailPlatform").value.trim(),p_operational_status:$("detailOperationalStatus").value,p_file_url:fileUrl,p_description:$("detailDescription").value.trim(),p_instructions:$("detailInstructions").value.trim(),p_requirements:$("detailRequirements").value.trim(),p_warranty:$("detailWarranty").value.trim(),p_additional_info:$("detailAdditional").value.trim()});$("productDetailNotice").textContent="Konten detail "+product+" tersimpan.";notice("Konten detail produk berhasil disimpan.","success");}
+ catch(err){notice("Gagal menyimpan detail: "+err.message+". Pastikan migration product-details-v1.sql sudah dijalankan.","error");}finally{b.disabled=false;}
+}
+async function loadProductDetailsIntoForm(product){
+ $("detailProductName").value=product;$("detailPlatform").value="";$("detailOperationalStatus").value="unknown";$("detailFileUrl").value="";$("detailDescription").value="";$("detailInstructions").value="";$("detailRequirements").value="";$("detailWarranty").value="";$("detailAdditional").value="";
+ try{const {data,error}=await db.from("store_product_details").select("*").eq("product",product).maybeSingle();if(error)throw error;if(data){$("detailPlatform").value=data.platform||"";$("detailOperationalStatus").value=data.operational_status||"unknown";$("detailFileUrl").value=data.file_url||"";$("detailDescription").value=data.description||"";$("detailInstructions").value=data.instructions||"";$("detailRequirements").value=data.requirements||"";$("detailWarranty").value=data.warranty||"";$("detailAdditional").value=data.additional_info||"";}}
+ catch(err){$("productDetailNotice").textContent="Detail belum dapat dimuat: "+err.message;}
+}
 function renderProducts(){
   const q=$("productSearch").value.trim().toLowerCase(),v=$("productVisibility").value;
   const list=products.filter(p=>(p.product+" "+p.variant).toLowerCase().includes(q)&&(v==="active"?p.is_active:v==="hidden"?!p.is_active:true));
@@ -155,9 +169,9 @@ function editProduct(id){
   $("productId").value=p.id;$("productName").value=p.product;$("productVariant").value=p.variant;
   $("productPublic").value=p.public_price??"";$("productReseller").value=p.reseller_price??"";
   $("productSort").value=p.sort_order??0;$("productStock").checked=p.in_stock;$("productActive").checked=p.is_active;
-  $("productName").focus();window.scrollTo({top:0,behavior:"smooth"});
+  $("productName").focus();loadProductDetailsIntoForm(p.product);window.scrollTo({top:0,behavior:"smooth"});
 }
-function resetProductForm(){$("productForm").reset();$("productId").value="";$("productSort").value=0;$("productStock").checked=true;$("productActive").checked=true;}
+function resetProductForm(){$("productForm").reset();$("productId").value="";$("productSort").value=0;$("productStock").checked=true;$("productActive").checked=true;$("detailProductName").value=$("productName").value.trim();}
 async function saveProduct(e){
   e.preventDefault();const id=$("productId").value||null;
   const val=id=>$(id).value.trim();
