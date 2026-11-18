@@ -123,7 +123,7 @@ BEGIN
   UPDATE public.referral_risk_signals
   SET status=p_decision,reviewed_at=now(),reviewed_by=auth.uid(),
       review_note=NULLIF(trim(COALESCE(p_note,'')),'')
-  WHERE id=p_signal_id AND status='open';
+  WHERE id=p_signal_id AND status<>p_decision;
   IF NOT FOUND THEN RAISE EXCEPTION 'Sinyal tidak ditemukan atau sudah ditinjau'; END IF;
   INSERT INTO public.admin_audit_logs(admin_id,action,entity_type,entity_id,details)
   VALUES(auth.uid(),'referral_risk_'||p_decision,'referral_risk_signal',p_signal_id::text,
@@ -142,7 +142,7 @@ AS $$
 BEGIN
   IF EXISTS (
     SELECT 1 FROM public.referral_risk_signals
-    WHERE user_id=NEW.user_id AND status='open'
+    WHERE user_id=NEW.user_id AND status IN ('open','confirmed')
   ) THEN
     RAISE EXCEPTION 'Pencairan ditahan: terdapat sinyal anti-fraud yang belum ditinjau admin';
   END IF;
