@@ -24,6 +24,7 @@ async function start(){
 $("saleForm").addEventListener("submit",createSale);
   $("paymentSettingsForm").addEventListener("submit",savePaymentSettings);
   $("resetProduct").addEventListener("click",resetProductForm);
+  $("initializeProductDetails").addEventListener("click",initializeExistingProductDetails);
   if(!db){notice("Supabase JS tidak termuat. Periksa koneksi internet lalu muat ulang.","error");return;}
   const {data,error}=await db.auth.getSession();
   if(error||!data.session){location.replace("admin-login.html?next=admin");return;}
@@ -150,12 +151,60 @@ function renderProducts(){
   $("productsBody").querySelectorAll("[data-edit]").forEach(b=>b.addEventListener("click",()=>editProduct(b.dataset.edit)));
   $("productsBody").querySelectorAll("[data-archive]").forEach(b=>b.addEventListener("click",()=>toggleProduct(b.dataset.archive)));
 }
+async function loadProductDetailsIntoForm(productName){
+  const {data,error}=await db.from("store_product_details")
+    .select("product,platform,operational_status,file_url,description,instructions,requirements,warranty,additional_info")
+    .eq("product",productName).maybeSingle();
+  if(error)throw error;
+  const d=data||{};
+  $("detailPlatform").value=d.platform||"";
+  $("detailOperationalStatus").value=d.operational_status||"unknown";
+  $("detailFileUrl").value=d.file_url||"";
+  $("detailDescription").value=d.description||"";
+  $("detailInstructions").value=d.instructions||"";
+  $("detailRequirements").value=d.requirements||"";
+  $("detailWarranty").value=d.warranty||"";
+  $("detailAdditional").value=d.additional_info||"";
+  $("productEditorTitle").textContent="Edit Produk: "+productName;
+  $("productDetailNotice").textContent=data?"Konten detail produk berhasil dimuat.":"Detail belum tersedia; status awal akan Unknown dan link kosong.";
+}
+async function initializeExistingProductDetails(){
+  const names=[...new Set(products.map(p=>(p.product||"").trim()).filter(Boolean))];
+  if(!names.length){notice("Belum ada produk yang dapat diproses.","error");return;}
+  if(!confirm("Siapkan detail untuk "+names.length+" produk yang sudah terdaftar? Semua status operasional akan menjadi Unknown dan semua link file dikosongkan. Deskripsi, instruksi, garansi, dan informasi detail yang sudah ada akan dipertahankan."))return;
+  const button=$("initializeProductDetails");button.disabled=true;
+  try{
+    const {data:existing,error:readError}=await db.from("store_product_details")
+      .select("product,platform,operational_status,file_url,description,instructions,requirements,warranty,additional_info");
+    if(readError)throw readError;
+    const byName=new Map((existing||[]).map(d=>[d.product,d]));
+    const rows=names.map(product=>{
+      const old=byName.get(product)||{};
+      return {
+        product,
+        platform:old.platform||"",
+        operational_status:"unknown",
+        file_url:null,
+        description:old.description||"",
+        instructions:old.instructions||"",
+        requirements:old.requirements||"",
+        warranty:old.warranty||"",
+        additional_info:old.additional_info||""
+      };
+    });
+    const {error}=await db.from("store_product_details").upsert(rows,{onConflict:"product"});
+    if(error)throw error;
+    notice("Berhasil menyiapkan "+rows.length+" produk. Status semuanya Unknown, link kosong, dan konten detail lama dipertahankan.","success");
+  }catch(error){
+    notice("Gagal menyiapkan detail produk: "+error.message+". Pastikan tabel store_product_details dan izin admin sudah aktif.","error");
+  }finally{button.disabled=false;}
+}
 async function editProduct(id){
   const p=products.find(x=>x.id===id);if(!p)return;
   $("productId").value=p.id;$("productName").value=p.product;$("productVariant").value=p.variant;
   $("productPublic").value=p.public_price??"";$("productReseller").value=p.reseller_price??"";
   $("productSort").value=p.sort_order??0;$("productStock").checked=p.in_stock;$("productActive").checked=p.is_active;
-  $("productName").focus();await loadProductDetailsIntoForm(p.product);window.scrollTo({top:0,behavior:"smooth"});
+  $("productName").focus();try{await loadProductDetailsIntoForm(p.product);}catch(e){notice("Gagal memuat detail produk: "+e.message,"error");return;}window.scrollTo({top:0,behavior:"smooth"});
 }
 function resetProductForm(){$("productForm").reset();$("productId").value="";$("productSort").value=0;$("productStock").checked=true;$("productActive").checked=true;$("detailPlatform").value="";$("detailOperationalStatus").value="unknown";$("detailFileUrl").value="";$("detailDescription").value="";$("detailInstructions").value="";$("detailRequirements").value="";$("detailWarranty").value="";$("detailAdditional").value="";$("productEditorTitle").textContent="Tambah Produk";$("productDetailNotice").textContent="Form siap untuk produk baru.";}
 async function saveProduct(e){
