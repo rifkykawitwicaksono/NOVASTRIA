@@ -14,7 +14,7 @@ try {
 } catch (error) {
   console.error("Supabase gagal diinisialisasi:", error);
 }
-let catalog=[],selectedOrder=null,joinType="referral",currentUser=null,member=null,memberLoadError="",authMode="login",activeCategory="all";
+let catalog=[],productDetails={},selectedOrder=null,joinType="referral",currentUser=null,member=null,memberLoadError="",authMode="login",activeCategory="all";
 
 async function init(){
   $("year").textContent=new Date().getFullYear();
@@ -46,6 +46,17 @@ async function init(){
       const r=await fetch("assets/products.json");
       if(!r.ok)throw new Error("Katalog gagal dimuat.");
       catalog=(await r.json()).products||[];
+    }
+    // Ambil konten detail agar pelanggan dapat membacanya langsung di kartu katalog.
+    productDetails={};
+    if(supabaseClient){
+      const detailResult=await supabaseClient.from("store_product_details")
+        .select("product,platform,operational_status,description,instructions,requirements,warranty,additional_info");
+      if(!detailResult.error){
+        (detailResult.data||[]).forEach(item=>{productDetails[item.product]=item;});
+      }else{
+        console.warn("Konten detail produk belum dapat dimuat:",detailResult.error.message);
+      }
     }
     $("productCount").textContent=catalog.length;
     populateCategories();renderProducts();
@@ -184,6 +195,18 @@ function populateCategories(){
   document.querySelector('[data-category="iOS"]').textContent="iOS · "+counts.iOS;
 }
 
+function renderInlineProductDetails(name){
+  const d=productDetails[name];
+  if(!d)return '<details class="inline-product-details"><summary>Lihat detail produk</summary><div class="inline-detail-body"><p class="inline-detail-empty">Detail produk belum diisi admin.</p></div></details>';
+  const status=["online","offline","unknown"].includes(String(d.operational_status||"unknown").toLowerCase())?String(d.operational_status||"unknown").toLowerCase():"unknown";
+  const labels={online:"Online — aman digunakan",offline:"Offline — sedang maintenance, jangan ditransaksikan",unknown:"Unknown — status belum diketahui"};
+  const section=(title,value)=>value?'<section class="inline-detail-section"><h4>'+title+'</h4><p>'+esc(value)+'</p></section>':'';
+  return '<details class="inline-product-details"><summary>Lihat detail produk</summary><div class="inline-detail-body"><div class="inline-detail-status"><span class="status-led '+status+'" aria-hidden="true"></span>'+labels[status]+'</div>'+
+    (d.platform?'<span class="inline-detail-platform">'+esc(d.platform)+'</span>':'')+
+    section("Deskripsi produk",d.description)+section("Cara top up / instalasi",d.instructions)+section("Persyaratan perangkat",d.requirements)+section("Garansi & ketentuan",d.warranty)+section("Informasi tambahan",d.additional_info)+
+    '</div></details>';
+}
+
 function renderProducts(){
   const q=$("searchInput").value.toLowerCase().trim();
   const groups=new Map();
@@ -203,7 +226,7 @@ function renderProducts(){
     const current=available[0]||g.items[0];
     const optionMarkup=g.items.map(p=>'<option value="'+p._index+'" '+(p._index===current._index?'selected':'')+' '+(!p.inStock?'data-unavailable="true"':'')+'>'+esc(p.variant)+(p.inStock?'':' — Stok habis')+'</option>').join("");
     const price=member?.resellerActive===true?current.resellerPrice:current.publicPrice;
-    return '<article class="product-card grouped-product" data-product-card="'+groupIndex+'"><div class="product-card-top"><span class="platform-tag">'+esc(g.platform)+'</span><span class="variant-count">'+g.items.length+' varian</span></div><div class="product-visual"><span class="product-icon" aria-hidden="true">'+productVisual(g.name)+'</span><div class="product-visual-copy"><span>PRODUK DIGITAL</span><strong>'+(available.length?available.length+' varian tersedia':'Stok belum tersedia')+'</strong></div></div><h3>'+esc(g.name)+'</h3><p class="product-description">'+esc(productDescription(g.name))+'</p><label class="variant-picker-label">Pilih durasi / varian<select class="variant-picker" data-variant-picker="'+groupIndex+'">'+optionMarkup+'</select></label><div class="price-row"><div><div class="price-caption">'+(member?.resellerActive===true?"Harga reseller":"Harga publik")+'</div><div class="price-value" data-current-price>'+(!current.inStock?'Stok habis':price==null?'Harga belum ditetapkan':money(price))+'</div></div><span class="price-caption">IDR</span></div><a class="product-detail-link" href="product.html?name='+encodeURIComponent(g.name)+'">Lihat detail produk →</a><button class="btn btn-primary" data-order="'+current._index+'" '+(!current.inStock?'disabled':'')+'>'+(current.inStock?'Pesan produk':'Stok tidak tersedia')+'</button></article>';
+    return '<article class="product-card grouped-product" data-product-card="'+groupIndex+'"><div class="product-card-top"><span class="platform-tag">'+esc(g.platform)+'</span><span class="variant-count">'+g.items.length+' varian</span></div><div class="product-visual"><span class="product-icon" aria-hidden="true">'+productVisual(g.name)+'</span><div class="product-visual-copy"><span>PRODUK DIGITAL</span><strong>'+(available.length?available.length+' varian tersedia':'Stok belum tersedia')+'</strong></div></div><h3>'+esc(g.name)+'</h3><p class="product-description">'+esc(productDescription(g.name))+'</p><label class="variant-picker-label">Pilih durasi / varian<select class="variant-picker" data-variant-picker="'+groupIndex+'">'+optionMarkup+'</select></label><div class="price-row"><div><div class="price-caption">'+(member?.resellerActive===true?"Harga reseller":"Harga publik")+'</div><div class="price-value" data-current-price>'+(!current.inStock?'Stok habis':price==null?'Harga belum ditetapkan':money(price))+'</div></div><span class="price-caption">IDR</span></div>'+renderInlineProductDetails(g.name)+'<button class="btn btn-primary" data-order="'+current._index+'" '+(!current.inStock?'disabled':'')+'>'+(current.inStock?'Pesan produk':'Stok tidak tersedia')+'</button></article>';
   }).join("");
   document.querySelectorAll("[data-variant-picker]").forEach(select=>select.addEventListener("change",()=>{
     const product=catalog[Number(select.value)],card=select.closest("[data-product-card]");
