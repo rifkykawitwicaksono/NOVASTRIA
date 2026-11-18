@@ -451,6 +451,21 @@ function setAuthMode(mode){
   setAuthMessage("");
 }
 
+function getReferralDeviceToken(){
+  const key="novastria_device_token_v1";
+  try{
+    let token=localStorage.getItem(key);
+    if(!token){
+      token=window.crypto?.randomUUID?.()||("nva-"+Date.now().toString(36)+"-"+Math.random().toString(36).slice(2));
+      localStorage.setItem(key,token);
+    }
+    return token;
+  }catch(_){
+    // Private browsing/storage restrictions: anti-fraud device signal unavailable.
+    return null;
+  }
+}
+
 async function handleAuthSubmit(event){
   event.preventDefault();
   if (!supabaseClient) {
@@ -468,7 +483,7 @@ async function handleAuthSubmit(event){
         email,password,
         options:{
           emailRedirectTo:window.location.origin+window.location.pathname,
-          data:{full_name:fullName,phone:phone,referral_code:inviteCode||null}
+          data:{full_name:fullName,phone:phone,referral_code:inviteCode||null,device_token:getReferralDeviceToken()}
         }
       });
       if(result.error)throw result.error;
