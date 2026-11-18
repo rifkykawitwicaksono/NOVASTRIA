@@ -25,6 +25,7 @@ $("saleForm").addEventListener("submit",createSale);
   $("paymentSettingsForm").addEventListener("submit",savePaymentSettings);
   $("resetProduct").addEventListener("click",resetProductForm);
   $("initializeProductDetails").addEventListener("click",initializeExistingProductDetails);
+  $("autoFillProductContent").addEventListener("click",autoFillProductContent);
   if(!db){notice("Supabase JS tidak termuat. Periksa koneksi internet lalu muat ulang.","error");return;}
   const {data,error}=await db.auth.getSession();
   if(error||!data.session){location.replace("admin-login.html?next=admin");return;}
@@ -199,6 +200,69 @@ async function initializeExistingProductDetails(){
     notice("Gagal menyiapkan detail produk: "+error.message+". Pastikan tabel store_product_details dan izin admin sudah aktif.","error");
   }finally{button.disabled=false;}
 }
+
+function getAutoProductTemplate(productName){
+  const name=String(productName||"").toLowerCase();
+  const hasIOS=/\\bios\\b|iphone|ipad/.test(name);
+  const hasAndroid=/android|apk|\\bmod\\b|cheat/.test(name);
+  if(hasIOS&&hasAndroid){
+    return {
+      platform:"iOS & Android",
+      description:"📦 Mod ini dapat digunakan di perangkat iOS & Android dengan cara penggunaan yang sama\\n\\n🍏 iOS:\\n🛠️ Pemasangan menggunakan Safari\\n🚫 No jailbreak & reset\\n✅ Support all iOS\\n❌ No Gbox\\n\\n🤖 Android:\\n🛠️ Pemasangan menggunakan Chrome\\n🚫 No Android root\\n✅ Support all Android",
+      instructions:"1. Pilih durasi produk\\n2. Pilih metode pembayaran\\n3. Bayar sesuai harga\\n4. Salin kode yang tertera setelah bayar\\n5. Klik cara pasang di atas untuk mendapatkan file & panduan.",
+      requirements:"iOS: mendukung perangkat iOS, tanpa jailbreak dan reset, tidak menggunakan Gbox. Android: mendukung Android, tanpa root.",
+    };
+  }
+  if(hasIOS&&!hasAndroid){
+    return {
+      platform:"iOS",
+      description:"🛠️ Pemasangan wajib menggunakan Gbox/Esign\\n🚫 No iPhone bypass\\n✅ Support all iOS",
+      instructions:"1. Pilih durasi produk\\n2. Pilih metode pembayaran\\n3. Bayar sesuai harga\\n4. Salin kode yang tertera setelah bayar\\n5. Hubungi admin untuk mendapatkan file & cara pasang.",
+      requirements:"Perangkat iOS. Pemasangan wajib menggunakan Gbox atau Esign. Tidak mendukung iPhone bypass.",
+    };
+  }
+  return {
+    platform:"Android",
+    description:"🛠️ Pemasangan menggunakan ZArchiver/MT Manager\\n🚫 No Android root\\n✅ Support Android 11+",
+    instructions:"1. Pilih durasi produk\\n2. Pilih metode pembayaran\\n3. Bayar sesuai harga\\n4. Salin kode yang tertera setelah bayar\\n5. Klik cara pasang di atas untuk mendapatkan link + tutorial download.",
+    requirements:"Android 11 atau lebih baru. Tidak memerlukan akses root. Pemasangan menggunakan ZArchiver atau MT Manager.",
+  };
+}
+async function autoFillProductContent(){
+  const names=[...new Set(products.map(p=>(p.product||"").trim()).filter(Boolean))];
+  if(!names.length){notice("Belum ada produk yang dapat diisi.","error");return;}
+  const preview=names.slice(0,8).join(", ")+(names.length>8?" dan seterusnya":"");
+  if(!confirm("Isi otomatis deskripsi, platform, persyaratan, dan cara top up untuk "+names.length+" nama produk? Klasifikasi iOS/Android dilakukan dari nama produk. Status operasional, URL file, garansi, dan informasi tambahan yang sudah ada tidak diubah.\\n\\nProduk: "+preview))return;
+  const button=$("autoFillProductContent");button.disabled=true;
+  try{
+    const {data:existing,error:readError}=await db.from("store_product_details")
+      .select("product,platform,operational_status,file_url,description,instructions,requirements,warranty,additional_info");
+    if(readError)throw readError;
+    const byName=new Map((existing||[]).map(d=>[d.product,d]));
+    const rows=names.map(product=>{
+      const old=byName.get(product)||{};
+      const t=getAutoProductTemplate(product);
+      return {
+        product,
+        platform:t.platform,
+        operational_status:old.operational_status||"unknown",
+        file_url:old.file_url||null,
+        description:t.description,
+        instructions:t.instructions,
+        requirements:t.requirements,
+        warranty:old.warranty||"",
+        additional_info:old.additional_info||""
+      };
+    });
+    const {error}=await db.from("store_product_details").upsert(rows,{onConflict:"product"});
+    if(error)throw error;
+    notice("Konten otomatis berhasil diisi untuk "+rows.length+" produk. Periksa klasifikasi platform dan lengkapi URL file serta garansi dari admin.","success");
+    const first=names[0];if(first)await loadProductDetailsIntoForm(first);
+  }catch(error){
+    notice("Gagal mengisi konten otomatis: "+error.message+". Pastikan login admin dan izin tabel detail aktif.","error");
+  }finally{button.disabled=false;}
+}
+
 async function editProduct(id){
   const p=products.find(x=>x.id===id);if(!p)return;
   $("productId").value=p.id;$("productName").value=p.product;$("productVariant").value=p.variant;
