@@ -226,7 +226,7 @@ function renderProducts(){
     const current=available[0]||g.items[0];
     const optionMarkup=g.items.map(p=>'<option value="'+p._index+'" '+(p._index===current._index?'selected':'')+' '+(!p.inStock?'data-unavailable="true"':'')+'>'+esc(p.variant)+(p.inStock?'':' — Stok habis')+'</option>').join("");
     const price=member?.resellerActive===true?current.resellerPrice:current.publicPrice;
-    return '<article class="product-card grouped-product" data-product-card="'+groupIndex+'"><div class="product-card-top"><span class="platform-tag">'+esc(g.platform)+'</span><span class="variant-count">'+g.items.length+' varian</span></div><div class="product-visual"><span class="product-icon" aria-hidden="true">'+productVisual(g.name)+'</span><div class="product-visual-copy"><span>PRODUK DIGITAL</span><strong>'+(available.length?available.length+' varian tersedia':'Stok belum tersedia')+'</strong></div></div><h3>'+esc(g.name)+'</h3><p class="product-description">'+esc(productDescription(g.name))+'</p><label class="variant-picker-label">Pilih durasi / varian<select class="variant-picker" data-variant-picker="'+groupIndex+'">'+optionMarkup+'</select></label><div class="price-row"><div><div class="price-caption">'+(member?.resellerActive===true?"Harga reseller":"Harga publik")+'</div><div class="price-value" data-current-price>'+(!current.inStock?'Stok habis':price==null?'Harga belum ditetapkan':money(price))+'</div></div><span class="price-caption">IDR</span></div>'+renderInlineProductDetails(g.name)+'<button class="btn btn-primary" data-order="'+current._index+'" '+(!current.inStock?'disabled':'')+'>'+(current.inStock?'Pesan produk':'Stok tidak tersedia')+'</button></article>';
+    return '<article class="product-card grouped-product" data-product-card="'+groupIndex+'"><div class="product-card-top"><span class="platform-tag">'+esc(g.platform)+'</span><span class="variant-count">'+g.items.length+' varian</span></div><div class="product-visual"><span class="product-icon" aria-hidden="true">'+productVisual(g.name)+'</span><div class="product-visual-copy"><span>PRODUK DIGITAL</span><strong>'+(available.length?available.length+' varian tersedia':'Stok belum tersedia')+'</strong></div></div><h3>'+esc(g.name)+'</h3><label class="variant-picker-label">Pilih durasi / varian<select class="variant-picker" data-variant-picker="'+groupIndex+'">'+optionMarkup+'</select></label><div class="price-row"><div><div class="price-caption">'+(member?.resellerActive===true?"Harga reseller":"Harga publik")+'</div><div class="price-value" data-current-price>'+(!current.inStock?'Stok habis':price==null?'Harga belum ditetapkan':money(price))+'</div></div><span class="price-caption">IDR</span></div><button class="btn btn-primary" data-order="'+current._index+'" '+(!current.inStock?'disabled':'')+'>'+(current.inStock?'Pesan produk':'Stok tidak tersedia')+'</button></article>';
   }).join("");
   document.querySelectorAll("[data-variant-picker]").forEach(select=>select.addEventListener("change",()=>{
     const product=catalog[Number(select.value)],card=select.closest("[data-product-card]");
@@ -446,6 +446,19 @@ async function logout(){
   currentUser=null;member=null;$("authForm").reset();$("accountDialog").close();updateMemberUI();
 }
 
+function renderOrderProductDetails(productName){
+  const d=productDetails[productName];
+  if(!d)return '<div class="inline-detail-body"><p class="inline-detail-empty">Informasi produk belum diisi admin.</p></div>';
+  const rawStatus=String(d.operational_status||"unknown").toLowerCase();
+  const status=["online","offline","unknown"].includes(rawStatus)?rawStatus:"unknown";
+  const labels={online:"Online — aman digunakan",offline:"Offline — sedang maintenance, jangan ditransaksikan",unknown:"Unknown — status belum diketahui"};
+  const section=(title,value)=>value?'<section class="inline-detail-section"><h4>'+title+'</h4><p>'+esc(value)+'</p></section>':'';
+  return '<div class="inline-detail-body"><div class="inline-detail-status"><span class="status-led '+status+'" aria-hidden="true"></span>'+labels[status]+'</div>'+
+    (d.platform?'<span class="inline-detail-platform">'+esc(d.platform)+'</span>':'')+
+    section("Deskripsi produk",d.description)+section("Cara top up / instalasi",d.instructions)+section("Persyaratan perangkat",d.requirements)+section("Garansi & ketentuan",d.warranty)+section("Informasi tambahan",d.additional_info)+
+    '</div>';
+}
+
 function openOrder(product){
   selectedOrder=product;
   $("sendOrder").hidden=false;
@@ -454,7 +467,8 @@ function openOrder(product){
   const reseller=member?.resellerActive===true,price=reseller?product.resellerPrice:product.publicPrice;
   const validPrice=Number.isSafeInteger(Number(price))&&Number(price)>0;
   $("orderTitle").textContent=product.product;
-  $("orderDescription").textContent=productDescription(product.product)+" Varian: "+product.variant+" — "+(validPrice?money(Number(price)):"Harga perlu dikonfirmasi admin")+". "+(reseller?"Jika pesanan berhasil, saldo reseller dipotong otomatis dan detail diteruskan ke WhatsApp.":"Pindai QRIS yang ditampilkan untuk membayar. Pesanan tercatat dan dapat dilacak dengan kode unik.");
+  $("orderDescription").textContent="Varian: "+product.variant+" — "+(validPrice?money(Number(price)):"Harga perlu dikonfirmasi admin")+". "+(reseller?"Jika pesanan berhasil, saldo reseller dipotong otomatis dan detail diteruskan ke WhatsApp.":"Pindai QRIS yang ditampilkan untuk membayar. Pesanan tercatat dan dapat dilacak dengan kode unik.");
+  $("orderProductDetails").innerHTML=renderOrderProductDetails(product.product);
   const paymentBox=$("orderPaymentInstructions"),resellerNote=$("resellerWalletNotice");
   paymentBox.hidden=reseller||!validPrice;
   resellerNote.hidden=!reseller;
