@@ -48,7 +48,7 @@ async function init(){
       catalog=(await r.json()).products||[];
     }
     catalog=catalog.map(p=>({...p,product:/^NEXORA iOS & Android$/i.test(p.product)?"RezzX iOS & Android":p.product,
-      isRecommended:!!p.isRecommended||["rezzx ios & android","drip client wire ios & android"].includes(String(p.product||"").toLowerCase())
+      isRecommended:!!p.isRecommended,isRecommendationCopy:!!p.isRecommendationCopy
     }));
     // Ambil konten detail agar pelanggan dapat membacanya langsung di kartu katalog.
     productDetails={};
@@ -236,8 +236,8 @@ function startProductBannerAuto(){
 function renderProductShowcase(){
   const track=$("productBannerTrack"),dots=$("productBannerDots"),carousel=$("productBannerCarousel");
   if(!track||!dots||!carousel)return;
-  const groups=[...new Map(catalog.map(p=>[p.product,null])).keys()].map(name=>({
-    name,items:catalog.map((p,index)=>({...p,_index:index})).filter(p=>p.product===name)
+  const groups=[...new Map(catalog.filter(p=>!p.isRecommendationCopy).map(p=>[p.product,null])).keys()].map(name=>({
+    name,items:catalog.map((p,index)=>({...p,_index:index})).filter(p=>p.product===name&&!p.isRecommendationCopy)
   }));
   if(!groups.length){track.innerHTML='<div class="empty">Belum ada produk untuk ditampilkan.</div>';dots.innerHTML="";return;}
   track.innerHTML=groups.map((group,index)=>{
@@ -278,7 +278,7 @@ function renderRecommendedProducts(){
   const names=["RezzX iOS & Android","Drip Client Wire iOS & Android"];
   const groups=names.map(name=>({
     name,
-    items:catalog.map((p,index)=>({...p,_index:index})).filter(p=>p.product.toLowerCase()===name.toLowerCase())
+    items:catalog.map((p,index)=>({...p,_index:index})).filter(p=>p.product.toLowerCase()===name.toLowerCase()&&p.isRecommendationCopy)
   })).filter(group=>group.items.length);
   if(!groups.length){
     target.innerHTML='<div class="empty">Produk rekomendasi belum tersedia.</div>';
@@ -307,6 +307,7 @@ function renderProducts(){
   const q=$("searchInput").value.toLowerCase().trim();
   const groups=new Map();
   catalog.forEach((p,index)=>{
+    if(p.isRecommendationCopy)return;
     if(!groups.has(p.product))groups.set(p.product,[]);
     groups.get(p.product).push({...p,_index:index});
   });
