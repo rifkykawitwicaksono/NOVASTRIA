@@ -3,6 +3,8 @@
 const SUPABASE_URL="https://tuwthcllamszebhizayk.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY="sb_publishable_SOt1_Iz0mSjIuX6FrddpjQ_h_cpHjpM";
 const $=id=>document.getElementById(id);
+const isCustomer=new URLSearchParams(location.search).get("source")==="customer";
+if(isCustomer){$("resetBack").href="index.html";$("resetBack").textContent="← Kembali ke toko";$("resetFoot").href="index.html";$("resetFoot").textContent="Kembali ke halaman masuk pelanggan";}
 const client=window.supabase?.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY,{
  auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}
 });
@@ -16,7 +18,7 @@ async function init(){
  const params=new URLSearchParams(location.search);
  const hash=new URLSearchParams(location.hash.replace(/^#/,""));
  if(params.get("error")||hash.get("error")){
-  message("Tautan pemulihan tidak valid atau sudah kedaluwarsa. Minta tautan baru dari halaman login admin.");
+  message("Tautan pemulihan tidak valid atau sudah kedaluwarsa. Minta tautan baru dari halaman masuk pelanggan.");
   return;
  }
  client.auth.onAuthStateChange((event,session)=>{
