@@ -665,7 +665,10 @@ async function trackOrder(event){
     const order=Array.isArray(data)?data[0]:data;
     if(!order){box.textContent="Pesanan tidak ditemukan. Periksa kembali kode dan nomor WhatsApp pembelian.";return;}
     const labels={pending_payment:"Menunggu pembayaran",pending_verification:"Menunggu verifikasi admin",processing:"Sedang diproses",completed:"Selesai",cancelled:"Dibatalkan"};
-    box.innerHTML="<strong>"+esc(order.order_code)+"</strong><h3 style='margin:8px 0'>"+esc(labels[order.status]||order.status)+"</h3><p>"+esc(order.product)+" — "+esc(order.variant)+"</p><p>Jumlah: "+esc(order.quantity)+"</p><p>Total: "+money(Number(order.unit_price)*Number(order.quantity))+"</p><small>Dibuat: "+new Date(order.created_at).toLocaleString("id-ID")+"</small><br><small>Pembaruan: "+new Date(order.updated_at).toLocaleString("id-ID")+"</small>";
+    const delivery=order.delivery_code?("<div class='delivery-code-panel' style='margin-top:16px;padding:16px;border:1px solid #36cfc0;border-radius:12px;background:#36cfc012'><strong>KODE SN / VOUCHER</strong><p id='deliveryCodeValue' style='font-size:20px;font-weight:700;overflow-wrap:anywhere;margin:10px 0'>"+esc(order.delivery_code)+"</p><button class='btn btn-primary' id='copyDeliveryCode' type='button'>Salin kode</button></div>"):(order.status==="completed"?"<p style='margin-top:12px'>Pesanan selesai, tetapi kode belum tercatat. Hubungi admin untuk bantuan.</p>":"");
+    box.innerHTML="<strong>"+esc(order.order_code)+"</strong><h3 style='margin:8px 0'>"+esc(labels[order.status]||order.status)+"</h3><p>"+esc(order.product)+" — "+esc(order.variant)+"</p><p>Jumlah: "+esc(order.quantity)+"</p><p>Total: "+money(Number(order.unit_price)*Number(order.quantity))+"</p>"+delivery+"<small>Dibuat: "+new Date(order.created_at).toLocaleString("id-ID")+"</small><br><small>Pembaruan: "+new Date(order.updated_at).toLocaleString("id-ID")+"</small>";
+    const copyButton=$("copyDeliveryCode");
+    if(copyButton)copyButton.addEventListener("click",async()=>{try{await navigator.clipboard.writeText(order.delivery_code);copyButton.textContent="Kode tersalin";}catch(copyError){copyButton.textContent="Gagal menyalin — salin manual";}});
   }catch(error){box.textContent="Gagal melacak pesanan: "+(error.message||"Periksa koneksi atau jalankan migration SQL terlebih dahulu.");}
 }
 
