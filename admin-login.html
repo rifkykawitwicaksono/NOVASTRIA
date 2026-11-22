@@ -14,7 +14,7 @@
 .admin-login-form input:focus{border-color:#9c83ff;box-shadow:0 0 0 3px #9c83ff22}
 .admin-password{display:flex;gap:8px}.admin-password input{flex:1;min-width:0}.admin-password button{border:1px solid #ffffff24;border-radius:10px;background:#ffffff0b;color:white;padding:0 12px;cursor:pointer}
 .admin-login-btn{width:100%;margin-top:5px}.admin-login-message{display:none;padding:12px;border-radius:10px;font-size:12px;line-height:1.6;background:#ffffff0b;color:#d8dcef;overflow-wrap:anywhere}.admin-login-message.show{display:block}.admin-login-message.error{border:1px solid #b95b5b;color:#ffc4bd}.admin-login-message.success{border:1px solid #398b7e;color:#a5f2e5}
-.admin-login-foot{margin-top:20px;text-align:center;font-size:12px;color:var(--muted)}.admin-login-foot a{color:#c9baff}
+.admin-login-foot{margin-top:20px;text-align:center;font-size:12px;color:var(--muted)}.admin-login-foot a{color:#c9baff}.admin-forgot{display:block;text-align:right;margin-top:-5px;font-size:12px;color:#c9baff;text-decoration:none}.admin-forgot:hover{text-decoration:underline}
 </style>
 </head>
 <body>
@@ -28,6 +28,7 @@
 <form id="adminLoginForm" class="admin-login-form">
 <label>Email administrator<input id="adminEmail" type="email" autocomplete="username" placeholder="admin@domain.com" required></label>
 <label>Password<div class="admin-password"><input id="adminPassword" type="password" autocomplete="current-password" placeholder="Masukkan password" required><button type="button" id="togglePassword" aria-label="Tampilkan password">Lihat</button></div></label>
+<a class="admin-forgot" href="reset-password.html">Lupa password?</a>
 <button class="btn btn-primary admin-login-btn" id="adminLoginSubmit" type="submit">Masuk ke Admin</button>
 </form>
 <div class="admin-login-foot"><a href="index.html">Kembali ke halaman DUKUN CHEAT</a></div>
