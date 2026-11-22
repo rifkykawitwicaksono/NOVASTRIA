@@ -481,6 +481,7 @@ function setAuthMode(mode){
   $("authPhone").required=signup;
   $("authSubmit").textContent=signup?"Daftar akun":"Masuk";
   $("authPassword").autocomplete=signup?"new-password":"current-password";
+  $("customerForgotLink").hidden=signup;
   $("loginModeBtn").classList.toggle("active",!signup);
   $("signupModeBtn").classList.toggle("active",signup);
   $("loginModeBtn").setAttribute("aria-pressed",String(!signup));
