@@ -8,413 +8,472 @@
       "variant": "1 Hari",
       "inStock": true,
       "resellerPrice": 5000,
-      "publicPrice": 11000
+      "publicPrice": 11000,
+      "isRecommended": false
     },
     {
       "product": "Drip Client Apk Mod",
       "variant": "3 Hari",
       "inStock": true,
       "resellerPrice": 11000,
-      "publicPrice": 22000
+      "publicPrice": 22000,
+      "isRecommended": false
     },
     {
       "product": "Drip Client Apk Mod",
       "variant": "7 Hari",
       "inStock": true,
       "resellerPrice": 21000,
-      "publicPrice": 43000
+      "publicPrice": 43000,
+      "isRecommended": false
     },
     {
       "product": "Drip Client Apk Mod",
       "variant": "15 Hari",
       "inStock": true,
       "resellerPrice": 37000,
-      "publicPrice": 75000
+      "publicPrice": 75000,
+      "isRecommended": false
     },
     {
       "product": "Drip Client Apk Mod",
       "variant": "30 Hari",
       "inStock": true,
       "resellerPrice": 57000,
-      "publicPrice": 86000
+      "publicPrice": 86000,
+      "isRecommended": false
     },
     {
       "product": "Drip Client Root",
       "variant": "1 Hari",
       "inStock": true,
       "resellerPrice": 6000,
-      "publicPrice": null
+      "publicPrice": null,
+      "isRecommended": false
     },
     {
       "product": "Drip Client Root",
       "variant": "7 Hari",
       "inStock": true,
       "resellerPrice": 21000,
-      "publicPrice": 49000
+      "publicPrice": 49000,
+      "isRecommended": false
     },
     {
       "product": "Drip Client Root",
       "variant": "30 Hari",
       "inStock": true,
       "resellerPrice": 47000,
-      "publicPrice": 86000
+      "publicPrice": 86000,
+      "isRecommended": false
     },
     {
       "product": "Hg Cheats Apk Mod",
       "variant": "1 Hari",
       "inStock": true,
       "resellerPrice": 8000,
-      "publicPrice": 14000
+      "publicPrice": 14000,
+      "isRecommended": false
     },
     {
       "product": "Hg Cheats Apk Mod",
       "variant": "7 Hari",
       "inStock": true,
       "resellerPrice": 21000,
-      "publicPrice": 38000
+      "publicPrice": 38000,
+      "isRecommended": false
     },
     {
       "product": "Hg Cheats Apk Mod",
       "variant": "10 Hari",
       "inStock": true,
       "resellerPrice": 31000,
-      "publicPrice": 49000
+      "publicPrice": 49000,
+      "isRecommended": false
     },
     {
       "product": "Hg Cheats Apk Mod",
       "variant": "30 Hari",
       "inStock": true,
       "resellerPrice": 57000,
-      "publicPrice": 86000
+      "publicPrice": 86000,
+      "isRecommended": false
     },
     {
       "product": "Pato Team Orange & Blue",
       "variant": "3 Hari Orange",
       "inStock": true,
       "resellerPrice": 29000,
-      "publicPrice": 49000
+      "publicPrice": 49000,
+      "isRecommended": false
     },
     {
       "product": "Pato Team Orange & Blue",
       "variant": "3 Hari Blue",
       "inStock": false,
       "resellerPrice": null,
-      "publicPrice": null
+      "publicPrice": null,
+      "isRecommended": false
     },
     {
       "product": "Pato Team Orange & Blue",
       "variant": "7 Hari Orange",
       "inStock": true,
       "resellerPrice": 47000,
-      "publicPrice": 81000
+      "publicPrice": 81000,
+      "isRecommended": false
     },
     {
       "product": "Pato Team Orange & Blue",
       "variant": "7 Hari Blue",
       "inStock": true,
       "resellerPrice": 37000,
-      "publicPrice": 70000
+      "publicPrice": 70000,
+      "isRecommended": false
     },
     {
       "product": "Pato Team Orange & Blue",
       "variant": "15 Hari Orange",
       "inStock": true,
       "resellerPrice": 76000,
-      "publicPrice": 107000
+      "publicPrice": 107000,
+      "isRecommended": false
     },
     {
       "product": "Pato Team Orange & Blue",
       "variant": "15 Hari Blue",
       "inStock": true,
       "resellerPrice": 52000,
-      "publicPrice": 129000
+      "publicPrice": 129000,
+      "isRecommended": false
     },
     {
       "product": "Pato Team Orange & Blue",
       "variant": "30 Hari Orange",
       "inStock": true,
       "resellerPrice": 109000,
-      "publicPrice": 161000
+      "publicPrice": 161000,
+      "isRecommended": false
     },
     {
       "product": "Pato Team Orange & Blue",
       "variant": "30 Hari Blue",
       "inStock": true,
       "resellerPrice": 73000,
-      "publicPrice": 161000
+      "publicPrice": 161000,
+      "isRecommended": false
     },
     {
       "product": "Prime Hook Apk Mod",
       "variant": "1 Hari",
       "inStock": true,
       "resellerPrice": 5000,
-      "publicPrice": 8000
+      "publicPrice": 8000,
+      "isRecommended": false
     },
     {
       "product": "Prime Hook Apk Mod",
       "variant": "3 Hari",
       "inStock": true,
       "resellerPrice": 14000,
-      "publicPrice": 19000
+      "publicPrice": 19000,
+      "isRecommended": false
     },
     {
       "product": "Prime Hook Apk Mod",
       "variant": "7 Hari",
       "inStock": true,
       "resellerPrice": 26000,
-      "publicPrice": 38000
+      "publicPrice": 38000,
+      "isRecommended": false
     },
     {
       "product": "Silent Cheats Apk Mod",
       "variant": "1 Hari",
       "inStock": true,
       "resellerPrice": 9000,
-      "publicPrice": 17000
+      "publicPrice": 17000,
+      "isRecommended": false
     },
     {
       "product": "Silent Cheats Apk Mod",
       "variant": "3 Hari",
       "inStock": true,
       "resellerPrice": 18000,
-      "publicPrice": 27000
+      "publicPrice": 27000,
+      "isRecommended": false
     },
     {
       "product": "Silent Cheats Apk Mod",
       "variant": "7 Hari",
       "inStock": false,
       "resellerPrice": null,
-      "publicPrice": null
+      "publicPrice": null,
+      "isRecommended": false
     },
     {
       "product": "Silent Cheats Apk Mod",
       "variant": "15 Hari",
       "inStock": false,
       "resellerPrice": null,
-      "publicPrice": null
+      "publicPrice": null,
+      "isRecommended": false
     },
     {
       "product": "Silent Cheats Apk Mod",
       "variant": "28 Hari",
       "inStock": false,
       "resellerPrice": null,
-      "publicPrice": null
+      "publicPrice": null,
+      "isRecommended": false
     },
     {
       "product": "Certificate Gbox / Esign",
       "variant": "1 Tahun (Garansi 30 Hari)",
       "inStock": true,
       "resellerPrice": 52000,
-      "publicPrice": 81000
+      "publicPrice": 81000,
+      "isRecommended": false
     },
     {
       "product": "Migul",
       "variant": "1 Hari",
       "inStock": true,
       "resellerPrice": 21000,
-      "publicPrice": 43000
+      "publicPrice": 43000,
+      "isRecommended": false
     },
     {
       "product": "Migul",
       "variant": "7 Hari",
       "inStock": true,
       "resellerPrice": 73000,
-      "publicPrice": 129000
+      "publicPrice": 129000,
+      "isRecommended": false
     },
     {
       "product": "Migul",
       "variant": "30 Hari",
       "inStock": true,
       "resellerPrice": 145000,
-      "publicPrice": 375000
+      "publicPrice": 375000,
+      "isRecommended": false
     },
     {
       "product": "Drip Client Wire iOS & Android",
       "variant": "6 Jam",
       "inStock": true,
       "resellerPrice": 4000,
-      "publicPrice": 8000
+      "publicPrice": 8000,
+      "isRecommended": true
     },
     {
       "product": "Drip Client Wire iOS & Android",
       "variant": "12 Jam",
       "inStock": true,
       "resellerPrice": 9000,
-      "publicPrice": 13000
+      "publicPrice": 13000,
+      "isRecommended": true
     },
     {
       "product": "Drip Client Wire iOS & Android",
       "variant": "1 Hari",
       "inStock": true,
       "resellerPrice": 13000,
-      "publicPrice": 22000
+      "publicPrice": 22000,
+      "isRecommended": true
     },
     {
       "product": "Drip Client Wire iOS & Android",
       "variant": "7 Hari",
       "inStock": true,
       "resellerPrice": 31000,
-      "publicPrice": 43000
+      "publicPrice": 43000,
+      "isRecommended": true
     },
     {
       "product": "Drip Client Wire iOS & Android",
       "variant": "30 Hari",
       "inStock": true,
       "resellerPrice": 73000,
-      "publicPrice": 107000
+      "publicPrice": 107000,
+      "isRecommended": true
     },
     {
       "product": "Phantom iOS & Android",
       "variant": "1 Jam",
       "inStock": true,
       "resellerPrice": 3000,
-      "publicPrice": 5000
+      "publicPrice": 5000,
+      "isRecommended": false
     },
     {
       "product": "Phantom iOS & Android",
       "variant": "3 Jam",
       "inStock": true,
       "resellerPrice": 5000,
-      "publicPrice": 7000
+      "publicPrice": 7000,
+      "isRecommended": false
     },
     {
       "product": "Phantom iOS & Android",
       "variant": "6 Jam",
       "inStock": true,
       "resellerPrice": 8000,
-      "publicPrice": 13000
+      "publicPrice": 13000,
+      "isRecommended": false
     },
     {
       "product": "Phantom iOS & Android",
       "variant": "12 Jam",
       "inStock": true,
       "resellerPrice": 10000,
-      "publicPrice": 17000
+      "publicPrice": 17000,
+      "isRecommended": false
     },
     {
       "product": "Phantom iOS & Android",
       "variant": "1 Hari",
       "inStock": true,
       "resellerPrice": 13000,
-      "publicPrice": 22000
+      "publicPrice": 22000,
+      "isRecommended": false
     },
     {
       "product": "Phantom iOS & Android",
       "variant": "3 Hari",
       "inStock": true,
       "resellerPrice": 21000,
-      "publicPrice": 38000
+      "publicPrice": 38000,
+      "isRecommended": false
     },
     {
       "product": "Phantom iOS & Android",
       "variant": "7 Hari",
       "inStock": true,
       "resellerPrice": 37000,
-      "publicPrice": 75000
+      "publicPrice": 75000,
+      "isRecommended": false
     },
     {
       "product": "Phantom iOS & Android",
       "variant": "30 Hari",
       "inStock": true,
       "resellerPrice": 73000,
-      "publicPrice": 129000
+      "publicPrice": 129000,
+      "isRecommended": false
     },
     {
       "product": "Xreg iOS & Android",
       "variant": "1 Jam",
       "inStock": true,
       "resellerPrice": 4000,
-      "publicPrice": 6000
+      "publicPrice": 6000,
+      "isRecommended": false
     },
     {
       "product": "Xreg iOS & Android",
       "variant": "3 Jam",
       "inStock": true,
       "resellerPrice": 5000,
-      "publicPrice": 9000
+      "publicPrice": 9000,
+      "isRecommended": false
     },
     {
       "product": "Xreg iOS & Android",
       "variant": "6 Jam",
       "inStock": true,
       "resellerPrice": 8000,
-      "publicPrice": 13000
+      "publicPrice": 13000,
+      "isRecommended": false
     },
     {
       "product": "Xreg iOS & Android",
       "variant": "12 Jam",
       "inStock": true,
       "resellerPrice": 11000,
-      "publicPrice": 17000
+      "publicPrice": 17000,
+      "isRecommended": false
     },
     {
       "product": "Xreg iOS & Android",
       "variant": "1 Hari",
       "inStock": true,
       "resellerPrice": 16000,
-      "publicPrice": 22000
+      "publicPrice": 22000,
+      "isRecommended": false
     },
     {
       "product": "Xreg iOS & Android",
       "variant": "3 Hari",
       "inStock": true,
       "resellerPrice": 29000,
-      "publicPrice": 43000
+      "publicPrice": 43000,
+      "isRecommended": false
     },
     {
       "product": "RezzX iOS & Android",
       "variant": "1 Jam",
       "inStock": true,
       "resellerPrice": 3000,
-      "publicPrice": 5000
+      "publicPrice": 5000,
+      "isRecommended": true
     },
     {
       "product": "RezzX iOS & Android",
       "variant": "3 Jam",
       "inStock": true,
       "resellerPrice": 5000,
-      "publicPrice": 7000
+      "publicPrice": 7000,
+      "isRecommended": true
     },
     {
       "product": "RezzX iOS & Android",
       "variant": "6 Jam",
       "inStock": true,
       "resellerPrice": 9000,
-      "publicPrice": 13000
+      "publicPrice": 13000,
+      "isRecommended": true
     },
     {
       "product": "RezzX iOS & Android",
       "variant": "12 Jam",
       "inStock": true,
       "resellerPrice": 11000,
-      "publicPrice": 17000
+      "publicPrice": 17000,
+      "isRecommended": true
     },
     {
       "product": "RezzX iOS & Android",
       "variant": "1 Hari",
       "inStock": true,
       "resellerPrice": 15000,
-      "publicPrice": 22000
+      "publicPrice": 22000,
+      "isRecommended": true
     },
     {
       "product": "RezzX iOS & Android",
       "variant": "3 Hari",
       "inStock": true,
       "resellerPrice": 27000,
-      "publicPrice": 43000
+      "publicPrice": 43000,
+      "isRecommended": true
     },
     {
       "product": "RezzX iOS & Android",
       "variant": "7 Hari",
       "inStock": true,
       "resellerPrice": 73000,
-      "publicPrice": 107000
+      "publicPrice": 107000,
+      "isRecommended": true
     },
     {
       "product": "RezzX iOS & Android",
       "variant": "30 Hari",
       "inStock": true,
       "resellerPrice": 98000,
-      "publicPrice": 140000
+      "publicPrice": 140000,
+      "isRecommended": true
     }
   ]
 }
