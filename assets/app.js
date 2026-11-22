@@ -454,7 +454,6 @@ async function submitWalletDeposit(e){
  const amount=Number($("walletDepositAmount").value),method=$("walletDepositMethod").value;
  const sender=$("walletSenderName").value.trim(),reference=$("walletPaymentReference").value.trim();
  if(!Number.isSafeInteger(amount)||amount<10000){setWalletMessage("Minimal deposit Rp10.000.");return;}
- if(proof&&!/^https:\/\//i.test(proof)){setWalletMessage("Tautan bukti pembayaran harus menggunakan HTTPS.");return;}
  const button=e.submitter;button.disabled=true;button.textContent="Mengirim...";
  try{
   const r=await supabaseClient.rpc("member_create_wallet_deposit",{p_amount:amount,p_method:method,p_sender_name:sender,p_reference:reference||null,p_proof_url:null});
