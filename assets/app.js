@@ -27,12 +27,13 @@ async function init(){
     // Prioritaskan katalog Supabase agar perubahan admin langsung muncul di toko.
     if(supabaseClient){
       const live=await supabaseClient.from("store_products")
-        .select("product,variant,public_price,reseller_price,in_stock")
+        .select("product,variant,public_price,reseller_price,in_stock,is_recommended,is_recommendation_copy")
         .eq("is_active",true).order("sort_order").order("product").order("variant");
       if(!live.error&&Array.isArray(live.data)&&live.data.length>0){
         liveProducts=live.data.map(p=>({
           product:p.product,variant:p.variant,inStock:p.in_stock,
-          publicPrice:p.public_price,resellerPrice:p.reseller_price
+          publicPrice:p.public_price,resellerPrice:p.reseller_price,
+          isRecommended:!!p.is_recommended,isRecommendationCopy:!!p.is_recommendation_copy
         }));
       }else if(!live.error&&Array.isArray(live.data)&&live.data.length===0){
         console.warn("Katalog Supabase kosong; memakai katalog cadangan.");
@@ -278,7 +279,7 @@ function renderRecommendedProducts(){
   const names=["RezzX iOS & Android","Drip Client Wire iOS & Android"];
   const groups=names.map(name=>({
     name,
-    items:catalog.map((p,index)=>({...p,_index:index})).filter(p=>p.product.toLowerCase()===name.toLowerCase()&&p.isRecommendationCopy)
+    items:catalog.map((p,index)=>({...p,_index:index})).filter(p=>p.product.toLowerCase()===name.toLowerCase()&&p.isRecommended)
   })).filter(group=>group.items.length);
   if(!groups.length){
     target.innerHTML='<div class="empty">Produk rekomendasi belum tersedia.</div>';
