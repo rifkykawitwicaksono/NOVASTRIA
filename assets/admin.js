@@ -75,7 +75,8 @@ function renderStats(){
   $("statReferral").textContent=overview.referral_active??members.filter(m=>m.referral_status==="active").length;
   $("statReseller").textContent=overview.reseller_active??members.filter(m=>m.reseller_status==="active").length;
   $("statPending").textContent=overview.pending_payments??payments.filter(p=>p.status==="pending").length;
-  $("statRevenue").textContent=money(overview.verified_revenue);
+  // Tampilan sementara: pendapatan membership terverifikasi ditampilkan Rp0. Data database tidak diubah.
+  $("statRevenue").textContent=money(0);
   $("statCommission").textContent=money(overview.available_commission);
   $("statPayout").textContent=money(overview.paid_commission);
   $("statProducts").textContent=products.filter(p=>p.is_active).length;
