@@ -311,10 +311,11 @@ function renderSales(){
 }
 function renderStoreOrders(){
  const labels={pending_payment:"Menunggu pembayaran",pending_verification:"Menunggu verifikasi",processing:"Diproses",completed:"Selesai",cancelled:"Dibatalkan"};
- const next={pending_payment:["pending_verification","processing","cancelled"],pending_verification:["processing","cancelled"],processing:["completed","cancelled"],completed:[],cancelled:[]};
+ const next={pending_payment:["pending_verification","processing","cancelled"],pending_verification:["processing","cancelled"],processing:["cancelled"],completed:[],cancelled:[]};
  $("storeOrdersBody").innerHTML=storeOrders.length?storeOrders.map(o=>{
   const actions=(next[o.status]||[]).map(s=>'<button data-order-status="'+s+'" data-id="'+esc(o.id)+'">'+labels[s]+'</button>').join("");
-  return '<tr><td><strong>'+esc(o.order_code)+'</strong><small>'+esc(date(o.created_at))+'</small></td><td><strong>'+esc(o.customer_name)+'</strong><small>'+esc(o.customer_phone)+'</small></td><td>'+esc(o.product)+'<small>'+esc(o.variant)+'</small><small>Detail: '+esc(o.account_detail||"-")+'</small></td><td>'+money(Number(o.unit_price)*Number(o.quantity))+'<small>'+esc(o.payment_method)+'</small></td><td>'+badge(o.status)+'</td><td><div class="admin-actions">'+actions+'</div></td></tr>';
+  const complete=o.status==="processing"?'<button data-order-complete data-id="'+esc(o.id)+'">Selesaikan + masukkan kode</button>':"";
+  return '<tr><td><strong>'+esc(o.order_code)+'</strong><small>'+esc(date(o.created_at))+'</small></td><td><strong>'+esc(o.customer_name)+'</strong><small>'+esc(o.customer_phone)+'</small></td><td>'+esc(o.product)+'<small>'+esc(o.variant)+'</small><small>Detail: '+esc(o.account_detail||"-")+'</small></td><td>'+money(Number(o.unit_price)*Number(o.quantity))+'<small>'+esc(o.payment_method)+'</small></td><td>'+badge(o.status)+'</td><td><div class="admin-actions">'+actions+complete+'</div></td></tr>';
  }).join(""):'<tr><td colspan="6" class="admin-empty">Belum ada pesanan yang dibuat melalui toko.</td></tr>';
  $("storeOrdersBody").querySelectorAll("[data-order-status]").forEach(b=>b.addEventListener("click",async()=>{
   const label=labels[b.dataset.orderStatus];
@@ -322,6 +323,16 @@ function renderStoreOrders(){
   const note=prompt("Catatan admin (opsional):")||null;
   try{await rpc("admin_update_store_order",{p_order_id:b.dataset.id,p_status:b.dataset.orderStatus,p_admin_note:note});await loadAll();notice("Status pesanan diperbarui menjadi "+label+".","success");}
   catch(e){notice("Gagal memperbarui pesanan: "+e.message,"error");}
+ }));
+ $("storeOrdersBody").querySelectorAll("[data-order-complete]").forEach(b=>b.addEventListener("click",async()=>{
+  const code=prompt("Masukkan kode voucher/serial dari supplier. Kode ini akan terlihat oleh pelanggan setelah pesanan selesai:");
+  if(code===null)return;
+  if(code.trim().length<3||code.trim().length>200){notice("Kode harus berisi 3 sampai 200 karakter.","error");return;}
+  if(!confirm("Simpan kode untuk pesanan ini dan tandai sebagai Selesai? Pastikan kode benar dan belum digunakan."))return;
+  const note=prompt("Catatan admin (opsional):")||null;
+  b.disabled=true;
+  try{await rpc("admin_complete_store_order",{p_order_id:b.dataset.id,p_delivery_code:code.trim(),p_admin_note:note});await loadAll();notice("Kode tersimpan. Pesanan selesai dan kode dapat dilihat pelanggan.","success");}
+  catch(e){notice("Gagal menyimpan kode: "+e.message,"error");b.disabled=false;}
  }));
 }
 async function createSale(e){
