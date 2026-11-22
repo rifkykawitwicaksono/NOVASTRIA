@@ -265,7 +265,7 @@
       "inStock": true,
       "resellerPrice": 4000,
       "publicPrice": 8000,
-      "isRecommended": true
+      "isRecommended": false
     },
     {
       "product": "Drip Client Wire iOS & Android",
@@ -273,7 +273,7 @@
       "inStock": true,
       "resellerPrice": 9000,
       "publicPrice": 13000,
-      "isRecommended": true
+      "isRecommended": false
     },
     {
       "product": "Drip Client Wire iOS & Android",
@@ -281,7 +281,7 @@
       "inStock": true,
       "resellerPrice": 13000,
       "publicPrice": 22000,
-      "isRecommended": true
+      "isRecommended": false
     },
     {
       "product": "Drip Client Wire iOS & Android",
@@ -289,7 +289,7 @@
       "inStock": true,
       "resellerPrice": 31000,
       "publicPrice": 43000,
-      "isRecommended": true
+      "isRecommended": false
     },
     {
       "product": "Drip Client Wire iOS & Android",
@@ -297,7 +297,7 @@
       "inStock": true,
       "resellerPrice": 73000,
       "publicPrice": 107000,
-      "isRecommended": true
+      "isRecommended": false
     },
     {
       "product": "Phantom iOS & Android",
@@ -417,7 +417,7 @@
       "inStock": true,
       "resellerPrice": 3000,
       "publicPrice": 5000,
-      "isRecommended": true
+      "isRecommended": false
     },
     {
       "product": "RezzX iOS & Android",
@@ -425,7 +425,7 @@
       "inStock": true,
       "resellerPrice": 5000,
       "publicPrice": 7000,
-      "isRecommended": true
+      "isRecommended": false
     },
     {
       "product": "RezzX iOS & Android",
@@ -433,7 +433,7 @@
       "inStock": true,
       "resellerPrice": 9000,
       "publicPrice": 13000,
-      "isRecommended": true
+      "isRecommended": false
     },
     {
       "product": "RezzX iOS & Android",
@@ -441,7 +441,7 @@
       "inStock": true,
       "resellerPrice": 11000,
       "publicPrice": 17000,
-      "isRecommended": true
+      "isRecommended": false
     },
     {
       "product": "RezzX iOS & Android",
@@ -449,7 +449,7 @@
       "inStock": true,
       "resellerPrice": 15000,
       "publicPrice": 22000,
-      "isRecommended": true
+      "isRecommended": false
     },
     {
       "product": "RezzX iOS & Android",
@@ -457,7 +457,7 @@
       "inStock": true,
       "resellerPrice": 27000,
       "publicPrice": 43000,
-      "isRecommended": true
+      "isRecommended": false
     },
     {
       "product": "RezzX iOS & Android",
@@ -465,7 +465,7 @@
       "inStock": true,
       "resellerPrice": 73000,
       "publicPrice": 107000,
-      "isRecommended": true
+      "isRecommended": false
     },
     {
       "product": "RezzX iOS & Android",
@@ -473,7 +473,137 @@
       "inStock": true,
       "resellerPrice": 98000,
       "publicPrice": 140000,
-      "isRecommended": true
+      "isRecommended": false
+    },
+    {
+      "product": "Drip Client Wire iOS & Android",
+      "variant": "6 Jam",
+      "inStock": true,
+      "resellerPrice": 4000,
+      "publicPrice": 8000,
+      "isRecommended": true,
+      "isRecommendationCopy": true,
+      "sourceProduct": "Drip Client Wire iOS & Android"
+    },
+    {
+      "product": "Drip Client Wire iOS & Android",
+      "variant": "12 Jam",
+      "inStock": true,
+      "resellerPrice": 9000,
+      "publicPrice": 13000,
+      "isRecommended": true,
+      "isRecommendationCopy": true,
+      "sourceProduct": "Drip Client Wire iOS & Android"
+    },
+    {
+      "product": "Drip Client Wire iOS & Android",
+      "variant": "1 Hari",
+      "inStock": true,
+      "resellerPrice": 13000,
+      "publicPrice": 22000,
+      "isRecommended": true,
+      "isRecommendationCopy": true,
+      "sourceProduct": "Drip Client Wire iOS & Android"
+    },
+    {
+      "product": "Drip Client Wire iOS & Android",
+      "variant": "7 Hari",
+      "inStock": true,
+      "resellerPrice": 31000,
+      "publicPrice": 43000,
+      "isRecommended": true,
+      "isRecommendationCopy": true,
+      "sourceProduct": "Drip Client Wire iOS & Android"
+    },
+    {
+      "product": "Drip Client Wire iOS & Android",
+      "variant": "30 Hari",
+      "inStock": true,
+      "resellerPrice": 73000,
+      "publicPrice": 107000,
+      "isRecommended": true,
+      "isRecommendationCopy": true,
+      "sourceProduct": "Drip Client Wire iOS & Android"
+    },
+    {
+      "product": "RezzX iOS & Android",
+      "variant": "1 Jam",
+      "inStock": true,
+      "resellerPrice": 3000,
+      "publicPrice": 5000,
+      "isRecommended": true,
+      "isRecommendationCopy": true,
+      "sourceProduct": "RezzX iOS & Android"
+    },
+    {
+      "product": "RezzX iOS & Android",
+      "variant": "3 Jam",
+      "inStock": true,
+      "resellerPrice": 5000,
+      "publicPrice": 7000,
+      "isRecommended": true,
+      "isRecommendationCopy": true,
+      "sourceProduct": "RezzX iOS & Android"
+    },
+    {
+      "product": "RezzX iOS & Android",
+      "variant": "6 Jam",
+      "inStock": true,
+      "resellerPrice": 9000,
+      "publicPrice": 13000,
+      "isRecommended": true,
+      "isRecommendationCopy": true,
+      "sourceProduct": "RezzX iOS & Android"
+    },
+    {
+      "product": "RezzX iOS & Android",
+      "variant": "12 Jam",
+      "inStock": true,
+      "resellerPrice": 11000,
+      "publicPrice": 17000,
+      "isRecommended": true,
+      "isRecommendationCopy": true,
+      "sourceProduct": "RezzX iOS & Android"
+    },
+    {
+      "product": "RezzX iOS & Android",
+      "variant": "1 Hari",
+      "inStock": true,
+      "resellerPrice": 15000,
+      "publicPrice": 22000,
+      "isRecommended": true,
+      "isRecommendationCopy": true,
+      "sourceProduct": "RezzX iOS & Android"
+    },
+    {
+      "product": "RezzX iOS & Android",
+      "variant": "3 Hari",
+      "inStock": true,
+      "resellerPrice": 27000,
+      "publicPrice": 43000,
+      "isRecommended": true,
+      "isRecommendationCopy": true,
+      "sourceProduct": "RezzX iOS & Android"
+    },
+    {
+      "product": "RezzX iOS & Android",
+      "variant": "7 Hari",
+      "inStock": true,
+      "resellerPrice": 73000,
+      "publicPrice": 107000,
+      "isRecommended": true,
+      "isRecommendationCopy": true,
+      "sourceProduct": "RezzX iOS & Android"
+    },
+    {
+      "product": "RezzX iOS & Android",
+      "variant": "30 Hari",
+      "inStock": true,
+      "resellerPrice": 98000,
+      "publicPrice": 140000,
+      "isRecommended": true,
+      "isRecommendationCopy": true,
+      "sourceProduct": "RezzX iOS & Android"
     }
   ]
 }
