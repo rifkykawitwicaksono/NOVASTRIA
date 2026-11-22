@@ -153,3 +153,5 @@ button:disabled{opacity:.6;cursor:wait;transform:none}
 .recommended-card{border-color:#9a75ff66;background:linear-gradient(145deg,#211b3d,#11182d)}
 .recommended-label{display:inline-flex;align-items:center;padding:5px 9px;border-radius:7px;background:#8b68f133;color:#d5c5ff;font-size:9px;font-weight:800;letter-spacing:.8px}
 @media(max-width:650px){.recommended-grid{grid-template-columns:1fr}}
+
+.auth-forgot-link{margin:10px 0 4px;text-align:right;font-size:13px}.auth-forgot-link a{color:#c9baff;text-decoration:none}.auth-forgot-link a:hover{text-decoration:underline}
