@@ -117,8 +117,7 @@ function renderPayments(){
   const q=$("paymentSearch").value.trim().toLowerCase(),filter=$("paymentFilter").value;
   const list=payments.filter(p=>(!filter||p.status===filter)&&[p.email,p.full_name,p.reference_code,p.payment_method].join(" ").toLowerCase().includes(q));
   $("paymentsBody").innerHTML=list.length?list.map(p=>{
-    const proofUrl=(()=>{try{const u=new URL(p.proof_url);return ["https:","http:"].includes(u.protocol)?u.href:"";}catch{return "";}})();
-    const proof=proofUrl?'<a href="'+esc(proofUrl)+'" target="_blank" rel="noopener noreferrer">Buka bukti</a>':"Tidak ada";
+     const proof=p.proof_url?"Tersimpan (tautan tidak ditampilkan)":"Tidak ada";
     const actions=p.status==="pending"?'<div class="admin-actions"><button data-review="verified" data-id="'+esc(p.id)+'">Verifikasi</button><button class="admin-danger" data-review="rejected" data-id="'+esc(p.id)+'">Tolak</button></div>':badge(p.status);
     return '<tr><td><strong>'+esc(p.full_name||"-")+'</strong><small>'+esc(p.email)+'</small></td><td>'+esc(p.membership_type==="referral"?"Referral Member":"Reseller Member")+'</td><td>'+money(p.amount)+'<small>'+esc(p.payment_method)+'</small></td><td>'+esc(p.reference_code||"-")+'<small>'+proof+'</small></td><td>'+badge(p.status)+'</td><td>'+esc(date(p.created_at))+'</td><td>'+actions+'</td></tr>';
   }).join(""):'<tr><td colspan="7" class="admin-empty">Belum ada pembayaran.</td></tr>';
