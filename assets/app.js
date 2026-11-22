@@ -47,7 +47,9 @@ async function init(){
       if(!r.ok)throw new Error("Katalog gagal dimuat.");
       catalog=(await r.json()).products||[];
     }
-    catalog=catalog.map(p=>({...p,product:/^NEXORA iOS & Android$/i.test(p.product)?"RezzX iOS & Android":p.product}));
+    catalog=catalog.map(p=>({...p,product:/^NEXORA iOS & Android$/i.test(p.product)?"RezzX iOS & Android":p.product,
+      isRecommended:!!p.isRecommended||["rezzx ios & android","drip client wire ios & android"].includes(String(p.product||"").toLowerCase())
+    }));
     // Ambil konten detail agar pelanggan dapat membacanya langsung di kartu katalog.
     productDetails={};
     if(supabaseClient){
@@ -268,6 +270,37 @@ function renderProductShowcase(){
   productBannerIndex=Math.min(productBannerIndex,groups.length-1);
   setProductBanner(productBannerIndex);
   startProductBannerAuto();
+}
+
+function renderRecommendedProducts(){
+  const target=$("recommendedGrid");
+  if(!target)return;
+  const names=["RezzX iOS & Android","Drip Client Wire iOS & Android"];
+  const groups=names.map(name=>({
+    name,
+    items:catalog.map((p,index)=>({...p,_index:index})).filter(p=>p.product.toLowerCase()===name.toLowerCase())
+  })).filter(group=>group.items.length);
+  if(!groups.length){
+    target.innerHTML='<div class="empty">Produk rekomendasi belum tersedia.</div>';
+    return;
+  }
+  target.innerHTML=groups.map((group,index)=>{
+    const available=group.items.filter(p=>p.inStock);
+    const current=available[0]||group.items[0];
+    const options=group.items.map(p=>'<option value="'+p._index+'" '+(p._index===current._index?'selected':'')+' '+(!p.inStock?'disabled':'')+'>'+esc(p.variant)+(p.inStock?'':' — Stok habis')+'</option>').join("");
+    const price=member?.resellerActive===true?current.resellerPrice:current.publicPrice;
+    return '<article class="product-card grouped-product recommended-card" data-recommended-card="'+index+'"><div class="product-card-top"><span class="recommended-label">★ REKOMENDASI</span><span class="variant-count">'+group.items.length+' varian</span></div><div class="product-visual"><span class="product-icon" aria-hidden="true">'+productVisual(group.name)+'</span><div class="product-visual-copy"><span>PRODUK PILIHAN</span><strong>'+(available.length?available.length+' varian tersedia':'Stok belum tersedia')+'</strong></div></div><h3>'+esc(group.name)+'</h3><label class="variant-picker-label">Pilih durasi / varian<select class="variant-picker" data-recommended-picker="'+index+'">'+options+'</select></label><div class="price-row"><div><div class="price-caption">'+(member?.resellerActive===true?"Harga reseller":"Harga publik")+'</div><div class="price-value" data-recommended-price>'+(!current.inStock?'Stok habis':price==null?'Harga belum ditetapkan':money(price))+'</div></div><span class="price-caption">IDR</span></div><button class="btn btn-primary" data-recommended-order="'+current._index+'" '+(!current.inStock?'disabled':'')+'>'+(current.inStock?'Pesan produk':'Stok tidak tersedia')+'</button></article>';
+  }).join("");
+  target.querySelectorAll("[data-recommended-picker]").forEach(select=>select.addEventListener("change",()=>{
+    const product=catalog[Number(select.value)],card=select.closest("[data-recommended-card]");
+    const price=member?.resellerActive===true?product.resellerPrice:product.publicPrice;
+    const button=card.querySelector("[data-recommended-order]");
+    button.dataset.recommendedOrder=String(Number(select.value));
+    button.disabled=!product.inStock;
+    button.textContent=product.inStock?"Pesan produk":"Stok tidak tersedia";
+    card.querySelector("[data-recommended-price]").textContent=!product.inStock?"Stok habis":price==null?"Harga belum ditetapkan":money(price);
+  }));
+  target.querySelectorAll("[data-recommended-order]").forEach(button=>button.addEventListener("click",()=>openOrder(catalog[Number(button.dataset.recommendedOrder)])));
 }
 
 function renderProducts(){
