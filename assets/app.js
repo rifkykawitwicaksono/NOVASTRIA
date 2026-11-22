@@ -62,7 +62,7 @@ async function init(){
       }
     }
     $("productCount").textContent=catalog.length;
-    populateCategories();renderProducts();renderProductShowcase();
+    populateCategories();renderProducts();renderProductShowcase();renderRecommendedProducts();
   }catch(error){$("productGrid").innerHTML='<div class="empty">Katalog belum bisa dimuat. Periksa koneksi dan sumber katalog.</div>';}
   $("searchInput").addEventListener("input",renderProducts);
   $("categoryTabs").addEventListener("click",event=>{const button=event.target.closest("[data-category]");if(!button)return;activeCategory=button.dataset.category;document.querySelectorAll(".category-tab").forEach(x=>x.classList.toggle("active",x===button));renderProducts();});
@@ -390,6 +390,7 @@ function updateMemberUI(){
   }
   renderProducts();
   renderProductShowcase();
+  renderRecommendedProducts();
 }
 
 
