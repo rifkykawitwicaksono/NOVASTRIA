@@ -146,3 +146,10 @@ button:disabled{opacity:.6;cursor:wait;transform:none}
 @keyframes buyer-notice-run{from{transform:translateX(0)}to{transform:translateX(-50%)}}
 @media(max-width:700px){.product-banner-slide{grid-template-columns:1fr;gap:18px;padding:20px;min-height:0}.product-banner-art{min-height:170px}.product-banner-icon{width:105px;height:105px;border-radius:23px}.product-banner-copy h3{font-size:27px}.product-banner-copy p{font-size:12px}.product-banner-controls .icon-close{width:36px;height:36px}}
 @media(prefers-reduced-motion:reduce){.product-banner-track,.product-banner-dots button{transition:none}.buyer-notice-track{animation:none;flex-wrap:wrap;width:100%;padding:0 14px}.buyer-notice{padding:10px 0}}
+
+/* Produk rekomendasi: salinan tampilan katalog dengan data varian yang sama */
+.recommended-section{padding-top:36px;padding-bottom:40px}
+.recommended-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+.recommended-card{border-color:#9a75ff66;background:linear-gradient(145deg,#211b3d,#11182d)}
+.recommended-label{display:inline-flex;align-items:center;padding:5px 9px;border-radius:7px;background:#8b68f133;color:#d5c5ff;font-size:9px;font-weight:800;letter-spacing:.8px}
+@media(max-width:650px){.recommended-grid{grid-template-columns:1fr}}
