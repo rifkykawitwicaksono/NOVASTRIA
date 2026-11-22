@@ -1,5 +1,5 @@
-const SUPABASE_URL="https://hwtrqgtabamuixaqiscx.supabase.co";
-const SUPABASE_PUBLISHABLE_KEY="sb_publishable_LBhpfEc_ANm5geSULymA6A_qINelIr6";
+const SUPABASE_URL="https://tuwthcllamszebhizayk.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY="sb_publishable_SOt1_Iz0mSjIuX6FrddpjQ_h_cpHjpM";
 const $=id=>document.getElementById(id);
 const money=n=>new Intl.NumberFormat("id-ID",{style:"currency",currency:"IDR",maximumFractionDigits:0}).format(Number(n||0));
 const priceLabel=n=>n===null||n===undefined?"Belum ditetapkan":money(n);
