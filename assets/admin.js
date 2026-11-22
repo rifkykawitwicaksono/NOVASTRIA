@@ -107,7 +107,7 @@ async function createPayment(e){
   if(!user||!Number.isFinite(amount)||amount<=0){notice("Pilih anggota dan nominal pembayaran yang benar.","error");return;}
   const b=e.submitter;b.disabled=true;
   try{
-    await rpc("admin_create_payment",{p_user_id:user,p_type:type,p_amount:amount,p_method:$("paymentMethod").value.trim(),p_reference:$("paymentReference").value.trim()||null,p_proof_url:$("paymentProof").value.trim()||null,p_notes:$("paymentNotes").value.trim()||null});
+    await rpc("admin_create_payment",{p_user_id:user,p_type:type,p_amount:amount,p_method:$("paymentMethod").value.trim(),p_reference:$("paymentReference").value.trim()||null,p_proof_url:null,p_notes:$("paymentNotes").value.trim()||null});
     $("paymentForm").reset();$("paymentAmount").value=150000;await loadAll();showTab("payments");
     notice("Pembayaran dicatat dengan status MENUNGGU. Verifikasi setelah bukti diperiksa.","success");
   }catch(err){notice("Gagal mencatat pembayaran: "+err.message,"error");}
@@ -391,7 +391,7 @@ function renderWalletDeposits(){
  const labels={pending:"Menunggu",verified:"Terverifikasi",rejected:"Ditolak"};
  $("walletDepositsBody").innerHTML=walletDeposits.length?walletDeposits.map(d=>{
   const actions=d.status==="pending"?'<div class="admin-actions"><button data-wallet-decision="verified" data-id="'+esc(d.id)+'">Verifikasi & kreditkan</button><button class="admin-danger" data-wallet-decision="rejected" data-id="'+esc(d.id)+'">Tolak</button></div>':badge(d.status);
-  const proof=d.proof_url?'<a href="'+esc(d.proof_url)+'" target="_blank" rel="noopener">Buka bukti</a>':"Tidak dilampirkan";
+  const proof=d.proof_url?"Tersimpan (tautan tidak dibuka)":"Tidak dilampirkan";
   return '<tr><td><strong>'+esc(d.full_name||"-")+'</strong><small>'+esc(d.email)+'</small><small>'+esc(d.phone||"-")+'</small></td><td><strong>'+money(d.amount)+'</strong></td><td>'+esc(d.payment_method)+'<small>Pengirim: '+esc(d.sender_name)+'</small><small>Ref: '+esc(d.payment_reference||"-")+'</small></td><td>'+proof+'</td><td>'+badge(d.status)+'<small>'+esc(d.admin_notes||"")+'</small><small>'+esc(date(d.created_at))+'</small></td><td>'+actions+'</td></tr>';
  }).join(""):'<tr><td colspan="6" class="admin-empty">Belum ada pengajuan deposit.</td></tr>';
  $("walletDepositsBody").querySelectorAll("[data-wallet-decision]").forEach(b=>b.addEventListener("click",async()=>{
