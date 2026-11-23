@@ -166,3 +166,43 @@ GRANT EXECUTE ON FUNCTION public.admin_unblock_referral_member(UUID) TO authenti
 GRANT EXECUTE ON FUNCTION public.member_is_account_blocked() TO authenticated;
 
 NOTIFY pgrst,'reload schema';
+
+-- Additional database guards for member-originated operations.
+-- Updates to existing requests (e.g. admin review) remain possible because the
+-- triggers run only on INSERT or a change to user_id.
+CREATE OR REPLACE FUNCTION public.guard_blocked_member_activity()
+RETURNS trigger
+LANGUAGE plpgsql SECURITY DEFINER SET search_path = ''
+AS $$
+BEGIN
+  IF NEW.user_id IS NOT NULL AND EXISTS (
+    SELECT 1 FROM public.member_account_restrictions
+    WHERE user_id=NEW.user_id AND is_blocked=true
+  ) THEN
+    RAISE EXCEPTION 'Akun diblokir oleh administrator melalui Anti-Fraud Referral';
+  END IF;
+  RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS guard_blocked_commission_request ON public.commission_payout_requests;
+CREATE TRIGGER guard_blocked_commission_request
+BEFORE INSERT OR UPDATE OF user_id ON public.commission_payout_requests
+FOR EACH ROW EXECUTE FUNCTION public.guard_blocked_member_activity();
+
+DROP TRIGGER IF EXISTS guard_blocked_referral_payout_request ON public.referral_payouts;
+CREATE TRIGGER guard_blocked_referral_payout_request
+BEFORE INSERT OR UPDATE OF user_id ON public.referral_payouts
+FOR EACH ROW EXECUTE FUNCTION public.guard_blocked_member_activity();
+
+DROP TRIGGER IF EXISTS guard_blocked_wallet_deposit_request ON public.wallet_deposit_requests;
+CREATE TRIGGER guard_blocked_wallet_deposit_request
+BEFORE INSERT OR UPDATE OF user_id ON public.wallet_deposit_requests
+FOR EACH ROW EXECUTE FUNCTION public.guard_blocked_member_activity();
+
+DROP TRIGGER IF EXISTS guard_blocked_member_order ON public.orders;
+CREATE TRIGGER guard_blocked_member_order
+BEFORE INSERT OR UPDATE OF user_id ON public.orders
+FOR EACH ROW EXECUTE FUNCTION public.guard_blocked_member_activity();
+
+REVOKE ALL ON FUNCTION public.guard_blocked_member_activity() FROM PUBLIC;
