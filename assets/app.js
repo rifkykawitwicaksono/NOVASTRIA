@@ -348,10 +348,10 @@ async function refreshMember(){
     const restrictionResult=await supabaseClient.rpc("member_is_account_blocked");
     if(restrictionResult.error) throw restrictionResult.error;
     if(restrictionResult.data===true){
-      memberLoadError="Akun ini dibatasi oleh administrator setelah pemeriksaan Anti-Fraud Referral. Hubungi admin jika merasa ini keliru.";
+      memberLoadError="Akun Anda sedang dibatasi oleh administrator. Anda tidak dapat menggunakan fitur anggota. Jika merasa ini keliru, silakan hubungi admin DUKUN CHEAT melalui WhatsApp.";
       currentUser=null;
       await supabaseClient.auth.signOut();
-      setProfileMessage(memberLoadError);
+      setAuthMessage(memberLoadError,"error");
       updateMemberUI();
       return;
     }
@@ -537,7 +537,7 @@ async function handleAuthSubmit(event){
       if(result.data.session){
         currentUser=result.data.user;
         await refreshMember();
-        setProfileMessage("Akun berhasil dibuat dan sesi sudah aktif.","success");
+        if(currentUser) setProfileMessage("Akun berhasil dibuat dan sesi sudah aktif.","success");
       }else{
         $("authForm").reset();
         setAuthMessage("Pendaftaran diterima. Buka email Anda dan klik tautan verifikasi sebelum login.","success");
@@ -547,7 +547,7 @@ async function handleAuthSubmit(event){
       if(result.error)throw result.error;
       currentUser=result.data.user;
       await refreshMember();
-      setProfileMessage("Login berhasil.","success");
+      if(currentUser) setProfileMessage("Login berhasil.","success");
     }
   }catch(error){setAuthMessage(error.message||"Terjadi kesalahan. Coba kembali.");}
   finally{button.disabled=false;button.textContent=authMode==="signup"?"Daftar akun":"Masuk";}
