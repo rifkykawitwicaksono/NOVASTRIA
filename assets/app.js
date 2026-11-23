@@ -345,6 +345,16 @@ async function refreshMember(){
     return;
   }
   try{
+    const restrictionResult=await supabaseClient.rpc("member_is_account_blocked");
+    if(restrictionResult.error) throw restrictionResult.error;
+    if(restrictionResult.data===true){
+      memberLoadError="Akun ini dibatasi oleh administrator setelah pemeriksaan Anti-Fraud Referral. Hubungi admin jika merasa ini keliru.";
+      currentUser=null;
+      await supabaseClient.auth.signOut();
+      setProfileMessage(memberLoadError);
+      updateMemberUI();
+      return;
+    }
     const profileResult=await supabaseClient.from("profiles").select("id,full_name,phone,referral_code").eq("id",currentUser.id).maybeSingle();
     if(profileResult.error) throw profileResult.error;
     if(!profileResult.data){
