@@ -3,7 +3,7 @@
 const SUPABASE_URL="https://tuwthcllamszebhizayk.supabase.co";
 const SUPABASE_KEY="sb_publishable_SOt1_Iz0mSjIuX6FrddpjQ_h_cpHjpM";
 const $=id=>document.getElementById(id);
-let client=null, audio=null, soundOn=false, baseline=null, polling=false;
+let client=null, audio=null, soundOn=true, baseline=null, polling=false, audioUnlocked=false;
 const sources=[
   {key:"orders",rpc:"admin_list_store_orders",label:"Pesanan baru",filter:r=>["pending_payment","pending_verification","processing"].includes(r.status)},
   {key:"payments",rpc:"admin_list_payments",label:"Pembayaran membership",filter:r=>r.status==="pending"||r.status==="verified"},
@@ -76,26 +76,28 @@ async function poll(){
  catch(e){console.warn("Admin notification polling:",e.message);}
  finally{polling=false;}
 }
+async function unlockAudio(){
+ if(audioUnlocked)return;
+ try{
+  const Ctx=window.AudioContext||window.webkitAudioContext;
+  if(!Ctx)return;
+  if(!audio)audio=new Ctx();
+  await audio.resume();
+  audioUnlocked=audio.state==="running";
+  if(audioUnlocked){
+   document.removeEventListener("pointerdown",unlockAudio,true);
+   document.removeEventListener("keydown",unlockAudio,true);
+   document.removeEventListener("touchstart",unlockAudio,true);
+  }
+ }catch(e){console.warn("Audio menunggu interaksi browser",e);}
+}
 async function boot(){
- const toggle=$("soundToggle"),test=$("soundTest");
- if(!toggle||!test||!window.supabase?.createClient)return;
+ if(!window.supabase?.createClient)return;
+ // Suara aktif otomatis. Browser mewajibkan satu interaksi pengguna sebelum audio diputar.
+ document.addEventListener("pointerdown",unlockAudio,true);
+ document.addEventListener("keydown",unlockAudio,true);
+ document.addEventListener("touchstart",unlockAudio,true);
  client=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
- toggle.addEventListener("click",async()=>{
-  try{
-   const Ctx=window.AudioContext||window.webkitAudioContext;
-   if(!Ctx){toggle.textContent="Audio tidak didukung";return;}
-   if(!audio)audio=new Ctx();
-   await audio.resume();
-   soundOn=!soundOn;
-   toggle.textContent=soundOn?"Matikan suara":"Aktifkan suara";
-   toggle.setAttribute("aria-pressed",String(soundOn));
-   if(soundOn)playAlert();
-  }catch(e){toggle.textContent="Aktifkan suara";console.warn(e);}
- });
- test.addEventListener("click",async()=>{
-  try{const Ctx=window.AudioContext||window.webkitAudioContext;if(!audio&&Ctx)audio=new Ctx();if(audio)await audio.resume();playAlert();}
-  catch(e){console.warn(e);}
- });
  // Tunggu sesi dan pemeriksaan admin pada halaman utama selesai.
  for(let i=0;i<20;i++){
   const {data}=await client.auth.getSession();
