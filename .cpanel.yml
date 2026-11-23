@@ -1,0 +1,6 @@
+---
+deployment:
+  tasks:
+    - export DEPLOYPATH=/home/rymmbvlc/public_html/
+    - /bin/mkdir -p "$DEPLOYPATH"
+    - /bin/cp -R * "$DEPLOYPATH"
