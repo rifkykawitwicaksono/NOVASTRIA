@@ -79,5 +79,5 @@ begin
 end;
 $function$;
 
-revoke all on function public.member_activate_referral_membership() from public;
+revoke all on function public.member_activate_referral_membership() from public, anon;
 grant execute on function public.member_activate_referral_membership() to authenticated;
