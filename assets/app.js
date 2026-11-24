@@ -372,6 +372,7 @@ async function refreshMember(){
       resellerActive:active.some(m=>m.membership_type==="reseller"&&m.status==="active")
     };
     loadMemberPayoutHistory();
+    loadReferralRewardSummary();
     loadMemberWallet();
   }catch(error){
     memberLoadError=error?.message||"Gagal mengambil data anggota dari database.";
@@ -414,6 +415,27 @@ async function loadMemberPayoutHistory(){
   box.innerHTML="<strong>Riwayat pengajuan</strong><br>"+(r.data?.length?r.data.map(x=>esc(new Date(x.created_at).toLocaleDateString("id-ID"))+" — "+esc(money(x.amount))+" — "+esc(labels[x.status]||x.status)+(x.admin_notes?" ("+esc(x.admin_notes)+")":"")).join("<br>"):"Belum ada pengajuan.");
  }catch(e){box.textContent="Fitur ini aktif setelah migrasi database v3 dijalankan.";}
 }
+async function loadReferralRewardSummary(){
+ const box=$("referralRewardSummary");if(!box||!currentUser||!supabaseClient)return;
+ try{
+  const r=await supabaseClient.rpc("member_get_referral_reward_summary");if(r.error)throw r.error;
+  const s=r.data||{};
+  const current=Math.max(0,Math.min(14,Number(s.current_progress||0)));
+  const remaining=Math.max(0,Number(s.next_batch_remaining??(15-current)));
+  box.innerHTML="<strong>Progress referral langsung</strong><br>"+
+    "<span>"+current+"/15 referral valid untuk bonus berikutnya</span><br>"+
+    "<progress max=\"15\" value=\""+current+"\" style=\"width:100%;margin:8px 0\"></progress>"+
+    "<small>Total referral valid: "+Number(s.qualified_total||0).toLocaleString("id-ID")+
+    " · Kurang "+remaining+" orang</small><br>"+
+    "<small>Bonus terbentuk: "+Number(s.batch_count||0).toLocaleString("id-ID")+
+    " · Kas operasional terkumpul: "+money(Number(s.operating_reserve_total||0))+"</small><br>"+
+    "<strong>Saldo komisi tersedia: "+money(Number(s.available_balance||0))+"</strong>";
+ }catch(e){
+  box.textContent="Ringkasan referral belum dapat dimuat. Muat ulang halaman atau hubungi admin.";
+  console.warn("Ringkasan referral:",e.message||e);
+ }
+}
+
 async function submitMemberPayout(e){
  e.preventDefault();if(!currentUser){setProfileMessage("Silakan login terlebih dahulu.");return;}
  const amount=Number($("memberPayoutAmount").value),method=$("memberPayoutMethod").value,account=$("memberPayoutAccount").value.trim(),notes=$("memberPayoutNotes").value.trim(),button=e.submitter;
