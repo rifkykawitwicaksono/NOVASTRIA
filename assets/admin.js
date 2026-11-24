@@ -8,7 +8,7 @@ const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&
 const db=window.supabase?.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
 let members=[],payments=[],commissions=[],payouts=[],products=[],overview={},sales=[],storeOrders=[],payoutRequests=[],salesSummary={},walletDeposits=[],allTransactions=[],referralProgress=[],referralBonusBatches=[];
 function notice(message,type=""){const el=$("adminNotice");el.textContent=message;el.className="admin-alert "+type;}
-function badge(status){return '<span class="admin-badge '+esc(status)+'">'+esc(({active:"Aktif",inactive:"Nonaktif",none:"Belum ada",pending:"Menunggu",verified:"Terverifikasi",rejected:"Ditolak",approved:"Disetujui",paid:"Dibayar",pending_payment:"Menunggu pembayaran",pending_verification:"Menunggu verifikasi",processing:"Diproses",completed:"Selesai",cancelled:"Dibatalkan"}[status]||status))+'</span>';}
+function badge(status){return '<span class="admin-badge '+esc(status)+'">'+esc(({active:"Aktif",inactive:"Nonaktif",none:"Belum ada",pending:"Menunggu",verified:"Terverifikasi",rejected:"Ditolak",approved:"Disetujui",paid:"Dibayar",blocked:"Diblokir",pending_payment:"Menunggu pembayaran",pending_verification:"Menunggu verifikasi",processing:"Diproses",completed:"Selesai",cancelled:"Dibatalkan"}[status]||status))+'</span>';}
 async function rpc(name,args={}){const r=await db.rpc(name,args);if(r.error)throw r.error;return r.data;}
 async function start(){
   $("adminLogout").addEventListener("click",logout);
@@ -84,7 +84,7 @@ function renderStats(){
   $("statReferralBatches").textContent=Number(overview.referral_bonus_batches||0).toLocaleString("id-ID");
   $("statReferralReserve").textContent=money(overview.referral_operating_reserve||0);
   $("statProducts").textContent=products.filter(p=>p.is_active).length;
-  $("dashboardSummary").textContent="Saat ini terdapat "+members.length+" profil anggota, "+payments.filter(p=>p.status==="pending").length+" pembayaran menunggu verifikasi, "+commissions.length+" catatan komisi referral, dan "+products.length+" produk katalog. Periksa bukti pembayaran sebelum melakukan verifikasi.";
+  $("dashboardSummary").textContent="Saat ini terdapat "+members.length+" profil anggota, "+payments.filter(p=>p.status==="pending").length+" pembayaran menunggu verifikasi, "+Number(overview.referral_bonus_batches||0)+" kelompok bonus referral terbentuk dengan alokasi kas operasional "+money(overview.referral_operating_reserve||0)+", serta "+products.length+" produk katalog. Periksa bukti pembayaran sebelum melakukan verifikasi.";
 }
 function renderMembers(){
   const q=$("memberSearch").value.trim().toLowerCase(),filter=$("memberFilter").value;
