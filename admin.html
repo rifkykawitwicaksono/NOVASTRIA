@@ -35,7 +35,7 @@
           <div class="admin-stat"><span>Pembayaran menunggu</span><strong id="statPending">0</strong></div>
           <div class="admin-stat"><span>Pendapatan membership terverifikasi</span><strong id="statRevenue">Rp0</strong></div>
           <div class="admin-stat"><span>Komisi belum dicairkan</span><strong id="statCommission">Rp0</strong></div>
-          <div class="admin-stat"><span>Total pencairan komisi</span><strong id="statPayout">Rp0</strong></div>
+          <div class="admin-stat"><span>Total pencairan komisi</span><strong id="statPayout">Rp0</strong></div><div class="admin-stat"><span>Bonus referral terbentuk</span><strong id="statReferralBatches">0</strong></div><div class="admin-stat"><span>Kas operasional referral</span><strong id="statReferralReserve">Rp0</strong></div>
           <div class="admin-stat"><span>Produk katalog aktif</span><strong id="statProducts">0</strong></div>
         </div>
         <div class="admin-card"><h2>Ringkasan operasional</h2><p class="admin-muted">Gunakan menu di samping untuk memproses pembayaran, membership, komisi, katalog, dan laporan. Nilai pendapatan pada dashboard hanya menghitung pembayaran membership yang diverifikasi, bukan penjualan produk via WhatsApp.</p><div id="dashboardSummary" class="admin-alert">Memuat ringkasan...</div></div>
@@ -62,7 +62,9 @@
       </section>
 
       <section class="admin-section" id="tab-commissions" hidden>
-        <div class="admin-card"><h2>Referral & Komisi</h2><p class="admin-muted">Komisi Rp100.000 dibuat otomatis saat pembayaran Referral Member diverifikasi dan akun pembeli memiliki pengundang. Pembayaran Reseller Member tidak menghasilkan komisi.</p><div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Pengundang</th><th>Anggota baru</th><th>Komisi</th><th>Tanggal</th></tr></thead><tbody id="commissionsBody"><tr><td colspan="4" class="admin-empty">Memuat...</td></tr></tbody></table></div></div>
+        <div class="admin-card"><h2>Referral & Komisi</h2><p class="admin-muted">Setiap 15 referral langsung yang berbeda, membayar Referral Member Rp150.000, dan diverifikasi menghasilkan bonus kotor Rp150.000. Sistem mencatat Rp50.000 sebagai kas operasional dan menambahkan Rp100.000 ke saldo komisi pengundang. Satu anggota hanya dihitung sekali.</p><div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Pengundang</th><th>Anggota baru</th><th>Komisi</th><th>Tanggal</th></tr></thead><tbody id="commissionsBody"><tr><td colspan="4" class="admin-empty">Memuat...</td></tr></tbody></table></div></div>
+        <div class="admin-card"><h2>Progress Referral Langsung</h2><p class="admin-muted">Hanya anggota baru unik dengan pembayaran Referral Member terverifikasi yang dihitung. Progress kembali ke 0 setelah satu kelompok 15 orang membentuk bonus.</p><div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Pengundang</th><th>Referral valid</th><th>Progress kelompok</th><th>Bonus terbentuk</th><th>Kas operasional</th><th>Saldo komisi tersedia</th><th>Status akun</th></tr></thead><tbody id="referralProgressBody"><tr><td colspan="7" class="admin-empty">Memuat...</td></tr></tbody></table></div></div>
+        <div class="admin-card"><h2>Ledger Bonus Referral</h2><p class="admin-muted">Setiap baris mewakili satu kelompok 15 referral. Detail 15 payment ID dan anggota disimpan dalam tabel kualifikasi dan audit log.</p><div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Pengundang</th><th>Kelompok</th><th>Referral</th><th>Komisi kotor</th><th>Kas operasional</th><th>Komisi bersih</th><th>Tanggal</th></tr></thead><tbody id="referralBonusBatchesBody"><tr><td colspan="7" class="admin-empty">Memuat...</td></tr></tbody></table></div></div>
         <div class="admin-card"><h2>Catat Pencairan Komisi</h2><p class="admin-muted">Catat hanya setelah dana benar-benar ditransfer ke pengundang. Sistem memvalidasi saldo tersedia sebelum menyimpan.</p><form id="payoutForm" class="admin-form-grid"><label>Penerima<select id="payoutUser" required><option value="">Pilih penerima komisi</option></select></label><label>Nominal pencairan (Rp)<input id="payoutAmount" type="number" min="1" required></label><label>Referensi transfer<input id="payoutReference" placeholder="Nomor referensi / bank"></label><label>Catatan<textarea id="payoutNotes" placeholder="Catatan pencairan"></textarea></label><button class="btn admin-primary" type="submit">Catat dana sudah dibayarkan</button></form></div>
         <div class="admin-card"><h2>Riwayat Pencairan</h2><div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Penerima</th><th>Nominal</th><th>Referensi</th><th>Tanggal</th><th>Status</th></tr></thead><tbody id="payoutsBody"><tr><td colspan="5" class="admin-empty">Memuat...</td></tr></tbody></table></div></div>
       </section>
@@ -150,6 +152,6 @@
   </div>
 </main>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="assets/admin.js?v=manual-voucher-code-v1"></script>
+<script src="assets/admin.js?v=referral-15-batch-v1"></script>
 <script src="assets/admin-notifications.js?v=audio-alert-v1"></script>
 </body></html>
