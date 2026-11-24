@@ -708,18 +708,56 @@ function openJoin(type){
     openAccount();setAuthMessage("Silakan masuk atau daftar akun terlebih dahulu untuk bergabung ke program anggota.");return;
   }
   joinType=type;
-  const isReferral=type==="referral",fee=isReferral?150000:100000;
-  $("joinTitle").textContent=isReferral?"Daftar Referral Member":"Daftar Reseller Member";
-  $("joinSummary").innerHTML=isReferral
-    ?"<strong>Biaya: "+money(fee)+"</strong><br>Referral member mendapat kode referral pribadi. Tidak otomatis menjadi reseller."
-    :"<strong>Biaya: "+money(fee)+"</strong><br>Reseller mendapat akses harga khusus setelah pembayaran diverifikasi. Tidak otomatis menjadi referral member.";
-  $("joinAccountNote").textContent="Akun: "+(member.name||member.email)+" • Kode referral pribadi: "+(member.referralCode||"Belum tersedia");
+  const isReferral=type==="referral";
+  $("joinTitle").textContent=isReferral?"GABUNG REFERRAL MEMBER":"Daftar Reseller Member";
+  $("joinEyebrow").textContent=isReferral?"PROGRAM REFERRAL DUKUN CHEAT":"PENDAFTARAN";
+  $("joinAccountNote").hidden=isReferral;
+  $("joinFootnote").hidden=isReferral;
+  $("requestJoin").textContent=isReferral?(member.referralActive?"REFERRAL MEMBER SUDAH AKTIF":"GABUNG SEKARANG"):"Minta instruksi pembayaran via WhatsApp";
+  $("requestJoin").disabled=isReferral&&member.referralActive;
+  if(isReferral){
+    $("joinSummary").innerHTML=
+      "<p>Dapatkan kode referral pribadi dan kesempatan memperoleh komisi dengan mengajak anggota baru.</p>"+
+      "<h3>Informasi Akun</h3>"+
+      "<div class='referral-account-row'><span>Akun</span><strong>"+esc(member.name||member.email)+"</strong></div>"+
+      "<div class='referral-account-row'><span>Kode referral pribadi</span><strong>"+esc(member.referralCode||"Kode belum tersedia")+"</strong></div>"+
+      "<div class='referral-target'><h3>Target Komisi Referral</h3><strong class='referral-target-number'>15 Anggota</strong>"+
+      "<p>Komisi Referral akan terbuka setelah Anda berhasil mengundang 15 anggota langsung yang tervalidasi.</p></div>"+
+      "<div class='referral-commission-grid'>"+
+      "<div><strong>Komisi kotor</strong><b>Rp150.000</b></div>"+
+      "<div><strong>Potongan kas operasional</strong><b>Rp50.000</b></div>"+
+      "<div><strong>Komisi bersih</strong><b>Rp100.000</b></div></div>"+
+      (member.referralActive?"<p class='referral-active-note'>Status Referral Member Anda sudah aktif.</p>":"");
+  }else{
+    const fee=100000;
+    $("joinSummary").innerHTML="<strong>Biaya: "+money(fee)+"</strong><br>Reseller mendapat akses harga khusus setelah pembayaran diverifikasi. Tidak otomatis menjadi referral member.";
+    $("joinAccountNote").textContent="Akun: "+(member.name||member.email)+" • Kode referral pribadi: "+(member.referralCode||"Belum tersedia");
+    $("joinFootnote").textContent="Keanggotaan reseller tidak aktif sebelum pembayaran diperiksa dan diverifikasi admin.";
+  }
   $("joinDialog").showModal();
 }
 
-function requestJoin(){
-  if(!member)return;
-  const fee=joinType==="referral"?150000:100000,program=joinType==="referral"?"Referral Member":"Reseller Member";
+async function requestJoin(){
+  if(!member||!currentUser)return;
+  const button=$("requestJoin");
+  if(joinType==="referral"){
+    if(member.referralActive)return;
+    button.disabled=true;button.textContent="MENGAKTIFKAN...";
+    try{
+      const result=await supabaseClient.rpc("member_activate_referral_membership");
+      if(result.error)throw result.error;
+      await refreshMember();
+      $("joinSummary").insertAdjacentHTML("beforeend","<p class='referral-active-note'>Referral Member berhasil diaktifkan. Kode referral pribadi Anda: <strong>"+esc(result.data?.referral_code||member?.referralCode||"")+"</strong></p>");
+      button.textContent="REFERRAL MEMBER AKTIF";
+      button.disabled=true;
+    }catch(error){
+      button.disabled=false;button.textContent="GABUNG SEKARANG";
+      $("joinAccountNote").hidden=false;
+      $("joinAccountNote").textContent="Aktivasi gagal: "+(error.message||"Silakan coba kembali.");
+    }
+    return;
+  }
+  const fee=100000,program="Reseller Member";
   const msg="Halo admin DUKUN CHEAT, saya ingin mendaftar "+program+".\nNama: "+member.name+"\nEmail: "+member.email+"\nNomor WhatsApp: "+member.phone+"\nKode referral pribadi: "+member.referralCode+"\nBiaya: "+money(fee)+"\nMohon instruksi pembayaran dan verifikasi.";
   window.open("https://wa.me/"+ADMIN_WA+"?text="+encodeURIComponent(msg),"_blank");
 }
