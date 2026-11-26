@@ -173,3 +173,9 @@ button:disabled{opacity:.6;cursor:wait;transform:none}
 .referral-join-button{display:block;width:min(100%,360px);margin:20px auto 0}
 .referral-active-note{margin:16px 0 0;color:#9cece2;font-weight:700}
 @media(max-width:520px){.referral-commission-grid{gap:7px}.referral-commission-grid strong{font-size:10px}.referral-commission-grid b{font-size:12px}.referral-account-row{font-size:12px}}
+
+
+/* Kategori katalog: tiga platform ditambah opsi semua produk */
+#categoryTabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}
+#categoryTabs .category-tab{min-width:0;white-space:normal;line-height:1.35}
+@media(max-width:520px){#categoryTabs{grid-template-columns:repeat(2,minmax(0,1fr))}#categoryTabs .category-tab{padding:10px 8px;font-size:10px}}
