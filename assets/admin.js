@@ -225,7 +225,7 @@ function getAutoProductTemplate(productName){
   const hasAndroid=/android|apk|\bmod\b|cheat/.test(name);
   if(hasIOS&&hasAndroid){
     return {
-      platform:"iOS & Android",
+      platform:"Android & iOS",
       description:"📦 Mod ini dapat digunakan di perangkat iOS & Android dengan cara penggunaan yang sama\n\n🍏 iOS:\n🛠️ Pemasangan menggunakan Safari\n🚫 No jailbreak & reset\n✅ Support all iOS\n❌ No Gbox\n\n🤖 Android:\n🛠️ Pemasangan menggunakan Chrome\n🚫 No Android root\n✅ Support all Android",
       instructions:"1. Pilih durasi produk\n2. Pilih metode pembayaran\n3. Bayar sesuai harga\n4. Salin kode yang tertera setelah bayar\n5. Klik cara pasang di atas untuk mendapatkan file & panduan.",
       requirements:"iOS: mendukung perangkat iOS, tanpa jailbreak dan reset, tidak menggunakan Gbox. Android: mendukung Android, tanpa root.",
