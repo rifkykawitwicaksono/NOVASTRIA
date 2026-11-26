@@ -157,6 +157,12 @@ function renderStoreActivity(){
 
 function productPlatform(name){
   const n=String(name||"").toLowerCase();
+  const detailPlatform=String(productDetails[name]?.platform||"").toLowerCase();
+  // Gunakan metadata platform dari detail produk jika admin sudah mengisinya.
+  if(detailPlatform.includes("android")&&detailPlatform.includes("ios"))return "Android & iOS";
+  if(detailPlatform.includes("ios"))return "iOS";
+  if(detailPlatform.includes("android"))return "Android";
+  // Fallback untuk produk yang belum memiliki metadata platform.
   if(n.includes("ios")&&n.includes("android"))return "Android & iOS";
   if(n.includes("ios")||n.includes("gbox")||n.includes("esign")||n==="migul")return "iOS";
   return "Android";
@@ -187,16 +193,16 @@ function productDescription(name){
 }
 
 function populateCategories(){
-  const counts={Android:0,"iOS":0};
+  const counts={Android:0,"iOS":0,"Android & iOS":0};
   const groups=new Map();
   catalog.forEach(p=>{if(!groups.has(p.product))groups.set(p.product,[]);groups.get(p.product).push(p);});
   for(const [name,items] of groups){
     const platform=productPlatform(name);
-    if(platform==="Android & iOS"){counts.Android+=items.length;counts.iOS+=items.length;}
-    else counts[platform]=(counts[platform]||0)+items.length;
+    counts[platform]=(counts[platform]||0)+items.length;
   }
   document.querySelector('[data-category="Android"]').textContent="Android · "+counts.Android;
-  document.querySelector('[data-category="iOS"]').textContent="iOS · "+counts.iOS;
+  document.querySelector('[data-category="iOS"]').textContent="iOS · "+counts["iOS"];
+  document.querySelector('[data-category="Android & iOS"]').textContent="Android & iOS · "+counts["Android & iOS"];
 }
 
 function renderInlineProductDetails(name){
@@ -316,7 +322,7 @@ function renderProducts(){
     const platform=productPlatform(name);
     const matches=items.filter(p=>!q||(p.product+" "+p.variant).toLowerCase().includes(q));
     return {name,platform,items:matches.length?matches:[],allItems:items};
-  }).filter(g=>g.items.length&&(activeCategory==="all"||g.platform===activeCategory||g.platform==="Android & iOS"));
+  }).filter(g=>g.items.length&&(activeCategory==="all"||g.platform===activeCategory));
   $("catalogSummary").textContent=visible.length+" produk · "+visible.reduce((n,g)=>n+g.items.length,0)+" varian tersedia";
   if(!visible.length){$("productGrid").innerHTML='<div class="empty">Produk tidak ditemukan pada kategori ini.</div>';return;}
   $("productGrid").innerHTML=visible.map((g,groupIndex)=>{
