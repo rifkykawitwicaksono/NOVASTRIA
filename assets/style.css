@@ -176,6 +176,6 @@ button:disabled{opacity:.6;cursor:wait;transform:none}
 
 
 /* Kategori katalog: tiga platform ditambah opsi semua produk */
-#categoryTabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}
+#categoryTabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}#categoryTabs [data-category="all"]{grid-column:1/-1}
 #categoryTabs .category-tab{min-width:0;white-space:normal;line-height:1.35}
-@media(max-width:520px){#categoryTabs{grid-template-columns:repeat(2,minmax(0,1fr))}#categoryTabs .category-tab{padding:10px 8px;font-size:10px}}
+@media(max-width:520px){#categoryTabs{grid-template-columns:repeat(3,minmax(0,1fr))}#categoryTabs .category-tab{padding:10px 5px;font-size:10px}}
