@@ -82,6 +82,7 @@
 <label>Urutan tampil<input id="productSort" type="number" value="0"></label>
 <label class="admin-check"><input id="productStock" type="checkbox" checked> Stok tersedia</label>
 <label class="admin-check"><input id="productActive" type="checkbox" checked> Tampilkan di toko</label>
+<label class="admin-check"><input id="productRecommended" type="checkbox"> Tampilkan sebagai Produk Rekomendasi</label>
 <div class="admin-detail-divider" style="grid-column:1/-1"><h3>Konten Detail Produk</h3><p class="admin-muted">Terhubung otomatis dengan nama produk di atas. Tidak perlu mengisi nama produk dua kali.</p></div>
 <label>Platform produk<select id="detailPlatform"><option value="">Pilih platform</option><option value="Android">Android saja</option><option value="iOS">iOS saja</option><option value="Android & iOS">Android &amp; iOS</option></select></label>
 <label>Status operasional<select id="detailOperationalStatus"><option value="unknown">Unknown — belum diketahui</option><option value="online">Online — aman digunakan</option><option value="offline">Offline — maintenance</option></select></label>
@@ -94,7 +95,7 @@
 <div class="admin-row" style="grid-column:1/-1"><button class="btn admin-primary" type="submit">Simpan produk & konten detail</button><button class="btn btn-outline" type="button" id="resetProduct">Tambah / kosongkan form</button></div>
 </form><div id="productDetailNotice" class="admin-alert">Pilih Edit pada produk untuk mengubahnya, atau isi form untuk menambahkan produk baru.</div>
 </div>
-<div class="admin-card"><div class="admin-row" style="justify-content:space-between;align-items:center"><h2>Daftar Produk & Harga</h2><button class="btn btn-outline" type="button" id="initializeProductDetails">Siapkan semua produk lama</button><button class="btn admin-primary" type="button" id="autoFillProductContent">Isi otomatis konten produk</button></div><p class="admin-muted">Gunakan “Isi otomatis konten produk” untuk mengisi platform, deskripsi, persyaratan, dan cara top up berdasarkan nama produk. Status operasional dan tautan file tidak diubah. Periksa hasil klasifikasi sebelum produk dipublikasikan.</p><p class="admin-muted">Tombol ini membuat data detail untuk setiap nama produk. Status diatur Unknown, link dikosongkan, dan konten detail yang sudah ada dipertahankan.</p><div class="admin-toolbar"><input id="productSearch" type="search" placeholder="Cari produk / varian"><select id="productVisibility"><option value="">Semua</option><option value="active">Tampil di toko</option><option value="hidden">Disembunyikan</option></select></div><div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Produk / Varian</th><th>Harga publik</th><th>Harga reseller</th><th>Stok</th><th>Visibilitas</th><th>Aksi</th></tr></thead><tbody id="productsBody"><tr><td colspan="6" class="admin-empty">Memuat...</td></tr></tbody></table></div></div>
+<div class="admin-card"><div class="admin-row" style="justify-content:space-between;align-items:center"><h2>Daftar Produk & Harga</h2><button class="btn btn-outline" type="button" id="initializeProductDetails">Siapkan semua produk lama</button><button class="btn admin-primary" type="button" id="autoFillProductContent">Isi otomatis konten produk</button></div><p class="admin-muted">Gunakan “Isi otomatis konten produk” untuk mengisi platform, deskripsi, persyaratan, dan cara top up berdasarkan nama produk. Status operasional dan tautan file tidak diubah. Periksa hasil klasifikasi sebelum produk dipublikasikan.</p><p class="admin-muted">Tombol ini membuat data detail untuk setiap nama produk. Status diatur Unknown, link dikosongkan, dan konten detail yang sudah ada dipertahankan.</p><div class="admin-toolbar"><input id="productSearch" type="search" placeholder="Cari produk / varian"><select id="productVisibility"><option value="">Semua</option><option value="active">Tampil di toko</option><option value="hidden">Disembunyikan</option></select></div><div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Produk / Varian</th><th>Harga publik</th><th>Harga reseller</th><th>Stok</th><th>Rekomendasi</th><th>Visibilitas</th><th>Aksi</th></tr></thead><tbody id="productsBody"><tr><td colspan="6" class="admin-empty">Memuat...</td></tr></tbody></table></div></div>
 </section>
 
 <section class="admin-section" id="tab-sales" hidden>
@@ -152,6 +153,6 @@
   </div>
 </main>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="assets/admin.js?v=platform-selector-v1referral-15-batch-v1"></script>
+<script src="assets/admin.js?v=product-recommendation-admin-v1"></script>
 <script src="assets/admin-notifications.js?v=audio-alert-v1"></script>
 </body></html>
