@@ -19,6 +19,7 @@ let catalog=[],productDetails={},selectedOrder=null,joinType="referral",currentU
 async function init(){
   $("year").textContent=new Date().getFullYear();
   $("contactLink").href="https://wa.me/"+ADMIN_WA+"?text="+encodeURIComponent("Halo admin DUKUN CHEAT, saya ingin bertanya.");
+  loadSiteAnnouncements();
   loadStoreActivity();
   setInterval(loadStoreActivity,120000);
   setInterval(renderStoreActivity,8000);
@@ -108,6 +109,24 @@ async function init(){
   }
 }
 
+
+
+async function loadSiteAnnouncements(){
+  const ticker=$("siteAnnouncementTicker"),track=$("siteAnnouncementTrack");
+  if(!ticker||!track||!supabaseClient)return;
+  try{
+    const {data,error}=await supabaseClient.from("site_announcements").select("message").eq("is_active",true).order("sort_order").order("created_at");
+    if(error)throw error;
+    const messages=(data||[]).map(row=>String(row.message||"").trim()).filter(Boolean);
+    if(!messages.length){ticker.hidden=true;track.innerHTML="";return;}
+    const items=messages.map(message=>'<span class="site-announcement-item">'+esc(message)+'</span>').join("");
+    track.innerHTML=items+ '<span class="site-announcement-copy" aria-hidden="true">'+items+'</span>';
+    ticker.hidden=false;
+  }catch(error){
+    ticker.hidden=true;
+    console.warn("Pengumuman website belum dapat dimuat:",error.message||error);
+  }
+}
 
 let storeActivityItems=[],storeActivityIndex=0,storeActivityLoaded=false,storeActivityLoading=false;
 async function loadStoreActivity(){
