@@ -282,11 +282,15 @@ function renderProductShowcase(){
 function renderRecommendedProducts(){
   const target=$("recommendedGrid");
   if(!target)return;
-  const names=["RezzX iOS & Android","Drip Client Wire iOS & Android"];
-  const groups=names.map(name=>({
-    name,
-    items:catalog.map((p,index)=>({...p,_index:index})).filter(p=>p.product.toLowerCase()===name.toLowerCase()&&p.isRecommended)
-  })).filter(group=>group.items.length);
+  const grouped=new Map();
+  catalog.forEach((product,index)=>{
+    if(!product.isRecommended)return;
+    const key=String(product.product||"").trim();
+    if(!key)return;
+    if(!grouped.has(key))grouped.set(key,{name:key,items:[]});
+    grouped.get(key).items.push({...product,_index:index});
+  });
+  const groups=[...grouped.values()];
   if(!groups.length){
     target.innerHTML='<div class="empty">Produk rekomendasi belum tersedia.</div>';
     return;
