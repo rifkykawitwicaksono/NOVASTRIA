@@ -29,7 +29,7 @@
 <section class="stats"><div><strong id="productCount">—</strong><span>Varian katalog</span></div><div><strong id="todaySoldCount">0</strong><span>Produk terjual hari ini</span></div><div><strong>2</strong><span>Program keanggotaan</span></div></section>
 <div class="store-activity-toast" id="storeActivityToast" hidden role="status" aria-live="polite"><span class="activity-indicator"></span><div class="activity-copy"><strong id="storeActivityTitle">Pesanan baru diproses</strong><span id="storeActivityDetail"></span><small id="storeActivityTime"></small></div></div>
 <section class="section" id="katalog"><div class="section-heading"><div><span class="eyebrow">JELAJAHI KATALOG</span><h2>Temukan produk digital</h2><p>Produk dikelompokkan berdasarkan platform. Pilih produk, tentukan varian, lalu pesan.</p></div><div class="catalog-tools"><input id="searchInput" type="search" placeholder="Cari nama produk atau durasi..."></div></div><div class="category-tabs" id="categoryTabs" role="group" aria-label="Filter platform"><button class="category-tab active" data-category="all" type="button">Semua produk</button><button class="category-tab" data-category="Android" type="button">Android</button><button class="category-tab" data-category="iOS" type="button">iOS</button><button class="category-tab" data-category="Android &amp; iOS" type="button">Android &amp; iOS</button></div><div class="catalog-summary" id="catalogSummary"></div><div class="product-grid" id="productGrid"><div class="loading">Memuat katalog...</div></div></section>
-<section class="section" id="lacak-pesanan">
+<section class="section on-demand-section" id="lacak-pesanan" hidden>
   <div class="section-heading"><div><span class="eyebrow">ORDER TRACKING</span><h2>Lacak pesanan</h2><p>Masukkan kode pesanan dan nomor WhatsApp yang digunakan saat membeli.</p></div></div>
   <form id="trackingForm" class="auth-form" style="max-width:560px">
     <label>Kode pesanan<input id="trackingCode" required maxlength="11" pattern="RKW-[0-9]{7}" placeholder="RKW-1234567" autocapitalize="characters"></label>
@@ -38,12 +38,12 @@
   </form>
   <div id="trackingResult" class="status-card" hidden aria-live="polite"></div>
 </section>
-<section class="section programs" id="program"><div class="section-heading"><div><span class="eyebrow">PILIH KEANGGOTAAN</span><h2>Dua program. Dua manfaat berbeda.</h2><p>Program referral dan reseller adalah keanggotaan terpisah.</p></div></div><div class="program-grid">
+<section class="section programs on-demand-section" id="program" hidden><div class="section-heading"><div><span class="eyebrow">PILIH KEANGGOTAAN</span><h2>Dua program. Dua manfaat berbeda.</h2><p>Program referral dan reseller adalah keanggotaan terpisah.</p></div></div><div class="program-grid">
 <article class="program-card"><span class="program-tag">PROGRAM REFERRAL</span><h3>Referral Member</h3><div class="price">Rp150.000<small>sekali bergabung</small></div><ul><li>Kode referral pribadi</li><li>Komisi Rp100.000 dari referral langsung yang tervalidasi</li><li>DUKUN CHEAT menerima Rp50.000 per pendaftaran referral tervalidasi</li><li>Tidak otomatis menjadi reseller</li></ul><button class="btn btn-primary full" data-join="referral">Daftar Referral — Rp150.000</button></article>
 <article class="program-card featured"><span class="program-tag">AKSES HARGA KHUSUS</span><h3>Reseller Member</h3><div class="price">Rp100.000<small>sekali bayar, tanpa perpanjangan</small></div><ul><li>Status reseller setelah pembayaran diverifikasi</li><li>Akses harga khusus reseller</li><li>Dapat memesan produk untuk pelanggan</li><li>Tidak otomatis mendapat status referral</li></ul><button class="btn btn-primary full" data-join="reseller">Daftar Reseller — Rp100.000</button></article>
 </div><p class="fineprint">Komisi referral hanya dihitung dari pendaftaran referral Rp150.000 yang terverifikasi, bukan biaya reseller. Program bukan jaminan penghasilan. Jelaskan manfaat, syarat, dan kebijakan pengembalian sebelum pembayaran.</p></section>
-<section class="section account-section" id="akun"><div class="account-box"><div><span class="eyebrow">AREA ANGGOTA</span><h2>Kelola akses DUKUN CHEAT</h2><p>Status akun, profil, dan keanggotaan tersimpan di database DUKUN CHEAT.</p></div><div class="account-status" id="accountStatus">Belum masuk</div><button class="btn btn-outline" id="manageAccount">Buka akun</button></div></section>
-<section class="section help-section" id="panduan-pemesanan">
+<section class="section account-section on-demand-section" id="akun" hidden><div class="account-box"><div><span class="eyebrow">AREA ANGGOTA</span><h2>Kelola akses DUKUN CHEAT</h2><p>Status akun, profil, dan keanggotaan tersimpan di database DUKUN CHEAT.</p></div><div class="account-status" id="accountStatus">Belum masuk</div><button class="btn btn-outline" id="manageAccount">Buka akun</button></div></section>
+<section class="section help-section on-demand-section" id="panduan-pemesanan" hidden>
   <div class="section-heading"><div><span class="eyebrow">ORDER GUIDE</span><h2>Panduan pemesanan</h2><p>Ikuti langkah berikut agar pesanan tercatat dengan benar.</p></div></div>
   <div class="guide-grid">
     <article class="guide-step"><span>01</span><h3>Pilih produk</h3><p>Buka katalog, pilih platform, produk, dan varian yang tersedia. Periksa deskripsi serta harga sebelum melanjutkan.</p></article>
@@ -53,7 +53,7 @@
   </div>
   <p class="fineprint">Khusus reseller, pembayaran produk menggunakan saldo reseller sesuai ketentuan yang tampil saat pemesanan.</p>
 </section>
-<section class="section help-section" id="faq">
+<section class="section help-section on-demand-section" id="faq" hidden>
   <div class="section-heading"><div><span class="eyebrow">FAQ & CUSTOMER SUPPORT</span><h2>Pertanyaan yang sering diajukan</h2><p>Jawaban singkat sebelum kamu melakukan pemesanan.</p></div></div>
   <div class="faq-list">
     <details><summary>Bagaimana cara memesan produk?</summary><p>Pilih produk dan varian di katalog, isi nama, nomor WhatsApp, serta detail akun jika diperlukan. Tekan tombol buat pesanan dan ikuti instruksi pembayaran yang tampil.</p></details>
@@ -64,7 +64,7 @@
     <details><summary>Apakah harus membuat akun untuk membeli?</summary><p>Kamu dapat mengisi data pemesan saat membuat pesanan. Akun diperlukan untuk mengakses fitur anggota seperti profil dan program keanggotaan.</p></details>
   </div>
 </section>
-<section class="section about-section" id="tentang-kami">
+<section class="section about-section on-demand-section" id="tentang-kami" hidden>
   <div class="about-panel"><div><span class="eyebrow">TENTANG DUKUN CHEAT</span><h2>Platform produk digital Android & iOS</h2><p>DUKUN CHEAT menyediakan katalog produk digital dengan informasi varian, proses pemesanan, dan bantuan admin dalam satu tempat. Kami berupaya menyajikan informasi produk secara jelas agar pelanggan dapat memeriksa detail sebelum memesan.</p></div></div>
 </section>
 </main>
@@ -149,5 +149,5 @@
 <dialog id="joinDialog"><div class="dialog-head"><div><span class="eyebrow" id="joinEyebrow">PROGRAM REFERRAL DUKUN CHEAT</span><h2 id="joinTitle">GABUNG REFERRAL MEMBER</h2></div><button class="icon-close" data-close="joinDialog" aria-label="Tutup">×</button></div><div class="dialog-body"><div class="status-card referral-join-summary" id="joinSummary"></div><p id="joinAccountNote" class="fineprint"></p><button class="btn btn-primary full referral-join-button" id="requestJoin" type="button">GABUNG SEKARANG</button><p id="joinFootnote" class="fineprint">Keanggotaan reseller tidak aktif sebelum pembayaran diperiksa dan diverifikasi admin.</p></div></dialog>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="assets/app.js?v=catalog-platforms-v1"></script>
+<script src="assets/app.js?v=footer-sections-onclick-v1"></script>
 </body></html>
