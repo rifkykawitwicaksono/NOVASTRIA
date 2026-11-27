@@ -8,13 +8,13 @@
 <body>
 <header class="topbar">
   <a class="brand" href="#"><span class="brand-mark">D</span><span>DUKUN CHEAT<small>PREMIUM DIGITAL STORE</small></span></a>
-  <nav><a href="#produk-rekomendasi">Rekomendasi</a><a href="#katalog">Katalog</a><a href="#lacak-pesanan">Lacak Pesanan</a><a href="#program">Program</a><a href="#akun">Akun</a></nav>
+  <nav><a href="#produk-rekomendasi" style="display:none">Rekomendasi</a><a href="#katalog">Katalog</a><a href="#lacak-pesanan">Lacak Pesanan</a><a href="#program">Program</a><a href="#akun">Akun</a></nav>
   <button class="btn btn-outline" id="openAccount">Masuk / Daftar</button>
 </header>
 <main>
 <div class="site-announcement-ticker" id="siteAnnouncementTicker" hidden aria-label="Pengumuman terbaru"><span class="site-announcement-label">INFO TERBARU</span><div class="site-announcement-viewport"><div class="site-announcement-track" id="siteAnnouncementTrack"></div></div></div>
 <div class="promo-ticker" aria-label="Informasi toko"><div class="promo-ticker-track"><span>✦ PRODUK DIGITAL ANDROID & iOS</span><span>✦ PILIH VARIAN SESUAI KEBUTUHAN</span><span>✦ DETAIL PRODUK TERSEDIA SAAT PEMESANAN</span><span>✦ BANTUAN ADMIN</span><span>✦ PRODUK DIGITAL ANDROID & iOS</span><span>✦ PILIH VARIAN SESUAI KEBUTUHAN</span><span>✦ DETAIL PRODUK TERSEDIA SAAT PEMESANAN</span><span>✦ BANTUAN ADMIN</span></div></div><section class="hero promo-hero"><div class="hero-copy"><span class="eyebrow">WELCOME TO DUKUN CHEAT</span><h1>Temukan akses digital yang tepat untukmu.</h1><p>Jelajahi pilihan produk Android dan iOS, pilih varian yang tersedia, lalu periksa informasi lengkap sebelum melakukan pemesanan.</p><div class="hero-actions"><a class="btn btn-primary" href="#katalog">Jelajahi produk <span aria-hidden="true">↗</span></a><a class="btn btn-outline" href="#lacak-pesanan">Lacak pesanan</a></div><div class="hero-points"><span>✓ Pilihan produk terkurasi</span><span>✓ Detail sebelum pesan</span><span>✓ Dukungan admin</span></div></div><div class="hero-panel promo-art"><div class="promo-orbit orbit-one"></div><div class="promo-orbit orbit-two"></div><div class="promo-art-glow"></div><span class="promo-art-kicker">YOUR DIGITAL STORE</span><div class="promo-art-title">LEVEL<br><em>UP.</em></div><div class="promo-art-bottom"><span>ANDROID • iOS</span><strong>DUKUN CHEAT</strong></div><span class="promo-spark spark-one">✦</span><span class="promo-spark spark-two">✧</span></div></section>
-<section class="section recommended-section" id="produk-rekomendasi">
+<section class="section recommended-section" id="produk-rekomendasi" hidden style="display:none">
   <div class="section-heading"><div><span class="eyebrow">PILIHAN UNGGULAN</span><h2>Produk rekomendasi</h2><p>Produk pilihan yang ditampilkan terpisah dari katalog utama agar lebih mudah ditemukan.</p></div></div>
   <div class="product-grid recommended-grid" id="recommendedGrid"><div class="loading">Memuat produk rekomendasi...</div></div>
 </section>
@@ -150,5 +150,5 @@
 <dialog id="joinDialog"><div class="dialog-head"><div><span class="eyebrow" id="joinEyebrow">PROGRAM REFERRAL DUKUN CHEAT</span><h2 id="joinTitle">GABUNG REFERRAL MEMBER</h2></div><button class="icon-close" data-close="joinDialog" aria-label="Tutup">×</button></div><div class="dialog-body"><div class="status-card referral-join-summary" id="joinSummary"></div><p id="joinAccountNote" class="fineprint"></p><button class="btn btn-primary full referral-join-button" id="requestJoin" type="button">GABUNG SEKARANG</button><p id="joinFootnote" class="fineprint">Keanggotaan reseller tidak aktif sebelum pembayaran diperiksa dan diverifikasi admin.</p></div></dialog>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="assets/app.js?v=site-announcements-ticker-v1"></script>
+<script src="assets/app.js?v=hide-empty-recommendations-v1"></script>
 </body></html>
