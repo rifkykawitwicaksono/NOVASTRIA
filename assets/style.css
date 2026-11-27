@@ -226,3 +226,9 @@ button:disabled{opacity:.6;cursor:wait;transform:none}
 @keyframes site-announcement-marquee{from{transform:translateX(0)}to{transform:translateX(-50%)}}
 @media(max-width:600px){.site-announcement-ticker{gap:9px;padding:9px 0}.site-announcement-label{margin-left:10px;padding:5px 7px;font-size:8px}.site-announcement-track{gap:30px;animation-duration:27s}.site-announcement-item{font-size:10px}}
 @media(prefers-reduced-motion:reduce){.site-announcement-track{animation:none;flex-wrap:wrap;width:100%;padding:0 12px}.site-announcement-viewport{overflow:visible}.site-announcement-ticker{align-items:flex-start}}
+
+
+/* Katalog: enam produk dalam satu baris di desktop, responsif di layar kecil. */
+@media(min-width:801px){#productGrid{grid-template-columns:repeat(6,minmax(0,1fr));gap:10px}#productGrid .product-card{min-width:0;padding:14px 12px}#productGrid .product-card h3{font-size:14px;overflow-wrap:anywhere}#productGrid .product-visual{gap:8px}#productGrid .product-visual-copy strong{font-size:10px}#productGrid .variant-picker-label{font-size:10px}#productGrid .variant-picker{min-width:0;width:100%;font-size:11px}#productGrid .price-value{font-size:16px}#productGrid .product-card .btn{padding:11px 8px;font-size:11px}}
+@media(max-width:800px){#productGrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:520px){#productGrid{grid-template-columns:1fr}}
