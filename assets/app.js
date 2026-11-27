@@ -771,4 +771,19 @@ async function requestJoin(){
 function setAuthMessage(message,type="error"){$("authMessage").textContent=message;$("authMessage").className="auth-message "+type;}
 function setProfileMessage(message,type="error"){$("profileMessage").textContent=message;$("profileMessage").className="auth-message "+type;}
 
+
+/* Informational and member sections open only when a menu link is selected. */
+document.addEventListener("click",function(event){
+  const link=event.target.closest('a[href^="#"]');
+  if(!link)return;
+  const id=decodeURIComponent(link.getAttribute("href").slice(1));
+  const target=document.getElementById(id);
+  if(!target||!target.classList.contains("on-demand-section"))return;
+  event.preventDefault();
+  document.querySelectorAll(".on-demand-section").forEach(section=>{section.hidden=section!==target;});
+  target.hidden=false;
+  history.replaceState(null,"","#"+id);
+  target.scrollIntoView({behavior:"smooth",block:"start"});
+});
+
 init();
