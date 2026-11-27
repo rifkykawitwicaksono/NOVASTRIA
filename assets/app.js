@@ -300,7 +300,9 @@ function renderProductShowcase(){
 
 function renderRecommendedProducts(){
   const target=$("recommendedGrid");
-  if(!target)return;
+  const section=$("produk-rekomendasi");
+  const navLink=document.querySelector('nav a[href="#produk-rekomendasi"]');
+  if(!target||!section)return;
   const grouped=new Map();
   catalog.forEach((product,index)=>{
     if(!product.isRecommended)return;
@@ -311,9 +313,15 @@ function renderRecommendedProducts(){
   });
   const groups=[...grouped.values()];
   if(!groups.length){
-    target.innerHTML='<div class="empty">Produk rekomendasi belum tersedia.</div>';
+    target.innerHTML="";
+    section.hidden=true;
+    section.style.display="none";
+    if(navLink)navLink.style.display="none";
     return;
   }
+  section.hidden=false;
+  section.style.display="";
+  if(navLink)navLink.style.display="";
   target.innerHTML=groups.map((group,index)=>{
     const available=group.items.filter(p=>p.inStock);
     const current=available[0]||group.items[0];
