@@ -22,7 +22,7 @@
       <button class="admin-nav" data-tab="members"><span>♙</span> Anggota</button>
       <button class="admin-nav" data-tab="payments"><span>▣</span> Pembayaran</button>
       <button class="admin-nav" data-tab="commissions"><span>↗</span> Referral & Komisi</button>
-      <button class="admin-nav" data-tab="products"><span>▤</span> Produk & Harga</button><button class="admin-nav" data-tab="sales"><span>▧</span> Penjualan</button><button class="admin-nav" data-tab="orders"><span>⌕</span> Lacak Pesanan</button><button class="admin-nav" data-tab="requests"><span>⇩</span> Pengajuan Komisi</button><button class="admin-nav" data-tab="wallet"><span>◈</span> Deposit Saldo</button>\n      <button class="admin-nav" data-tab="payment-settings"><span>▣</span> Pengaturan Pembayaran</button>
+      <button class="admin-nav" data-tab="products"><span>▤</span> Produk & Harga</button><button class="admin-nav" data-tab="announcements"><span>◉</span> Running Text</button><button class="admin-nav" data-tab="sales"><span>▧</span> Penjualan</button><button class="admin-nav" data-tab="orders"><span>⌕</span> Lacak Pesanan</button><button class="admin-nav" data-tab="requests"><span>⇩</span> Pengajuan Komisi</button><button class="admin-nav" data-tab="wallet"><span>◈</span> Deposit Saldo</button>\n      <button class="admin-nav" data-tab="payment-settings"><span>▣</span> Pengaturan Pembayaran</button>
       <button class="admin-nav" data-tab="transactions"><span>▤</span> Semua Transaksi</button><button class="admin-nav" data-tab="reports"><span>▥</span> Laporan</button>
       <button class="admin-nav" data-tab="audit"><span>◷</span> Aktivitas Admin</button>
     </aside>
@@ -98,6 +98,26 @@
 <div class="admin-card"><div class="admin-row" style="justify-content:space-between;align-items:center"><h2>Daftar Produk & Harga</h2><button class="btn btn-outline" type="button" id="initializeProductDetails">Siapkan semua produk lama</button><button class="btn admin-primary" type="button" id="autoFillProductContent">Isi otomatis konten produk</button></div><p class="admin-muted">Gunakan “Isi otomatis konten produk” untuk mengisi platform, deskripsi, persyaratan, dan cara top up berdasarkan nama produk. Status operasional dan tautan file tidak diubah. Periksa hasil klasifikasi sebelum produk dipublikasikan.</p><p class="admin-muted">Tombol ini membuat data detail untuk setiap nama produk. Status diatur Unknown, link dikosongkan, dan konten detail yang sudah ada dipertahankan.</p><div class="admin-toolbar"><input id="productSearch" type="search" placeholder="Cari produk / varian"><select id="productVisibility"><option value="">Semua</option><option value="active">Tampil di toko</option><option value="hidden">Disembunyikan</option></select></div><div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Produk / Varian</th><th>Harga publik</th><th>Harga reseller</th><th>Stok</th><th>Rekomendasi</th><th>Visibilitas</th><th>Aksi</th></tr></thead><tbody id="productsBody"><tr><td colspan="7" class="admin-empty">Memuat...</td></tr></tbody></table></div></div>
 </section>
 
+
+<section class="admin-section" id="tab-announcements" hidden>
+  <div class="admin-card">
+    <h2 id="announcementEditorTitle">Tambah Pengumuman</h2>
+    <p class="admin-muted">Tulis satu pesan untuk pelanggan. Setiap pesan aktif akan berjalan bergantian dalam banner di bagian atas website. Tidak perlu mengedit produk.</p>
+    <form id="announcementForm" class="admin-form-grid">
+      <input id="announcementId" type="hidden">
+      <label style="flex-basis:100%">Isi pengumuman<textarea id="announcementMessage" rows="3" maxlength="500" required placeholder="Contoh: RezzX iOS sedang maintenance sementara. Mohon menunggu informasi selanjutnya."></textarea></label>
+      <label>Urutan tampil<input id="announcementSort" type="number" value="0" step="1"></label>
+      <label class="admin-check"><input id="announcementActive" type="checkbox" checked> Aktifkan pengumuman</label>
+      <div class="admin-row" style="flex-basis:100%"><button class="btn admin-primary" type="submit" id="saveAnnouncement">Publikasikan pengumuman</button><button class="btn btn-outline" type="button" id="resetAnnouncement">Kosongkan form</button></div>
+    </form>
+    <div class="admin-alert">Tips: buat satu pengumuman untuk setiap produk atau informasi. Urutan angka lebih kecil akan tampil lebih dahulu. Maksimal 500 karakter per pengumuman.</div>
+  </div>
+  <div class="admin-card">
+    <h2>Daftar Pengumuman</h2>
+    <div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Pesan</th><th>Urutan</th><th>Status</th><th>Diperbarui</th><th>Aksi</th></tr></thead><tbody id="announcementsBody"><tr><td colspan="5" class="admin-empty">Memuat...</td></tr></tbody></table></div>
+  </div>
+</section>
+
 <section class="admin-section" id="tab-sales" hidden>
 <div class="admin-card"><h2>Catat Penjualan Produk</h2><p class="admin-muted">Catat pesanan dari WhatsApp. Isi modal per unit agar laba kotor dapat dihitung. Hanya status Dibayar dan Selesai masuk laporan pendapatan.</p>
 <form id="saleForm" class="admin-form-grid admin-product-form">
@@ -153,6 +173,6 @@
   </div>
 </main>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="assets/admin.js?v=product-recommendation-admin-v1"></script>
+<script src="assets/admin.js?v=site-announcements-ticker-v1"></script>
 <script src="assets/admin-notifications.js?v=audio-alert-v1"></script>
 </body></html>
