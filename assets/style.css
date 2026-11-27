@@ -216,7 +216,7 @@ button:disabled{opacity:.6;cursor:wait;transform:none}
 @media(max-width:520px){.guide-grid{grid-template-columns:1fr}.guide-step{padding:18px}.faq-list summary{font-size:13px;padding:17px 42px 17px 16px}.faq-list summary:after{right:16px;top:13px}.faq-list details p{padding:0 16px 17px}.about-panel{padding:22px}.about-panel h2{font-size:23px}}
 
 /* Admin-managed announcement ticker */
-.site-announcement-ticker{display:flex;align-items:center;gap:16px;overflow:hidden;padding:11px 0;background:linear-gradient(90deg,#2b1b43,#171b35 58%,#102a3b);border-top:1px solid #a58aff55;border-bottom:1px solid #62e6df44}
+.site-announcement-ticker[hidden]{display:none}.site-announcement-ticker{display:flex;align-items:center;gap:16px;overflow:hidden;padding:11px 0;background:linear-gradient(90deg,#2b1b43,#171b35 58%,#102a3b);border-top:1px solid #a58aff55;border-bottom:1px solid #62e6df44}
 .site-announcement-label{flex:0 0 auto;margin-left:clamp(12px,3vw,34px);padding:6px 10px;border:1px solid #f0c36b66;border-radius:6px;background:#f0b84a1a;color:#ffd98a;font-size:9px;font-weight:800;letter-spacing:1.4px}
 .site-announcement-viewport{min-width:0;overflow:hidden;flex:1}
 .site-announcement-track{display:flex;align-items:center;gap:52px;width:max-content;animation:site-announcement-marquee 34s linear infinite}
