@@ -6,7 +6,7 @@ const priceLabel=n=>n===null||n===undefined?"Belum ditetapkan":money(n);
 const date=v=>v?new Date(v).toLocaleString("id-ID",{dateStyle:"medium",timeStyle:"short"}):"-";
 const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const db=window.supabase?.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
-let members=[],payments=[],commissions=[],payouts=[],products=[],overview={},sales=[],storeOrders=[],payoutRequests=[],salesSummary={},walletDeposits=[],allTransactions=[],referralProgress=[],referralBonusBatches=[];
+let members=[],payments=[],commissions=[],payouts=[],products=[],overview={},sales=[],storeOrders=[],payoutRequests=[],salesSummary={},walletDeposits=[],allTransactions=[],referralProgress=[],referralBonusBatches=[],siteAnnouncements=[];
 function notice(message,type=""){const el=$("adminNotice");el.textContent=message;el.className="admin-alert "+type;}
 function badge(status){return '<span class="admin-badge '+esc(status)+'">'+esc(({active:"Aktif",inactive:"Nonaktif",none:"Belum ada",pending:"Menunggu",verified:"Terverifikasi",rejected:"Ditolak",approved:"Disetujui",paid:"Dibayar",blocked:"Diblokir",pending_payment:"Menunggu pembayaran",pending_verification:"Menunggu verifikasi",processing:"Diproses",completed:"Selesai",cancelled:"Dibatalkan"}[status]||status))+'</span>';}
 async function rpc(name,args={}){const r=await db.rpc(name,args);if(r.error)throw r.error;return r.data;}
@@ -21,6 +21,8 @@ async function start(){
   $("paymentForm").addEventListener("submit",createPayment);
   $("payoutForm").addEventListener("submit",createPayout);
   $("productForm").addEventListener("submit",saveProduct);
+  $("announcementForm").addEventListener("submit",saveAnnouncement);
+  $("resetAnnouncement").addEventListener("click",resetAnnouncementForm);
 $("saleForm").addEventListener("submit",createSale);
   $("paymentSettingsForm").addEventListener("submit",savePaymentSettings);
   $("resetProduct").addEventListener("click",resetProductForm);
@@ -72,11 +74,59 @@ async function loadAll(){
     if(storeError)throw storeError;
     products=storeRows||[];
   }catch(productError){errors.push("produk: "+productError.message);}
+  try{await loadAnnouncements();}catch(e){errors.push("pengumuman: "+e.message);}
   renderAll();
   if(errors.length)notice("Sebagian modul gagal dimuat: "+errors.join(" | "), "error");
   else notice("Semua modul berhasil diperbarui dari Supabase.","success");
 }
-function renderAll(){renderStats();renderMembers();renderMemberOptions();renderPayments();renderCommissions();renderReferralRewards();renderPayouts();renderProducts();renderSales();renderStoreOrders();renderPayoutRequests();renderWalletDeposits();renderAllTransactions();renderReports();}
+function renderAll(){renderAnnouncements();renderStats();renderMembers();renderMemberOptions();renderPayments();renderCommissions();renderReferralRewards();renderPayouts();renderProducts();renderSales();renderStoreOrders();renderPayoutRequests();renderWalletDeposits();renderAllTransactions();renderReports();}
+
+async function loadAnnouncements(){
+  const {data,error}=await db.from("site_announcements").select("id,message,is_active,sort_order,created_at,updated_at").order("sort_order").order("created_at");
+  if(error)throw error;
+  siteAnnouncements=data||[];
+  renderAnnouncements();
+}
+function renderAnnouncements(){
+  const body=$("announcementsBody");if(!body)return;
+  body.innerHTML=siteAnnouncements.length?siteAnnouncements.map(a=>'<tr><td>'+esc(a.message)+'</td><td>'+esc(a.sort_order)+'</td><td>'+badge(a.is_active?"active":"inactive")+'</td><td>'+esc(date(a.updated_at||a.created_at))+'</td><td><div class="admin-actions"><button type="button" data-ann-edit="'+esc(a.id)+'">Edit</button><button type="button" data-ann-toggle="'+esc(a.id)+'">'+(a.is_active?"Nonaktifkan":"Aktifkan")+'</button><button type="button" class="admin-danger" data-ann-delete="'+esc(a.id)+'">Hapus</button></div></td></tr>').join(""):'<tr><td colspan="5" class="admin-empty">Belum ada pengumuman. Tambahkan pesan pertama di atas.</td></tr>';
+  body.querySelectorAll("[data-ann-edit]").forEach(b=>b.addEventListener("click",()=>editAnnouncement(b.dataset.annEdit)));
+  body.querySelectorAll("[data-ann-toggle]").forEach(b=>b.addEventListener("click",()=>toggleAnnouncement(b.dataset.annToggle)));
+  body.querySelectorAll("[data-ann-delete]").forEach(b=>b.addEventListener("click",()=>deleteAnnouncement(b.dataset.annDelete)));
+}
+function resetAnnouncementForm(){
+  $("announcementForm").reset();$("announcementId").value="";$("announcementSort").value=0;$("announcementActive").checked=true;
+  $("announcementEditorTitle").textContent="Tambah Pengumuman";$("saveAnnouncement").textContent="Publikasikan pengumuman";
+}
+function editAnnouncement(id){
+  const a=siteAnnouncements.find(x=>x.id===id);if(!a)return;
+  $("announcementId").value=a.id;$("announcementMessage").value=a.message;$("announcementSort").value=a.sort_order??0;$("announcementActive").checked=!!a.is_active;
+  $("announcementEditorTitle").textContent="Edit Pengumuman";$("saveAnnouncement").textContent="Simpan perubahan";showTab("announcements");$("announcementMessage").focus();window.scrollTo({top:0,behavior:"smooth"});
+}
+async function saveAnnouncement(e){
+  e.preventDefault();const id=$("announcementId").value||null;const message=$("announcementMessage").value.trim();const sort=Number($("announcementSort").value||0);
+  if(message.length<3||message.length>500){notice("Isi pengumuman harus 3 sampai 500 karakter.","error");return;}
+  if(!Number.isInteger(sort)){notice("Urutan tampil harus berupa bilangan bulat.","error");return;}
+  const button=$("saveAnnouncement");button.disabled=true;
+  try{
+    const payload={message,is_active:$("announcementActive").checked,sort_order:sort};
+    const result=id?await db.from("site_announcements").update(payload).eq("id",id):await db.from("site_announcements").insert(payload);
+    if(result.error)throw result.error;
+    resetAnnouncementForm();await loadAnnouncements();notice("Pengumuman berhasil disimpan.","success");
+  }catch(err){notice("Gagal menyimpan pengumuman: "+err.message,"error");}
+  finally{button.disabled=false;}
+}
+async function toggleAnnouncement(id){
+  const a=siteAnnouncements.find(x=>x.id===id);if(!a)return;
+  try{const {error}=await db.from("site_announcements").update({is_active:!a.is_active}).eq("id",id);if(error)throw error;await loadAnnouncements();notice("Status pengumuman diperbarui.","success");}
+  catch(e){notice("Gagal mengubah status: "+e.message,"error");}
+}
+async function deleteAnnouncement(id){
+  const a=siteAnnouncements.find(x=>x.id===id);if(!a||!confirm("Hapus pengumuman ini?"))return;
+  try{const {error}=await db.from("site_announcements").delete().eq("id",id);if(error)throw error;await loadAnnouncements();if($("announcementId").value===id)resetAnnouncementForm();notice("Pengumuman dihapus.","success");}
+  catch(e){notice("Gagal menghapus pengumuman: "+e.message,"error");}
+}
+
 function renderStats(){
   $("statMembers").textContent=overview.members??members.length;
   $("statReferral").textContent=overview.referral_active??members.filter(m=>m.referral_status==="active").length;
