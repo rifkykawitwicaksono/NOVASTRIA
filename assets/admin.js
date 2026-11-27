@@ -67,6 +67,11 @@ async function loadAll(){
     else if(key==="allTransactions")allTransactions=value||[];
     else if(key==="audit")renderAudit(value||[]);
   }
+  try{
+    const {data:storeRows,error:storeError}=await db.from("store_products").select("*").order("sort_order").order("product").order("variant");
+    if(storeError)throw storeError;
+    products=storeRows||[];
+  }catch(productError){errors.push("produk: "+productError.message);}
   renderAll();
   if(errors.length)notice("Sebagian modul gagal dimuat: "+errors.join(" | "), "error");
   else notice("Semua modul berhasil diperbarui dari Supabase.","success");
@@ -166,7 +171,7 @@ function renderPayouts(){
 function renderProducts(){
   const q=$("productSearch").value.trim().toLowerCase(),v=$("productVisibility").value;
   const list=products.filter(p=>(p.product+" "+p.variant).toLowerCase().includes(q)&&(v==="active"?p.is_active:v==="hidden"?!p.is_active:true));
-  $("productsBody").innerHTML=list.length?list.map(p=>'<tr><td><strong>'+esc(p.product)+'</strong><small>'+esc(p.variant)+'</small></td><td>'+priceLabel(p.public_price)+'</td><td>'+priceLabel(p.reseller_price)+'</td><td>'+badge(p.in_stock?"active":"inactive")+'</td><td>'+badge(p.is_active?"active":"inactive")+'</td><td><div class="admin-actions"><button data-edit="'+esc(p.id)+'">Edit</button><button class="admin-danger" data-archive="'+esc(p.id)+'">'+(p.is_active?"Sembunyikan":"Aktifkan")+'</button></div></td></tr>').join(""):'<tr><td colspan="6" class="admin-empty">Produk tidak ditemukan.</td></tr>';
+  $("productsBody").innerHTML=list.length?list.map(p=>'<tr><td><strong>'+esc(p.product)+'</strong><small>'+esc(p.variant)+'</small></td><td>'+priceLabel(p.public_price)+'</td><td>'+priceLabel(p.reseller_price)+'</td><td>'+badge(p.in_stock?"active":"inactive")+'</td><td>'+(p.is_recommended?'<span class="admin-badge verified">Rekomendasi</span>':'<span class="admin-muted">—</span>')+'</td><td>'+badge(p.is_active?"active":"inactive")+'</td><td><div class="admin-actions"><button data-edit="'+esc(p.id)+'">Edit</button><button class="admin-danger" data-archive="'+esc(p.id)+'">'+(p.is_active?"Sembunyikan":"Aktifkan")+'</button></div></td></tr>').join(""):'<tr><td colspan="7" class="admin-empty">Produk tidak ditemukan.</td></tr>';
   $("productsBody").querySelectorAll("[data-edit]").forEach(b=>b.addEventListener("click",()=>editProduct(b.dataset.edit)));
   $("productsBody").querySelectorAll("[data-archive]").forEach(b=>b.addEventListener("click",()=>toggleProduct(b.dataset.archive)));
 }
@@ -285,10 +290,10 @@ async function editProduct(id){
   const p=products.find(x=>x.id===id);if(!p)return;
   $("productId").value=p.id;$("productName").value=p.product;$("productVariant").value=p.variant;
   $("productPublic").value=p.public_price??"";$("productReseller").value=p.reseller_price??"";
-  $("productSort").value=p.sort_order??0;$("productStock").checked=p.in_stock;$("productActive").checked=p.is_active;
+  $("productSort").value=p.sort_order??0;$("productStock").checked=p.in_stock;$("productActive").checked=p.is_active;$("productRecommended").checked=!!p.is_recommended;
   $("productName").focus();try{await loadProductDetailsIntoForm(p.product);}catch(e){notice("Gagal memuat detail produk: "+e.message,"error");return;}window.scrollTo({top:0,behavior:"smooth"});
 }
-function resetProductForm(){$("productForm").reset();$("productId").value="";$("productSort").value=0;$("productStock").checked=true;$("productActive").checked=true;$("detailPlatform").value="";$("detailOperationalStatus").value="unknown";$("detailFileUrl").value="";$("detailDescription").value="";$("detailInstructions").value="";$("detailRequirements").value="";$("detailWarranty").value="";$("detailAdditional").value="";$("productEditorTitle").textContent="Tambah Produk";$("productDetailNotice").textContent="Form siap untuk produk baru.";}
+function resetProductForm(){$("productForm").reset();$("productId").value="";$("productSort").value=0;$("productStock").checked=true;$("productActive").checked=true;$("productRecommended").checked=false;$("detailPlatform").value="";$("detailOperationalStatus").value="unknown";$("detailFileUrl").value="";$("detailDescription").value="";$("detailInstructions").value="";$("detailRequirements").value="";$("detailWarranty").value="";$("detailAdditional").value="";$("productEditorTitle").textContent="Tambah Produk";$("productDetailNotice").textContent="Form siap untuk produk baru.";}
 async function saveProduct(e){
   e.preventDefault();const id=$("productId").value||null;
   const val=id=>$(id).value.trim();
@@ -298,7 +303,9 @@ async function saveProduct(e){
   const b=e.submitter;b.disabled=true;
   try{
     const productName=val("productName");
-    await rpc("admin_save_product",{p_id:id,p_product:productName,p_variant:val("productVariant"),p_public_price:pub,p_reseller_price:res,p_in_stock:$("productStock").checked,p_is_active:$("productActive").checked,p_sort_order:Number(val("productSort")||0)});
+    const savedProductId=await rpc("admin_save_product",{p_id:id,p_product:productName,p_variant:val("productVariant"),p_public_price:pub,p_reseller_price:res,p_in_stock:$("productStock").checked,p_is_active:$("productActive").checked,p_sort_order:Number(val("productSort")||0)});
+    const recommendationUpdate=await db.from("store_products").update({is_recommended:$("productRecommended").checked}).eq("id",savedProductId);
+    if(recommendationUpdate.error)throw recommendationUpdate.error;
     const rawUrl=$("detailFileUrl").value.trim();let fileUrl=null;
     if(rawUrl){try{const u=new URL(rawUrl);if(!["https:","http:"].includes(u.protocol))throw new Error();fileUrl=u.href;}catch{throw new Error("URL file harus menggunakan http atau https.");}}
     await rpc("admin_save_product_details",{p_product:productName,p_platform:$("detailPlatform").value.trim(),p_operational_status:$("detailOperationalStatus").value,p_file_url:fileUrl,p_description:$("detailDescription").value.trim(),p_instructions:$("detailInstructions").value.trim(),p_requirements:$("detailRequirements").value.trim(),p_warranty:$("detailWarranty").value.trim(),p_additional_info:$("detailAdditional").value.trim()});
