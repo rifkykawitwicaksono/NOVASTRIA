@@ -353,7 +353,7 @@ function renderProducts(){
     const platform=productPlatform(name);
     const matches=items.filter(p=>!q||(p.product+" "+p.variant).toLowerCase().includes(q));
     return {name,platform,items:matches.length?matches:[],allItems:items};
-  }).filter(g=>g.items.length&&(activeCategory==="all"||g.platform===activeCategory));
+  }).filter(g=>g.items.length&&(activeCategory==="all"||g.platform===activeCategory)).slice(0,6);
   $("catalogSummary").textContent=visible.length+" produk · "+visible.reduce((n,g)=>n+g.items.length,0)+" varian tersedia";
   if(!visible.length){$("productGrid").innerHTML='<div class="empty">Produk tidak ditemukan pada kategori ini.</div>';return;}
   $("productGrid").innerHTML=visible.map((g,groupIndex)=>{
