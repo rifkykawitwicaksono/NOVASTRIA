@@ -79,7 +79,7 @@
 <label>Varian<input id="productVariant" required placeholder="Contoh: 30 Hari"></label>
 <label>Harga publik (Rp)<input id="productPublic" type="number" min="0" placeholder="Kosongkan jika belum ditetapkan"></label>
 <label>Harga reseller (Rp)<input id="productReseller" type="number" min="0" placeholder="Kosongkan jika belum ditetapkan"></label>
-<label>Urutan tampil<input id="productSort" type="number" value="0"></label>
+<p class="admin-muted" style="grid-column:1/-1">Urutan produk dan durasi varian diatur otomatis: nama produk A–Z, lalu durasi terpendek hingga terpanjang. Tidak perlu mengisi urutan manual.</p>
 <label class="admin-check"><input id="productStock" type="checkbox" checked> Stok tersedia</label>
 <label class="admin-check"><input id="productActive" type="checkbox" checked> Tampilkan di toko</label>
 <label class="admin-check"><input id="productRecommended" type="checkbox"> Tampilkan sebagai Produk Rekomendasi</label>
@@ -173,6 +173,6 @@
   </div>
 </main>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="assets/admin.js?v=site-announcements-ticker-v1"></script>
+<script src="assets/admin.js?v=auto-product-duration-sort-v1?v=site-announcements-ticker-v1"></script>
 <script src="assets/admin-notifications.js?v=audio-alert-v1"></script>
 </body></html>
