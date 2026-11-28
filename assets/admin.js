@@ -6,7 +6,7 @@ const priceLabel=n=>n===null||n===undefined?"Belum ditetapkan":money(n);
 const date=v=>v?new Date(v).toLocaleString("id-ID",{dateStyle:"medium",timeStyle:"short"}):"-";
 const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const db=window.supabase?.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
-let members=[],payments=[],commissions=[],payouts=[],products=[],overview={},sales=[],storeOrders=[],payoutRequests=[],salesSummary={},walletDeposits=[],allTransactions=[],referralProgress=[],referralBonusBatches=[],siteAnnouncements=[];
+let members=[],payments=[],commissions=[],payouts=[],products=[],productDetails=new Map(),overview={},sales=[],storeOrders=[],payoutRequests=[],salesSummary={},walletDeposits=[],allTransactions=[],referralProgress=[],referralBonusBatches=[],siteAnnouncements=[];
 function notice(message,type=""){const el=$("adminNotice");el.textContent=message;el.className="admin-alert "+type;}
 function badge(status){return '<span class="admin-badge '+esc(status)+'">'+esc(({active:"Aktif",inactive:"Nonaktif",none:"Belum ada",pending:"Menunggu",verified:"Terverifikasi",rejected:"Ditolak",approved:"Disetujui",paid:"Dibayar",blocked:"Diblokir",pending_payment:"Menunggu pembayaran",pending_verification:"Menunggu verifikasi",processing:"Diproses",completed:"Selesai",cancelled:"Dibatalkan"}[status]||status))+'</span>';}
 async function rpc(name,args={}){const r=await db.rpc(name,args);if(r.error)throw r.error;return r.data;}
@@ -16,7 +16,7 @@ async function start(){
   document.querySelectorAll("[data-tab]").forEach(b=>b.addEventListener("click",()=>showTab(b.dataset.tab)));
   $("memberSearch").addEventListener("input",renderMembers);$("memberFilter").addEventListener("change",renderMembers);
   $("paymentFilter").addEventListener("change",renderPayments);$("paymentSearch").addEventListener("input",renderPayments);
-  $("productSearch").addEventListener("input",renderProducts);$("productVisibility").addEventListener("change",renderProducts);
+  $("productSearch").addEventListener("input",renderProducts);$("productVisibility").addEventListener("change",renderProducts);$("productPlatformFilter")?.addEventListener("change",renderProducts);
   $("paymentType").addEventListener("change",()=>{$("paymentAmount").value=$("paymentType").value==="referral"?150000:100000;});
   $("paymentForm").addEventListener("submit",createPayment);
   $("payoutForm").addEventListener("submit",createPayout);
@@ -74,6 +74,11 @@ async function loadAll(){
     if(storeError)throw storeError;
     products=storeRows||[];
   }catch(productError){errors.push("produk: "+productError.message);}
+  try{
+    const {data:detailRows,error:detailError}=await db.from("store_product_details").select("product,platform");
+    if(detailError)throw detailError;
+    productDetails=new Map((detailRows||[]).map(d=>[d.product,d.platform||""]));
+  }catch(detailError){productDetails=new Map();errors.push("platform produk: "+detailError.message);}
   try{await loadAnnouncements();}catch(e){errors.push("pengumuman: "+e.message);}
   renderAll();
   if(errors.length)notice("Sebagian modul gagal dimuat: "+errors.join(" | "), "error");
@@ -226,8 +231,20 @@ function productPlatformRank(name){
   if(/android|\bapk\b/.test(n))return 1;
   return 4;
 }
+function productPlatformLabel(p){
+  const name=String(p?.product||"");
+  if(/\\broot\\b|rooted|root access/i.test(name))return "Root";
+  const stored=String(productDetails.get(name)||"").trim();
+  if(["Root","Android","iOS","Android & iOS"].includes(stored))return stored;
+  const rank=productPlatformRank(name);
+  return rank===0?"Root":rank===1?"Android":rank===2?"iOS":rank===3?"Android & iOS":"Belum diklasifikasikan";
+}
+function productPlatformRankFromRow(p){
+  const label=productPlatformLabel(p);
+  return ({"Root":0,"Android":1,"iOS":2,"Android & iOS":3})[label]??4;
+}
 function compareProductGroups(a,b){
-  return productPlatformRank(a)-productPlatformRank(b)||String(a).localeCompare(String(b),"id",{numeric:true,sensitivity:"base"});
+  return productPlatformRankFromRow(a)-productPlatformRankFromRow(b)||String(a.product||"").localeCompare(String(b.product||""),"id",{numeric:true,sensitivity:"base"});
 }
 function durationSortValue(label){
   const text=String(label||"").toLowerCase().normalize("NFKD");
@@ -252,9 +269,14 @@ function compareProductVariants(a,b){
   return String(a.variant||"").localeCompare(String(b.variant||""),"id",{numeric:true,sensitivity:"base"});
 }
 function renderProducts(){
-  const q=$("productSearch").value.trim().toLowerCase(),v=$("productVisibility").value;
-  const list=products.filter(p=>(p.product+" "+p.variant).toLowerCase().includes(q)&&(v==="active"?p.is_active:v==="hidden"?!p.is_active:true)).sort((a,b)=>compareProductGroups(a.product,b.product)||compareProductVariants(a,b));
-  $("productsBody").innerHTML=list.length?list.map(p=>'<tr><td><strong>'+esc(p.product)+'</strong><small>'+esc(p.variant)+'</small></td><td>'+priceLabel(p.public_price)+'</td><td>'+priceLabel(p.reseller_price)+'</td><td>'+badge(p.in_stock?"active":"inactive")+'</td><td>'+(p.is_recommended?'<span class="admin-badge verified">Rekomendasi</span>':'<span class="admin-muted">—</span>')+'</td><td>'+badge(p.is_active?"active":"inactive")+'</td><td><div class="admin-actions"><button data-edit="'+esc(p.id)+'">Edit</button><button class="admin-danger" data-archive="'+esc(p.id)+'">'+(p.is_active?"Sembunyikan":"Aktifkan")+'</button></div></td></tr>').join(""):'<tr><td colspan="7" class="admin-empty">Produk tidak ditemukan.</td></tr>';
+  const q=$("productSearch").value.trim().toLowerCase(),v=$("productVisibility").value,platform=$("productPlatformFilter")?.value||"";
+  const list=products.filter(p=>(p.product+" "+p.variant).toLowerCase().includes(q)&&(v==="active"?p.is_active:v==="hidden"?!p.is_active:true)&&(!platform||productPlatformLabel(p)===platform)).sort((a,b)=>compareProductGroups(a,b)||compareProductVariants(a,b));
+  const summary=$("productPlatformSummary");
+  if(summary){
+    const counts=["Root","Android","iOS","Android & iOS","Belum diklasifikasikan"].map(label=>label+": "+products.filter(p=>productPlatformLabel(p)===label).length);
+    summary.textContent=products.length+" varian produk · "+counts.join(" · ");
+  }
+  $("productsBody").innerHTML=list.length?list.map(p=>'<tr><td class="admin-product-name"><strong>'+esc(p.product)+'</strong><small>'+esc(p.variant)+'</small></td><td><span class="admin-platform-tag">'+esc(productPlatformLabel(p))+'</span></td><td class="admin-price-cell">'+priceLabel(p.public_price)+'</td><td class="admin-price-cell">'+priceLabel(p.reseller_price)+'</td><td>'+badge(p.in_stock?"active":"inactive")+'</td><td>'+(p.is_recommended?'<span class="admin-badge verified">Rekomendasi</span>':'<span class="admin-muted">—</span>')+'</td><td>'+badge(p.is_active?"active":"inactive")+'</td><td><div class="admin-actions"><button data-edit="'+esc(p.id)+'">Edit</button><button class="admin-danger" data-archive="'+esc(p.id)+'">'+(p.is_active?"Sembunyikan":"Aktifkan")+'</button></div></td></tr>').join(""):'<tr><td colspan="8" class="admin-empty">Produk tidak ditemukan pada filter ini.</td></tr>';
   $("productsBody").querySelectorAll("[data-edit]").forEach(b=>b.addEventListener("click",()=>editProduct(b.dataset.edit)));
   $("productsBody").querySelectorAll("[data-archive]").forEach(b=>b.addEventListener("click",()=>toggleProduct(b.dataset.archive)));
 }
