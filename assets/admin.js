@@ -233,7 +233,7 @@ function productPlatformRank(name){
 }
 function productPlatformLabel(p){
   const name=String(p?.product||"");
-  if(/\\broot\\b|rooted|root access/i.test(name))return "Root";
+  if(/\broot\b|rooted|root access/i.test(name))return "Root";
   const stored=String(productDetails.get(name)||"").trim();
   if(["Root","Android","iOS","Android & iOS"].includes(stored))return stored;
   const rank=productPlatformRank(name);
