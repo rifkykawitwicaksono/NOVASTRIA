@@ -341,6 +341,28 @@ function renderRecommendedProducts(){
   target.querySelectorAll("[data-recommended-order]").forEach(button=>button.addEventListener("click",()=>openOrder(catalog[Number(button.dataset.recommendedOrder)])));
 }
 
+function durationSortValue(label){
+  const text=String(label||"").toLowerCase().normalize("NFKD");
+  if(/lifetime|life\s*time|selamanya|permanen|permanent/.test(text))return Number.POSITIVE_INFINITY;
+  const match=text.match(/(\d+(?:[.,]\d+)?)\s*(menit|minute|min|mnt|jam|hour|hours|hr|hari|day|days|minggu|week|weeks|bulan|month|months|tahun|year|years|thn|bln|\bj\b|\bh\b)/i);
+  if(!match)return null;
+  const amount=Number(match[1].replace(",","."));
+  const unit=match[2].toLowerCase();
+  const factor=/^(menit|minute|min|mnt)$/.test(unit)?1:
+    /^(jam|hour|hours|hr|j)$/.test(unit)?60:
+    /^(hari|day|days|h)$/.test(unit)?1440:
+    /^(minggu|week|weeks)$/.test(unit)?10080:
+    /^(bulan|month|months|bln)$/.test(unit)?43200:
+    /^(tahun|year|years|thn)$/.test(unit)?525600:null;
+  return factor===null?null:amount*factor;
+}
+function compareProductVariants(a,b){
+  const av=durationSortValue(a.variant),bv=durationSortValue(b.variant);
+  if(av!==null&&bv!==null&&av!==bv)return av-bv;
+  if(av!==null&&bv===null)return -1;
+  if(av===null&&bv!==null)return 1;
+  return String(a.variant||"").localeCompare(String(b.variant||""),"id",{numeric:true,sensitivity:"base"});
+}
 function renderProducts(){
   const q=$("searchInput").value.toLowerCase().trim();
   const groups=new Map();
