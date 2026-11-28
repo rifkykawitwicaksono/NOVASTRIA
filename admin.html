@@ -84,7 +84,7 @@
 <label class="admin-check"><input id="productActive" type="checkbox" checked> Tampilkan di toko</label>
 <label class="admin-check"><input id="productRecommended" type="checkbox"> Tampilkan sebagai Produk Rekomendasi</label>
 <div class="admin-detail-divider" style="grid-column:1/-1"><h3>Konten Detail Produk</h3><p class="admin-muted">Terhubung otomatis dengan nama produk di atas. Tidak perlu mengisi nama produk dua kali.</p></div>
-<label>Platform produk<select id="detailPlatform"><option value="">Pilih platform</option><option value="Android">Android saja</option><option value="iOS">iOS saja</option><option value="Android & iOS">Android &amp; iOS</option></select></label>
+<label>Platform produk<select id="detailPlatform"><option value="">Pilih platform</option><option value="Root">Root saja</option><option value="Android">Android saja</option><option value="iOS">iOS saja</option><option value="Android & iOS">Android &amp; iOS</option></select></label>
 <label>Status operasional<select id="detailOperationalStatus"><option value="unknown">Unknown — belum diketahui</option><option value="online">Online — aman digunakan</option><option value="offline">Offline — maintenance</option></select></label>
 <label style="grid-column:1/-1">URL file / unduhan<input id="detailFileUrl" type="url" placeholder="https://..."></label>
 <label style="grid-column:1/-1">Deskripsi produk<textarea id="detailDescription" rows="4"></textarea></label>
@@ -173,6 +173,6 @@
   </div>
 </main>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="assets/admin.js?v=admin-auto-sort-v1"></script>
+<script src="assets/admin.js?v=platform-duration-auto-sort-v1"></script>
 <script src="assets/admin-notifications.js?v=audio-alert-v1"></script>
 </body></html>
