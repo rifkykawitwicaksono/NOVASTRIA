@@ -176,14 +176,14 @@ function renderStoreActivity(){
 
 function productPlatform(name){
   const n=String(name||"").toLowerCase();
-  const detailPlatform=String(productDetails[name]?.platform||"").toLowerCase();
-  // Gunakan metadata platform dari detail produk jika admin sudah mengisinya.
-  if(detailPlatform.includes("root"))return "Root";
+  const detailPlatform=String(productDetails[name]?.platform||"").trim().toLowerCase();
+  if(detailPlatform.includes("root")&&detailPlatform.includes("android")&&detailPlatform.includes("ios"))return "Root Android & iOS";
+  if(detailPlatform.includes("root")&&detailPlatform.includes("ios"))return "Root iOS";
+  if(detailPlatform.includes("root"))return "Root Android"; // nilai lama "Root" diperlakukan sebagai Root Android.
   if(detailPlatform.includes("android")&&detailPlatform.includes("ios"))return "Android & iOS";
   if(detailPlatform.includes("ios"))return "iOS";
   if(detailPlatform.includes("android"))return "Android";
-  // Fallback untuk produk yang belum memiliki metadata platform.
-  if(/\broot\b|rooted|root access/.test(n))return "Root";
+  if(/\broot\b|rooted|root access/.test(n))return "Root Android";
   if(n.includes("ios")&&n.includes("android"))return "Android & iOS";
   if(n.includes("ios")||n.includes("gbox")||n.includes("esign")||n==="migul")return "iOS";
   return "Android";
@@ -214,16 +214,18 @@ function productDescription(name){
 }
 
 function populateCategories(){
-  const counts={Android:0,"iOS":0,"Android & iOS":0};
+  const labels=["Android","iOS","Android & iOS","Root Android","Root iOS","Root Android & iOS"];
+  const counts=Object.fromEntries(labels.map(label=>[label,0]));
   const groups=new Map();
   catalog.forEach(p=>{if(!groups.has(p.product))groups.set(p.product,[]);groups.get(p.product).push(p);});
   for(const [name,items] of groups){
     const platform=productPlatform(name);
     counts[platform]=(counts[platform]||0)+items.length;
   }
-  document.querySelector('[data-category="Android"]').textContent="Android · "+counts.Android;
-  document.querySelector('[data-category="iOS"]').textContent="iOS · "+counts["iOS"];
-  document.querySelector('[data-category="Android & iOS"]').textContent="Android & iOS · "+counts["Android & iOS"];
+  labels.forEach(label=>{
+    const button=document.querySelector('[data-category="'+label+'"]');
+    if(button)button.textContent=label+" · "+counts[label];
+  });
 }
 
 function renderInlineProductDetails(name){
@@ -344,12 +346,8 @@ function renderRecommendedProducts(){
 }
 
 function productPlatformRank(name){
-  const n=String(name||"").toLowerCase();
-  if(/\broot\b|rooted|root access/.test(n))return 0;
-  if(/android\s*(?:&|dan|and)\s*ios|ios\s*(?:&|dan|and)\s*android/.test(n))return 3;
-  if(/\bios\b|iphone|ipad|gbox|esign/.test(n))return 2;
-  if(/android|\bapk\b/.test(n))return 1;
-  return 4;
+  const platform=productPlatform(name);
+  return ({"Android":0,"iOS":1,"Android & iOS":2,"Root Android":3,"Root iOS":4,"Root Android & iOS":5})[platform]??6;
 }
 function compareProductGroups(a,b){
   return productPlatformRank(a)-productPlatformRank(b)||String(a).localeCompare(String(b),"id",{numeric:true,sensitivity:"base"});
