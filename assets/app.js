@@ -178,10 +178,12 @@ function productPlatform(name){
   const n=String(name||"").toLowerCase();
   const detailPlatform=String(productDetails[name]?.platform||"").toLowerCase();
   // Gunakan metadata platform dari detail produk jika admin sudah mengisinya.
+  if(detailPlatform.includes("root"))return "Root";
   if(detailPlatform.includes("android")&&detailPlatform.includes("ios"))return "Android & iOS";
   if(detailPlatform.includes("ios"))return "iOS";
   if(detailPlatform.includes("android"))return "Android";
   // Fallback untuk produk yang belum memiliki metadata platform.
+  if(/\\broot\\b|rooted|root access/.test(n))return "Root";
   if(n.includes("ios")&&n.includes("android"))return "Android & iOS";
   if(n.includes("ios")||n.includes("gbox")||n.includes("esign")||n==="migul")return "iOS";
   return "Android";
@@ -341,6 +343,17 @@ function renderRecommendedProducts(){
   target.querySelectorAll("[data-recommended-order]").forEach(button=>button.addEventListener("click",()=>openOrder(catalog[Number(button.dataset.recommendedOrder)])));
 }
 
+function productPlatformRank(name){
+  const n=String(name||"").toLowerCase();
+  if(/\broot\b|rooted|root access/.test(n))return 0;
+  if(/android\s*(?:&|dan|and)\s*ios|ios\s*(?:&|dan|and)\s*android/.test(n))return 3;
+  if(/\bios\b|iphone|ipad|gbox|esign/.test(n))return 2;
+  if(/android|\bapk\b/.test(n))return 1;
+  return 4;
+}
+function compareProductGroups(a,b){
+  return productPlatformRank(a)-productPlatformRank(b)||String(a).localeCompare(String(b),"id",{numeric:true,sensitivity:"base"});
+}
 function durationSortValue(label){
   const text=String(label||"").toLowerCase().normalize("NFKD");
   if(/lifetime|life\s*time|selamanya|permanen|permanent/.test(text))return Number.POSITIVE_INFINITY;
@@ -375,7 +388,7 @@ function renderProducts(){
     const platform=productPlatform(name);
     const matches=items.filter(p=>!q||(p.product+" "+p.variant).toLowerCase().includes(q));
     return {name,platform,items:(matches.length?matches:[]).sort(compareProductVariants),allItems:items};
-  }).filter(g=>g.items.length&&(activeCategory==="all"||g.platform===activeCategory)).sort((a,b)=>a.name.localeCompare(b.name,"id",{sensitivity:"base"})).slice(0,6);
+  }).filter(g=>g.items.length&&(activeCategory==="all"||g.platform===activeCategory)).sort((a,b)=>productPlatformRank(a.name)-productPlatformRank(b.name)||a.name.localeCompare(b.name,"id",{sensitivity:"base"})).slice(0,6);
   $("catalogSummary").textContent=visible.length+" produk · "+visible.reduce((n,g)=>n+g.items.length,0)+" varian tersedia";
   if(!visible.length){$("productGrid").innerHTML='<div class="empty">Produk tidak ditemukan pada kategori ini.</div>';return;}
   $("productGrid").innerHTML=visible.map((g,groupIndex)=>{
