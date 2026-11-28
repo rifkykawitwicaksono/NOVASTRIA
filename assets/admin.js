@@ -272,25 +272,13 @@ function compareProductVariants(a,b){
 }
 function renderProducts(){
   const q=$("productSearch").value.trim().toLowerCase(),v=$("productVisibility").value,platform=$("productPlatformFilter")?.value||"";
-  const categoryOrder=["Android","iOS","Android & iOS","Root Android","Root iOS","Root Android & iOS","Belum diklasifikasikan"];
-  const filtered=products.filter(p=>(p.product+" "+p.variant).toLowerCase().includes(q)&&(v==="active"?p.is_active:v==="hidden"?!p.is_active:true)&&(!platform||productPlatformLabel(p)===platform));
-  const groups=new Map(categoryOrder.map(label=>[label,[]]));
-  filtered.forEach(p=>{const label=productPlatformLabel(p);if(!groups.has(label))groups.set(label,[]);groups.get(label).push(p);});
+  const list=products.filter(p=>(p.product+" "+p.variant).toLowerCase().includes(q)&&(v==="active"?p.is_active:v==="hidden"?!p.is_active:true)&&(!platform||productPlatformLabel(p)===platform)).sort((a,b)=>String(a.product||"").localeCompare(String(b.product||""),"id",{numeric:true,sensitivity:"base"})||compareProductVariants(a,b));
   const summary=$("productPlatformSummary");
   if(summary){
-    const counts=categoryOrder.map(label=>label+": "+products.filter(p=>productPlatformLabel(p)===label).length);
-    summary.textContent=products.length+" varian produk · "+counts.join(" · ");
+    const labels=["Android","iOS","Android & iOS","Root Android","Root iOS","Root Android & iOS"];
+    summary.textContent=products.length+" varian produk · "+labels.map(label=>label+": "+products.filter(p=>productPlatformLabel(p)===label).length).join(" · ");
   }
-  const columns=8;
-  const rows=[];
-  categoryOrder.forEach(label=>{
-    const items=groups.get(label)||[];
-    if(!items.length)return;
-    items.sort((a,b)=>String(a.product||"").localeCompare(String(b.product||""),"id",{numeric:true,sensitivity:"base"})||compareProductVariants(a,b));
-    rows.push('<tr class="admin-product-group-row"><td colspan="'+columns+'"><strong>'+esc(label.toUpperCase())+'</strong><small>'+items.length+' varian</small></td></tr>');
-    items.forEach(p=>rows.push('<tr><td class="admin-product-name"><strong>'+esc(p.product)+'</strong><small>'+esc(p.variant)+'</small></td><td><span class="admin-platform-tag">'+esc(productPlatformLabel(p))+'</span></td><td class="admin-price-cell">'+priceLabel(p.public_price)+'</td><td class="admin-price-cell">'+priceLabel(p.reseller_price)+'</td><td>'+badge(p.in_stock?"active":"inactive")+'</td><td>'+(p.is_recommended?'<span class="admin-badge verified">Rekomendasi</span>':'<span class="admin-muted">—</span>')+'</td><td>'+badge(p.is_active?"active":"inactive")+'</td><td><div class="admin-actions"><button data-edit="'+esc(p.id)+'">Edit</button><button class="admin-danger" data-archive="'+esc(p.id)+'">'+(p.is_active?"Sembunyikan":"Aktifkan")+'</button></div></td></tr>'));
-  });
-  $("productsBody").innerHTML=rows.length?rows.join(""):'<tr><td colspan="'+columns+'" class="admin-empty">Produk tidak ditemukan pada filter ini.</td></tr>';
+  $("productsBody").innerHTML=list.length?list.map(p=>'<tr><td class="admin-product-name"><strong>'+esc(p.product)+'</strong><small>'+esc(p.variant)+'</small></td><td><span class="admin-platform-tag">'+esc(productPlatformLabel(p))+'</span></td><td class="admin-price-cell">'+priceLabel(p.public_price)+'</td><td class="admin-price-cell">'+priceLabel(p.reseller_price)+'</td><td>'+badge(p.in_stock?"active":"inactive")+'</td><td>'+(p.is_recommended?'<span class="admin-badge verified">Rekomendasi</span>':'<span class="admin-muted">—</span>')+'</td><td>'+badge(p.is_active?"active":"inactive")+'</td><td><div class="admin-actions"><button data-edit="'+esc(p.id)+'">Edit</button><button class="admin-danger" data-archive="'+esc(p.id)+'">'+(p.is_active?"Sembunyikan":"Aktifkan")+'</button></div></td></tr>').join(""):'<tr><td colspan="8" class="admin-empty">Produk tidak ditemukan pada filter ini.</td></tr>';
   $("productsBody").querySelectorAll("[data-edit]").forEach(b=>b.addEventListener("click",()=>editProduct(b.dataset.edit)));
   $("productsBody").querySelectorAll("[data-archive]").forEach(b=>b.addEventListener("click",()=>toggleProduct(b.dataset.archive)));
 }
