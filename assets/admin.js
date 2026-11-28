@@ -225,23 +225,25 @@ function renderPayouts(){
 }
 function productPlatformRank(name){
   const n=String(name||"").toLowerCase();
-  if(/\broot\b|rooted|root access/.test(n))return 0;
-  if(/android\s*(?:&|dan|and)\s*ios|ios\s*(?:&|dan|and)\s*android/.test(n))return 3;
-  if(/\bios\b|iphone|ipad|gbox|esign/.test(n))return 2;
-  if(/android|\bapk\b/.test(n))return 1;
-  return 4;
+  if(/\broot\b|rooted|root access/.test(n))return 3;
+  if(/android\s*(?:&|dan|and)\s*ios|ios\s*(?:&|dan|and)\s*android/.test(n))return 2;
+  if(/\bios\b|iphone|ipad|gbox|esign/.test(n))return 1;
+  if(/android|\bapk\b/.test(n))return 0;
+  return 6;
 }
 function productPlatformLabel(p){
   const name=String(p?.product||"");
-  if(/\broot\b|rooted|root access/i.test(name))return "Root";
   const stored=String(productDetails.get(name)||"").trim();
-  if(["Root","Android","iOS","Android & iOS"].includes(stored))return stored;
+  const normalized=stored.toLowerCase();
+  if(normalized==="root")return "Root Android";
+  if(["Root Android","Root iOS","Root Android & iOS","Android","iOS","Android & iOS"].includes(stored))return stored;
+  if(/\broot\b|rooted|root access/i.test(name))return "Root Android";
   const rank=productPlatformRank(name);
-  return rank===0?"Root":rank===1?"Android":rank===2?"iOS":rank===3?"Android & iOS":"Belum diklasifikasikan";
+  return rank===0?"Android":rank===1?"iOS":rank===2?"Android & iOS":rank===3?"Root Android":"Belum diklasifikasikan";
 }
 function productPlatformRankFromRow(p){
   const label=productPlatformLabel(p);
-  return ({"Root":0,"Android":1,"iOS":2,"Android & iOS":3})[label]??4;
+  return ({"Android":0,"iOS":1,"Android & iOS":2,"Root Android":3,"Root iOS":4,"Root Android & iOS":5})[label]??6;
 }
 function compareProductGroups(a,b){
   return productPlatformRankFromRow(a)-productPlatformRankFromRow(b)||String(a.product||"").localeCompare(String(b.product||""),"id",{numeric:true,sensitivity:"base"});
@@ -273,7 +275,7 @@ function renderProducts(){
   const list=products.filter(p=>(p.product+" "+p.variant).toLowerCase().includes(q)&&(v==="active"?p.is_active:v==="hidden"?!p.is_active:true)&&(!platform||productPlatformLabel(p)===platform)).sort((a,b)=>compareProductGroups(a,b)||compareProductVariants(a,b));
   const summary=$("productPlatformSummary");
   if(summary){
-    const counts=["Root","Android","iOS","Android & iOS","Belum diklasifikasikan"].map(label=>label+": "+products.filter(p=>productPlatformLabel(p)===label).length);
+    const counts=["Android","iOS","Android & iOS","Root Android","Root iOS","Root Android & iOS","Belum diklasifikasikan"].map(label=>label+": "+products.filter(p=>productPlatformLabel(p)===label).length);
     summary.textContent=products.length+" varian produk · "+counts.join(" · ");
   }
   $("productsBody").innerHTML=list.length?list.map(p=>'<tr><td class="admin-product-name"><strong>'+esc(p.product)+'</strong><small>'+esc(p.variant)+'</small></td><td><span class="admin-platform-tag">'+esc(productPlatformLabel(p))+'</span></td><td class="admin-price-cell">'+priceLabel(p.public_price)+'</td><td class="admin-price-cell">'+priceLabel(p.reseller_price)+'</td><td>'+badge(p.in_stock?"active":"inactive")+'</td><td>'+(p.is_recommended?'<span class="admin-badge verified">Rekomendasi</span>':'<span class="admin-muted">—</span>')+'</td><td>'+badge(p.is_active?"active":"inactive")+'</td><td><div class="admin-actions"><button data-edit="'+esc(p.id)+'">Edit</button><button class="admin-danger" data-archive="'+esc(p.id)+'">'+(p.is_active?"Sembunyikan":"Aktifkan")+'</button></div></td></tr>').join(""):'<tr><td colspan="8" class="admin-empty">Produk tidak ditemukan pada filter ini.</td></tr>';
@@ -286,7 +288,7 @@ async function loadProductDetailsIntoForm(productName){
     .eq("product",productName).maybeSingle();
   if(error)throw error;
   const d=data||{};
-  $("detailPlatform").value=d.platform||"";
+  $("detailPlatform").value=d.platform==="Root"?"Root Android":(d.platform||"");
   $("detailOperationalStatus").value=d.operational_status||"unknown";
   $("detailFileUrl").value=d.file_url||"";
   $("detailDescription").value=d.description||"";
@@ -333,6 +335,15 @@ function getAutoProductTemplate(productName){
   const name=String(productName||"").toLowerCase();
   const hasIOS=/\bios\b|iphone|ipad/.test(name);
   const hasAndroid=/android|apk|\bmod\b|cheat/.test(name);
+  const hasRoot=/\broot\b|rooted|root access/.test(name);
+  if(hasRoot){
+    return {
+      platform:"Root Android",
+      description:"Produk ini memerlukan perangkat Android yang sudah memiliki akses root. Pastikan tipe perangkat dan versi Android kompatibel sebelum membeli.",
+      instructions:"1. Pastikan perangkat Android sudah memiliki akses root.\n2. Periksa persyaratan dan kompatibilitas produk.\n3. Pilih varian yang sesuai.\n4. Selesaikan pembayaran dan ikuti petunjuk instalasi dari admin.",
+      requirements:"Perangkat Android dengan akses root aktif. Kompatibilitas dapat berbeda menurut merek, model, versi Android, dan metode root."
+    };
+  }
   if(hasIOS&&hasAndroid){
     return {
       platform:"Android & iOS",
