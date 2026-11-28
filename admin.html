@@ -74,7 +74,7 @@
 <h2 id="productEditorTitle">Tambah Produk</h2>
 <p class="admin-muted">Semua informasi produk dan konten halaman detail dikelola dari satu editor. Klik Edit pada produk untuk memuat datanya.</p>
 <form id="productForm" class="admin-form-grid admin-product-form">
-<input id="productId" type="hidden">
+<input id="productId" type="hidden"><input id="productSort" type="hidden" value="0">
 <label>Nama produk<input id="productName" required placeholder="Nama aplikasi / produk"></label>
 <label>Varian<input id="productVariant" required placeholder="Contoh: 30 Hari"></label>
 <label>Harga publik (Rp)<input id="productPublic" type="number" min="0" placeholder="Kosongkan jika belum ditetapkan"></label>
@@ -173,6 +173,6 @@
   </div>
 </main>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="assets/admin.js?v=auto-product-duration-sort-v1?v=site-announcements-ticker-v1"></script>
+<script src="assets/admin.js?v=admin-auto-sort-v1"></script>
 <script src="assets/admin-notifications.js?v=audio-alert-v1"></script>
 </body></html>
