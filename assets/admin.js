@@ -218,6 +218,17 @@ async function createPayout(e){
 function renderPayouts(){
   $("payoutsBody").innerHTML=payouts.length?payouts.map(p=>'<tr><td><strong>'+esc(p.full_name||"-")+'</strong><small>'+esc(p.email)+'</small></td><td>'+money(p.amount)+'</td><td>'+esc(p.payment_reference||"-")+'</td><td>'+esc(date(p.paid_at||p.created_at))+'</td><td>'+badge(p.status)+'</td></tr>').join(""):'<tr><td colspan="5" class="admin-empty">Belum ada pencairan komisi.</td></tr>';
 }
+function productPlatformRank(name){
+  const n=String(name||"").toLowerCase();
+  if(/\broot\b|rooted|root access/.test(n))return 0;
+  if(/android\s*(?:&|dan|and)\s*ios|ios\s*(?:&|dan|and)\s*android/.test(n))return 3;
+  if(/\bios\b|iphone|ipad|gbox|esign/.test(n))return 2;
+  if(/android|\bapk\b/.test(n))return 1;
+  return 4;
+}
+function compareProductGroups(a,b){
+  return productPlatformRank(a)-productPlatformRank(b)||String(a).localeCompare(String(b),"id",{numeric:true,sensitivity:"base"});
+}
 function durationSortValue(label){
   const text=String(label||"").toLowerCase().normalize("NFKD");
   if(/lifetime|life\s*time|selamanya|permanen|permanent/.test(text))return Number.POSITIVE_INFINITY;
@@ -242,7 +253,7 @@ function compareProductVariants(a,b){
 }
 function renderProducts(){
   const q=$("productSearch").value.trim().toLowerCase(),v=$("productVisibility").value;
-  const list=products.filter(p=>(p.product+" "+p.variant).toLowerCase().includes(q)&&(v==="active"?p.is_active:v==="hidden"?!p.is_active:true)).sort((a,b)=>String(a.product||"").localeCompare(String(b.product||""),"id",{sensitivity:"base"})||compareProductVariants(a,b));
+  const list=products.filter(p=>(p.product+" "+p.variant).toLowerCase().includes(q)&&(v==="active"?p.is_active:v==="hidden"?!p.is_active:true)).sort((a,b)=>compareProductGroups(a.product,b.product)||compareProductVariants(a,b));
   $("productsBody").innerHTML=list.length?list.map(p=>'<tr><td><strong>'+esc(p.product)+'</strong><small>'+esc(p.variant)+'</small></td><td>'+priceLabel(p.public_price)+'</td><td>'+priceLabel(p.reseller_price)+'</td><td>'+badge(p.in_stock?"active":"inactive")+'</td><td>'+(p.is_recommended?'<span class="admin-badge verified">Rekomendasi</span>':'<span class="admin-muted">—</span>')+'</td><td>'+badge(p.is_active?"active":"inactive")+'</td><td><div class="admin-actions"><button data-edit="'+esc(p.id)+'">Edit</button><button class="admin-danger" data-archive="'+esc(p.id)+'">'+(p.is_active?"Sembunyikan":"Aktifkan")+'</button></div></td></tr>').join(""):'<tr><td colspan="7" class="admin-empty">Produk tidak ditemukan.</td></tr>';
   $("productsBody").querySelectorAll("[data-edit]").forEach(b=>b.addEventListener("click",()=>editProduct(b.dataset.edit)));
   $("productsBody").querySelectorAll("[data-archive]").forEach(b=>b.addEventListener("click",()=>toggleProduct(b.dataset.archive)));
