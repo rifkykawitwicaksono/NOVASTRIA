@@ -218,9 +218,31 @@ async function createPayout(e){
 function renderPayouts(){
   $("payoutsBody").innerHTML=payouts.length?payouts.map(p=>'<tr><td><strong>'+esc(p.full_name||"-")+'</strong><small>'+esc(p.email)+'</small></td><td>'+money(p.amount)+'</td><td>'+esc(p.payment_reference||"-")+'</td><td>'+esc(date(p.paid_at||p.created_at))+'</td><td>'+badge(p.status)+'</td></tr>').join(""):'<tr><td colspan="5" class="admin-empty">Belum ada pencairan komisi.</td></tr>';
 }
+function durationSortValue(label){
+  const text=String(label||"").toLowerCase().normalize("NFKD");
+  if(/lifetime|life\s*time|selamanya|permanen|permanent/.test(text))return Number.POSITIVE_INFINITY;
+  const match=text.match(/(\d+(?:[.,]\d+)?)\s*(menit|minute|min|mnt|jam|hour|hours|hr|hari|day|days|minggu|week|weeks|bulan|month|months|tahun|year|years|thn|bln|\bj\b|\bh\b)/i);
+  if(!match)return null;
+  const amount=Number(match[1].replace(",","."));
+  const unit=match[2].toLowerCase();
+  const factor=/^(menit|minute|min|mnt)$/.test(unit)?1:
+    /^(jam|hour|hours|hr|j)$/.test(unit)?60:
+    /^(hari|day|days|h)$/.test(unit)?1440:
+    /^(minggu|week|weeks)$/.test(unit)?10080:
+    /^(bulan|month|months|bln)$/.test(unit)?43200:
+    /^(tahun|year|years|thn)$/.test(unit)?525600:null;
+  return factor===null?null:amount*factor;
+}
+function compareProductVariants(a,b){
+  const av=durationSortValue(a.variant),bv=durationSortValue(b.variant);
+  if(av!==null&&bv!==null&&av!==bv)return av-bv;
+  if(av!==null&&bv===null)return -1;
+  if(av===null&&bv!==null)return 1;
+  return String(a.variant||"").localeCompare(String(b.variant||""),"id",{numeric:true,sensitivity:"base"});
+}
 function renderProducts(){
   const q=$("productSearch").value.trim().toLowerCase(),v=$("productVisibility").value;
-  const list=products.filter(p=>(p.product+" "+p.variant).toLowerCase().includes(q)&&(v==="active"?p.is_active:v==="hidden"?!p.is_active:true));
+  const list=products.filter(p=>(p.product+" "+p.variant).toLowerCase().includes(q)&&(v==="active"?p.is_active:v==="hidden"?!p.is_active:true)).sort((a,b)=>String(a.product||"").localeCompare(String(b.product||""),"id",{sensitivity:"base"})||compareProductVariants(a,b));
   $("productsBody").innerHTML=list.length?list.map(p=>'<tr><td><strong>'+esc(p.product)+'</strong><small>'+esc(p.variant)+'</small></td><td>'+priceLabel(p.public_price)+'</td><td>'+priceLabel(p.reseller_price)+'</td><td>'+badge(p.in_stock?"active":"inactive")+'</td><td>'+(p.is_recommended?'<span class="admin-badge verified">Rekomendasi</span>':'<span class="admin-muted">—</span>')+'</td><td>'+badge(p.is_active?"active":"inactive")+'</td><td><div class="admin-actions"><button data-edit="'+esc(p.id)+'">Edit</button><button class="admin-danger" data-archive="'+esc(p.id)+'">'+(p.is_active?"Sembunyikan":"Aktifkan")+'</button></div></td></tr>').join(""):'<tr><td colspan="7" class="admin-empty">Produk tidak ditemukan.</td></tr>';
   $("productsBody").querySelectorAll("[data-edit]").forEach(b=>b.addEventListener("click",()=>editProduct(b.dataset.edit)));
   $("productsBody").querySelectorAll("[data-archive]").forEach(b=>b.addEventListener("click",()=>toggleProduct(b.dataset.archive)));
