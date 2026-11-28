@@ -183,7 +183,7 @@ function productPlatform(name){
   if(detailPlatform.includes("ios"))return "iOS";
   if(detailPlatform.includes("android"))return "Android";
   // Fallback untuk produk yang belum memiliki metadata platform.
-  if(/\\broot\\b|rooted|root access/.test(n))return "Root";
+  if(/\broot\b|rooted|root access/.test(n))return "Root";
   if(n.includes("ios")&&n.includes("android"))return "Android & iOS";
   if(n.includes("ios")||n.includes("gbox")||n.includes("esign")||n==="migul")return "iOS";
   return "Android";
